@@ -1,7 +1,7 @@
 # Next-Gen Financial Tracker — Implementation Plan
 
-Status: Approved implementation sequence  
-Source of truth: IMPLEMENTATION_GUIDELINES.md, TECHNICAL_SPECIFICATION.md, and the PRD  
+Status: Approved implementation sequence
+Source of truth: IMPLEMENTATION_GUIDELINES.md, TECHNICAL_SPECIFICATION.md, and the PRD
 Architecture: Laravel modular monolith, DDD boundaries, PostgreSQL, Redis, MinIO, self-hosted PaddleOCR PP-OCRv6, backend API
 
 ## How to use this plan
@@ -291,7 +291,7 @@ Dependencies: Phase 4.
 5. Implement a provider-independent historical rate lookup interface supporting exact pair/date lookup, latest-valid fallback, stale/unavailable results, and manual used-rate overrides.
 6. Define the rate-locking contract: used rate and base amount are immutable after posting; later provider updates never rewrite history.
 7. Define cross-currency journal requirements: native/account amount and currency, functional/base amount and currency, applicable rate/date/source, and functional balancing.
-8. Define dedicated fee, FX gain/loss, and FX rounding ledger accounts. Differences within tolerance post to FX rounding; differences beyond tolerance post to explicit FX gain/loss. No hidden imbalance or silent user-amount mutation.
+8. Define dedicated fee, realized FX gain/loss, and FX rounding ledger accounts. Differences within tolerance post to FX rounding; differences beyond tolerance post to explicit realized FX gain/loss. No hidden imbalance or silent user-amount mutation.
 9. Define settings and validation for supported pairs, exponents, and rounding.
 
 ### Checklist
@@ -302,7 +302,7 @@ Dependencies: Phase 4.
 - [ ] Provider-independent historical lookup exists.
 - [ ] Used rates and base amounts are lockable and immutable after posting.
 - [ ] Native and functional journal amount requirements are documented.
-- [ ] FX gain/loss, FX rounding, and fee accounts are defined.
+- [ ] Realized FX gain/loss, FX rounding, and fee accounts are defined.
 - [ ] Account/base currency mutation rules are tested.
 - [ ] Conversion, precision, rounding, and rate-lock unit/property tests pass.
 
@@ -312,7 +312,7 @@ Exit criteria: the ledger can depend on a complete Currency Core without waiting
 
 ## Phase 6 — transaction aggregate and double-entry ledger
 
-Goal: deliver the first complete financial vertical slice.
+Goal: deliver the first complete financial vertical slice with exact functional-currency balancing and durable transaction semantics.
 
 Dependencies: Phase 5.
 
@@ -324,7 +324,7 @@ Every posted journal entry must satisfy:
 
 Every journal line retains its native/account amount and currency when it affects an account, plus a functional/base amount and currency. Rate, date, source, used rate, and rounding metadata are retained for converted lines. Native amounts drive native account balances; functional amounts drive the balancing invariant and base reporting.
 
-For cross-currency transfers, retain sent/source and received/destination native amounts, convert both using one locked effective rate, add explicit fee lines, and post any difference within tolerance to a dedicated FX rounding account. A difference beyond tolerance posts to an explicit FX gain/loss account. MVP does not perform periodic account revaluation. No hidden imbalance or user-amount mutation is allowed.
+For cross-currency transfers, retain sent/source and received/destination native amounts, convert both using one locked effective rate, add explicit fee lines, and post any difference within tolerance to a dedicated FX rounding account. A difference beyond tolerance posts to an explicit realized FX gain/loss account. MVP does not perform periodic account revaluation. No hidden imbalance or user-amount mutation is allowed.
 
 ### Transaction-type inclusion matrix
 
@@ -344,7 +344,7 @@ A credit-card purchase counts once as expense. Repayment is a liability/account 
 
 ### Adjustment semantics
 
-User-created adjustment operations require an explicit subtype and mandatory reason. A balance_correction may correct an account balance and affects balances/cash-flow classification but not expense/income/budget by default. A financial_system_adjustment is system-generated and requires audit evidence. Expense/income corrections must use their normal transaction/correction workflows. Budget adjustments are separate records and never journal lines. A generic adjustment endpoint cannot accept arbitrary debit/credit lines or bypass authorization, currency, balancing, or immutability.
+Only an authorized account owner may create a user-facing balance correction; privileged system services may create financial-system adjustments through an explicit audited command. Every adjustment requires an explicit subtype and mandatory reason. A balance_correction may correct an account balance and affects balances/cash-flow classification but not expense/income/budget by default. A financial_system_adjustment is system-generated and requires audit evidence. Expense/income corrections must use their normal transaction/correction workflows. Budget adjustments are separate records and never journal lines. A generic adjustment endpoint cannot accept arbitrary debit/credit lines or bypass authorization, currency, balancing, or immutability.
 
 ### Database defense-in-depth
 
@@ -398,7 +398,7 @@ Add constraints for positive line amounts, exactly one debit/credit side, valid 
 - [ ] Property tests exercise randomized balanced/unbalanced journal inputs.
 - [ ] Functional-currency cross-currency balancing and rounding tests pass.
 - [ ] Native account amounts remain available for balances.
-- [ ] Transaction inclusion matrix prevents report/budget double counting.
+- [ ] Transaction inclusion matrix prevents report/budget double counting, verified by report and budget integration tests.
 - [ ] Adjustment subtype, reason, authorization, and audit tests pass.
 - [ ] Database constraint and migration integration tests pass.
 - [ ] API filters and pagination are index-backed.
@@ -409,9 +409,29 @@ Exit criteria: the online manual ledger vertical slice is production-safe. Do no
 
 ## Phase 7 — budget engine, lazy initialization, and historical compensation
 
-Goal: implement deterministic monthly budgets independent from the ledger.
+Goal: implement deterministic monthly budgets, lazy initialization, borrowing reservations, refunds, and auditable historical compensation.
 
 Dependencies: Phase 6.
+
+### Shared initialization service
+
+EnsureBudgetPeriodExists is the single application service used by both the monthly scheduler and first-use API reads. It uses the same locks, deterministic reset logic, snapshots base_limit and budget timezone, persists period_start_at and period_end_at, and is idempotent under concurrent calls. Scheduled initialization remains required, but API reads initialize a missing current period safely.
+
+### Late and backdated budget compensation
+
+A backdated expense, income allocation, refund, reversal, correction, or split/category change affecting an initialized or closed period must not silently rewrite later budget history. RecalculateBudgetChain locks the affected historical period and all propagated periods, recomputes actual/rollover/carry effects, compares previous propagated adjustments with corrected values, and creates auditable compensating adjustments. Original snapshots and adjustments remain immutable and each correction links to its source transaction, revision, and prior adjustment. If August originally propagated +2,000 to September but a late expense changes the correct value to +500, preserve +2,000 and create a -1,500 rollover correction in September, continuing through later propagated periods as necessary. The operation is idempotent.
+
+### Borrowing snapshot and atomic reservation
+
+Borrowing freezes the full base_limit at confirmation time. Persist category, source period, target period, borrow amount, base_limit snapshot, actor, confirmation timestamp, operation/idempotency key, and linked adjustment IDs. The action locks both periods and creates two linked adjustments in one PostgreSQL transaction: BORROWING_IN positive in the current period and BORROWING_RESERVED negative in the immediate target period. A database uniqueness constraint on the category, target period, and reservation type prevents duplicate or concurrent borrowing. Partial borrowing is impossible; later category changes never change the stored amount.
+
+### Refund budget behavior
+
+Refunds should link to the original transaction/category. A same-period full or partial refund reduces actual spending in that period. A later-period refund invokes RecalculateBudgetChain and creates compensating adjustments rather than rewriting closed snapshots. Preserve the original transaction, refund, category, affected period, and correction chain.
+
+### Budget timezone changes
+
+Persist budget timezone, period_start_at, and period_end_at on each initialized period. A timezone change applies only to the next period that is not initialized; historical/initialized periods never change boundaries.
 
 ### Steps
 
@@ -432,6 +452,11 @@ Dependencies: Phase 6.
 9. Reject second borrow for the same category/target period and prevent chained/future borrowing.
 10. Add period close/correction behavior.
 11. Add budget API endpoints and server-calculated dashboard totals.
+12. Implement `EnsureBudgetPeriodExists` as the shared scheduler/first-use initialization service.
+13. Implement `RecalculateBudgetChain` for late/backdated transactions, refunds, reversals, corrections, and split/category changes.
+14. Implement confirmation-time borrowing snapshots and the atomic source/target reservation transaction.
+15. Implement original-transaction refund links and same-period versus later-period budget behavior.
+16. Persist budget timezone and period boundaries and apply timezone changes only to uninitialized future periods.
 
 ### Checklist
 
@@ -446,6 +471,17 @@ Dependencies: Phase 6.
 - [ ] Actual spend includes posted transactions only.
 - [ ] Month boundary, timezone, leap-year, and DST tests pass.
 - [ ] Budget formula, borrowing example, and correction tests pass.
+- [ ] Scheduler reruns are idempotent.
+- [ ] Scheduler failure is recovered by first-use initialization.
+- [ ] Concurrent first-use initialization creates one period.
+- [ ] Borrow amount is frozen at confirmation time.
+- [ ] Source and target borrowing adjustments commit atomically.
+- [ ] Duplicate/concurrent borrowing is rejected by lock and uniqueness constraint.
+- [ ] Late expenses, income, splits, corrections, reversals, and refunds create compensation chains.
+- [ ] Full/partial same-period refunds reduce spending.
+- [ ] Later refunds, including refunds after rollover, compensate later periods without rewriting snapshots.
+- [ ] Historical budget timezone boundaries remain unchanged.
+- [ ] Budget constraint, concurrency, idempotency, and compensation tests pass.
 
 Exit criteria: monthly budget history and current budget limits are deterministic, auditable, and independent of account balances.
 
@@ -455,11 +491,27 @@ Exit criteria: monthly budget history and current budget limits are deterministi
 
 Goal: deliver receipt upload/import processing without bypassing accounting review.
 
-Dependencies: Phase 6; Phase 1 MinIO/Redis; Phase 5 Currency Core; PaddleOCR service available.
+Dependencies: Phase 7; Phase 1 MinIO/Redis; Phase 5 Currency Core; PaddleOCR service available.
+
+### Locale and parser decision gate
+
+Before Phase 8 exits, approve an MVP parser matrix covering languages/scripts, currency symbols/names, decimal and thousands separators, date/time formats, and timezone interpretation. The parser must handle 1,250.50, 1.250,50, and 1 250,50 according to explicit locale rules. Ambiguous dates such as 11/08/2026 and 08/11/2026, ambiguous currency symbols, or unsupported formats become needs_review; Laravel must not guess. Persist locale, parser version, and ambiguity/confidence metadata with the extraction.
+
+### Image preprocessing and lifecycle
+
+Keep the original upload immutable for audit/history. Create a separate processing derivative and record its version:
+
+    original image -> derivative -> orientation/deskew/rotation/perspective/crop/contrast/resolution -> PaddleOCR -> parser
+
+Support EXIF/orientation correction, deskew, rotation, perspective correction, cropping, contrast normalization, resolution normalization/downscaling, screenshots/photos, and long receipts as applicable. Never replace the original. Configure retention for originals, derivatives, thumbnails, failed OCR files, abandoned Pending Review records, reports, and full exports.
+
+### Upload security and orphan cleanup
+
+Validate MIME and magic bytes, generate server-side object keys, reject client paths, protect against decompression bombs and unsafe image decoders, enforce byte/dimension/pixel limits at Nginx/PHP/Laravel/worker boundaries, calculate checksums, detect duplicate sources, and keep MinIO private. Reconcile upload/DB failure combinations: orphan object, missing object, report crash after object creation, and abandoned receipt. Cleanup/reconciliation is retry-safe, idempotent, and observable.
 
 ### Steps
 
-1. Create receipts and OCR extraction tables.
+1. Create receipts, immutable original-object metadata, processing-derivative metadata, and OCR extraction tables.
 2. Implement private MinIO upload:
    - validate bytes/MIME/size/dimensions;
    - calculate checksum;
@@ -480,6 +532,10 @@ Dependencies: Phase 6; Phase 1 MinIO/Redis; Phase 5 Currency Core; PaddleOCR ser
 10. Create Pending Review transaction only after OCR completes; never post automatically.
 11. Implement receipt-type correction, manual retry, unreadable-image fallback, and unsupported-file errors.
 12. Implement purchase reconciliation and transfer Unitemized / Other allocation behavior.
+13. Approve and encode the locale/parser matrix before enabling normalization or posting from OCR.
+14. Implement versioned image preprocessing derivatives without replacing original receipt objects.
+15. Implement retry-safe object/database reconciliation and lifecycle cleanup for orphaned, missing, failed, and abandoned records.
+16. Enforce upload, decoder, worker, checksum, private-object, and server-generated-key security controls.
 
 ### Checklist
 
@@ -495,6 +551,14 @@ Dependencies: Phase 6; Phase 1 MinIO/Redis; Phase 5 Currency Core; PaddleOCR ser
 - [ ] OCR timeout, provider failure, corrupt file, unreadable text, and retry tests pass.
 - [ ] PaddleOCR service is not publicly reachable.
 - [ ] OCR latency, success, failure, retry, and queue age are observable.
+- [ ] Locale/parser matrix is approved before phase exit.
+- [ ] Ambiguous dates, numbers, currencies, and unsupported locales become needs_review.
+- [ ] Original image is never replaced by a derivative.
+- [ ] Preprocessing version and source/derivative relationship persist.
+- [ ] Magic-byte, MIME, dimension, pixel, decompression, and worker resource protections pass.
+- [ ] Client names/paths cannot control object keys.
+- [ ] Orphan-object and missing-object reconciliation is retry-safe and observable.
+- [ ] Retention cleanup tests cover originals, derivatives, failed OCR, abandoned receipts, and missing objects.
 
 Exit criteria: a user can upload a receipt, receive a reviewable extraction, correct it, and proceed to the normal transaction posting flow.
 
@@ -538,13 +602,13 @@ Exit criteria: merchants/items are normalized consistently and duplicate decisio
 
 ## Phase 10 — FX provider operations and multi-currency reporting
 
-Goal: preserve original transactions while providing stable base-currency reporting.
+Goal: operate external rate providers and multi-currency reporting on top of the completed Currency Core without rewriting historical amounts.
 
 Dependencies: Phase 5; Phase 6; Phase 9 for item/report integration.
 
 ### Steps
 
-1. Seed supported currencies and exponents.
+1. Use the Currency Core registry and seed only provider-enabled pairs, source metadata, and operational settings.
 2. Create exchange_rates storage with pair/date uniqueness and provider metadata.
 3. Implement exchange-rate provider adapter, daily fetch job, retry/backoff, and stale-rate handling.
 4. Make provider, supported pairs, refresh cadence, stale threshold, and fallback policy configurable settings.
@@ -564,6 +628,9 @@ Dependencies: Phase 5; Phase 6; Phase 9 for item/report integration.
 - [ ] Cross-currency transfers reconcile sent/received amounts.
 - [ ] Provider failure, stale fallback, weekend/holiday, and override tests pass.
 - [ ] Rate freshness and job failure metrics/alerts work.
+- [ ] Exchange-rate provider, supported pairs, quotas, and stale threshold are approved.
+- [ ] Provider-independent historical lookup remains unchanged.
+- [ ] Native/functional FX reporting and override metadata reconcile.
 
 Exit criteria: historical multi-currency reporting is stable and explainable.
 
@@ -573,7 +640,11 @@ Exit criteria: historical multi-currency reporting is stable and explainable.
 
 Goal: support offline drafts while keeping Laravel authoritative.
 
-Dependencies: Phase 2; Phase 6; Phase 8.
+Dependencies: Phase 2; Phase 6; Phase 8; Phase 9; Phase 10.
+
+### Cursor and full-resync contract
+
+Define an opaque cursor with stable ordering, pagination, lifetime, and tombstone retention. If a cursor is too old or invalid, return the stable error SYNC_CURSOR_EXPIRED and never return an incomplete incremental result. Full authoritative resync must define whether archived resources, tombstones within retention, current versions, and pending server-side states are included. The response must include an authoritative cursor and complete ordering metadata.
 
 ### Steps
 
@@ -588,7 +659,9 @@ Dependencies: Phase 2; Phase 6; Phase 8.
 9. Implement tombstone/archival convergence for deletions.
 10. Ensure local drafts, pending sync, and conflicts are excluded from posted balances/reports.
 11. Add device/session behavior for forced logout on new-device login.
-12. Create contract tests for external API consumers.
+12. Implement cursor expiry detection and the `SYNC_CURSOR_EXPIRED` response without returning partial incremental data.
+13. Implement authoritative full-resync pagination, archived-state/tombstone/pending-state semantics, and authoritative cursor issuance.
+14. Create contract tests for external API consumers, cursor expiry, pagination, tombstone retention, and full resync.
 
 ### Checklist
 
@@ -602,6 +675,10 @@ Dependencies: Phase 2; Phase 6; Phase 8.
 - [ ] Idempotent push cannot double-post.
 - [ ] Sync status transitions and failure recovery are tested.
 - [ ] OpenAPI/DTO fixtures match Laravel resources and sync behavior.
+- [ ] Cursor ordering, pagination, lifetime, and tombstone retention are documented.
+- [ ] Expired cursors return SYNC_CURSOR_EXPIRED.
+- [ ] Full resync is authoritative and includes explicitly defined archived/tombstone/pending states.
+- [ ] Full-resync and cursor-expiry contract tests pass.
 
 Exit criteria: offline draft → reconnect → authoritative post is reliable and conflict-safe.
 
@@ -609,9 +686,13 @@ Exit criteria: offline draft → reconnect → authoritative post is reliable an
 
 ## Phase 12 — dashboard queries, forecast formulas, insights, and notifications
 
-Goal: provide server-calculated decision support and all approved notification channels.
+Goal: provide server-calculated decision support and all approved notification channels using approved, versioned formulas.
 
 Dependencies: Phase 7; Phase 10; Phase 11.
+
+### Formula decision gate
+
+Before Phase 12 exits, obtain approved/versioned formulas for safe-to-spend numerator/denominator, whether today is included, zero remaining days, negative remaining budget, borrowing/rollover/underflow, known future obligations, projected month-end spend, income concentration/diversification, and item inflation/deflation baseline, compatible-unit rule, dates, and percentage formula. If the source documents do not define the formulas, label PRODUCT DECISION REQUIRED BEFORE PHASE 12 and do not invent business semantics. Implement formula-version storage and deterministic tests only after approval.
 
 ### Steps
 
@@ -626,7 +707,7 @@ Dependencies: Phase 7; Phase 10; Phase 11.
    - top categories/merchants;
    - income concentration;
    - item-price alerts.
-2. Define and version deterministic forecast formulas.
+2. Obtain approved product formulas; if any are missing, block Phase 12 and label PRODUCT DECISION REQUIRED BEFORE PHASE 12. Then implement and version the deterministic forecast formulas.
 3. Implement income source share and concentration indicator.
 4. Implement normalized item price history and inflation/deflation calculations.
 5. Ensure insights use posted transactions and locked historical FX only.
@@ -648,6 +729,9 @@ Dependencies: Phase 7; Phase 10; Phase 11.
 - [ ] Notification preferences and thresholds are respected.
 - [ ] Delivery retries are idempotent and observable.
 - [ ] Notification failures do not affect ledger posting.
+- [ ] Formula decisions are approved and versioned before phase exit.
+- [ ] Safe-to-spend edge cases and formula versions have deterministic tests.
+- [ ] Concentration and price-change formulas have approved fixtures.
 
 Exit criteria: dashboard and insights are explainable, server-authoritative, and notifications are reliable across all approved channels.
 
@@ -658,6 +742,12 @@ Exit criteria: dashboard and insights are explainable, server-authoritative, and
 Goal: provide trustworthy, secure data portability.
 
 Dependencies: Phase 6; Phase 7; Phase 10; Phase 12.
+
+### Export terminology and full account portability
+
+Use Full JSON Data Export unless a true import/restore path exists. Do not call JSON export a backup. It preserves approved IDs, relationships, transaction states/history, journal references, budgets/adjustments, merchants/items, FX metadata, receipt metadata, and approved audit/import metadata.
+
+A full-account ZIP is separate from analytical reports and contains manifest.json, data.json, original receipt media under receipt UUID paths, and any other approved user-owned source media required for portability. It is authenticated, user-scoped, asynchronous for large accounts, stored privately, short-lived, observable, and cleaned after expiry.
 
 ### Steps
 
@@ -674,7 +764,10 @@ Dependencies: Phase 6; Phase 7; Phase 10; Phase 12.
 11. Store report jobs and private artifacts in MinIO.
 12. Include date range, timezone, and base-currency context in every output.
 13. Apply configurable report expiry and cleanup jobs.
-14. Ensure JSON preserves IDs, relationships, and import-relevant metadata.
+14. Ensure Full JSON Data Export preserves IDs, relationships, transaction state/history, journal references, budgets/adjustments, merchants/items, FX metadata, receipt metadata, and approved audit/import metadata.
+15. Implement full-account ZIP packaging with manifest.json, data.json, and original receipt media under `receipts/<receipt-uuid>.<ext>`, plus any approved user-owned source media.
+16. Apply configurable report/export expiry and cleanup jobs.
+17. Verify that full-account export ownership, media inclusion, expiry, and cleanup are enforced for large asynchronous jobs.
 
 ### Checklist
 
@@ -684,11 +777,14 @@ Dependencies: Phase 6; Phase 7; Phase 10; Phase 12.
 - [ ] Large XLSX/PDF/JSON jobs return 202 and progress/status.
 - [ ] Report files are private and short-lived.
 - [ ] Expired files are deleted.
-- [ ] JSON export preserves relationships and identifiers.
+- [ ] Full JSON Data Export is not described as backup.
+- [ ] JSON preserves IDs, relationships, state/history, journal references, budgets/adjustments, merchants/items, FX metadata, receipts metadata, and approved audit/import metadata.
+- [ ] Full-account ZIP includes original receipt media under the documented receipt UUID paths.
+- [ ] Export authorization, ownership, media-inclusion, large-export, and cleanup tests pass.
 - [ ] Export authorization and cross-user tests pass.
 - [ ] Report duration, failures, and queue age are observable.
 
-Exit criteria: users can securely export trustworthy reports in all required formats.
+Exit criteria: users can securely export trustworthy reports and complete account packages, including original receipt media, in all required formats.
 
 ---
 
@@ -697,6 +793,18 @@ Exit criteria: users can securely export trustworthy reports in all required for
 Goal: satisfy P0 release gates and prepare the VPS deployment.
 
 Dependencies: Phases 0–13.
+
+### Production retention and disaster-recovery gates
+
+Before Phase 14 exits, approve and configure concrete values for generated report retention, full export retention, failed OCR artifact retention, processing derivative retention, abandoned receipt retention, audit-event retention, deleted-account grace period, PostgreSQL backup retention, MinIO backup retention, sync tombstone retention, and failed-job retention.
+
+Before Phase 14 exits, approve measurable RPO/RTO objectives for PostgreSQL, MinIO receipt storage, report/export artifacts where applicable, core API/database restoration, queue, and OCR service. If values are not approved, mark PRODUCT/OPERATIONS DECISION REQUIRED BEFORE PRODUCTION and block exit. A restore drill must prove the approved objectives.
+
+### Database integrity and workflow correlation
+
+Use PostgreSQL constraints as defense-in-depth for positive journal amounts, exactly one debit/credit side, valid currencies, posted-state required fields, immutable posted relationships, reversal uniqueness, category/period uniqueness, borrowing reservations, exchange-rate pair/date uniqueness, and ownership consistency where feasible. Keep complex orchestration in Laravel rather than triggers.
+
+Propagate request_id, operation_id, idempotency_key, job_id, receipt_id, transaction_id, journal_entry_id, and report_job_id through asynchronous workflows. Correlate HTTP receipt upload through storage, OCR, Pending Review, posting, journal, notifications, and reports without logging sensitive payloads.
 
 ### Steps
 
@@ -715,6 +823,9 @@ Dependencies: Phases 0–13.
 13. Review account deletion, retention, report expiry, OCR retention, audit retention, and backup settings.
 14. Run dependency/security audits and verify pinned OCR model artifacts.
 15. Perform release candidate migration on a production-like database.
+16. Approve and configure concrete retention policies and failed-job cleanup values; block release if any required value is missing.
+17. Approve measurable RPO/RTO objectives for PostgreSQL, MinIO, report/export artifacts where applicable, API, queue, and OCR, then complete restore drills proving them.
+18. Execute migration-level constraint tests and correlation-trace tests across receipt upload, OCR, posting, journal, notification, and report workflows.
 
 ### Checklist
 
@@ -729,7 +840,11 @@ Dependencies: Phases 0–13.
 - [ ] PostgreSQL query plans are acceptable.
 - [ ] VPS health checks and alerts are active.
 - [ ] Retention/deletion settings are seeded and documented.
-- [ ] No known data-loss bug exists in posting, sync, corrections, or exports.
+- [ ] Concrete production retention values are approved.
+- [ ] RPO/RTO values are approved and restore drills prove them.
+- [ ] Database constraint and migration integration tests pass.
+- [ ] Correlation identifiers propagate through request/job workflows.
+- [ ] No known data-loss bug exists in posting, sync, corrections, refunds, or exports.
 
 Exit criteria: the MVP is release-ready from a correctness, security, reliability, and operations perspective.
 
@@ -738,6 +853,8 @@ Exit criteria: the MVP is release-ready from a correctness, security, reliabilit
 ## Phase 15 — MVP release and post-MVP boundary
 
 Goal: release only the approved MVP and preserve the roadmap boundary.
+
+Dependencies: Phase 14.
 
 ### MVP release checklist
 
@@ -753,6 +870,16 @@ Goal: release only the approved MVP and preserve the roadmap boundary.
 - [ ] Dashboard, insights, notifications, and reports use server truth.
 - [ ] CSV, XLSX, PDF, and JSON exports work securely.
 - [ ] VPS deployment, backups, monitoring, and recovery runbooks are complete.
+
+- [ ] Currency Core and immutable currency rules work.
+- [ ] Every posted transaction balances in functional currency while retaining native amounts and FX metadata.
+- [ ] Transaction inclusion rules prevent report/budget double counting.
+- [ ] Late changes, refunds, corrections, reversals, and borrowing compensation preserve history.
+- [ ] OCR locale, preprocessing, upload security, lifecycle, and orphan cleanup pass.
+- [ ] Sync supports idempotency, conflicts, cursor expiry, tombstones, and full resync.
+- [ ] Approved formulas drive dashboard/insights and all notification adapters work.
+- [ ] Full JSON Data Export and full-account ZIP include approved data and original receipt media.
+- [ ] Concrete retention and RPO/RTO decisions are approved and proven.
 
 ### Explicitly post-MVP
 
