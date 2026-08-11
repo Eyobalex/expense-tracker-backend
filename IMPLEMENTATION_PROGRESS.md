@@ -1,6 +1,6 @@
 # Next-Gen Financial Tracker — Backend Implementation Progress
 
-Status: IN PROGRESS
+Status: BLOCKED
 
 Last reconciled with implementation plan: 2026-08-12; plan phases 0–15 reconciled with the feature manifest, local `dev`, `origin/dev`, remote branches, and GitHub PR API (no existing PRs targeting `dev`).
 
@@ -98,15 +98,15 @@ Total planned features: 18
 
 Merged: 0
 
-In progress: 1
+In progress: 0
 
 PR open: 0
 
-Blocked: 0
+Blocked: 1
 
 Pending: 17
 
-Overall status: IN PROGRESS
+Overall status: BLOCKED
 
 ---
 
@@ -133,7 +133,7 @@ They may be split into additional independently reviewable features if required 
 
 | ID  | Feature                                                         | Implementation Plan Source            | Dependencies       | Branch                            | Status  | PR | Merge Commit | Tests / Gates | Notes                                                                          |
 | --- | --------------------------------------------------------------- | ------------------------------------- | ------------------ | --------------------------------- | ------- | -- | ------------ | ------------- | ------------------------------------------------------------------------------ |
-| 001 | Project governance and baseline                                 | Phase 0                               | None               | `feat/001-project-baseline`       | IN_PROGRESS | —  | —            | Version inventory, docs search, baseline tests | Manifest reconciled; branch created from `origin/dev`                         |
+| 001 | Project governance and baseline                                 | Phase 0                               | None               | `feat/001-project-baseline`       | BLOCKED | —  | —            | Version inventory, docs search | Laravel Boost `record-rule` MCP tool is unavailable in this session           |
 | 002 | PostgreSQL, Redis, MinIO and local runtime                      | Phase 1                               | 001                | `feat/002-runtime-infrastructure` | PENDING | —  | —            | —             | Production-shaped local/CI infrastructure                                      |
 | 003 | Laravel API shell, authentication and single-device enforcement | Phase 2                               | 002                | `feat/003-api-auth`               | PENDING | —  | —            | —             | May be split if final plan separates API foundation and auth                   |
 | 004 | DDD foundation and shared primitives                            | Phase 3                               | 003                | `feat/004-shared-primitives`      | PENDING | —  | —            | —             | Money, time, errors, audit, IDs                                                |
@@ -163,13 +163,13 @@ Feature: Project governance and baseline
 
 Branch: `feat/001-project-baseline`
 
-Status: IN_PROGRESS
+Status: BLOCKED
 
 Started: 2026-08-12
 
 PR: —
 
-Blocker: —
+Blocker: Laravel Boost `record-rule` MCP tool is unavailable; AGENTS.md prohibits manually creating the durable rule.
 
 ---
 
@@ -210,7 +210,7 @@ Use this section for final per-feature records when useful.
 
 ## Feature 001
 
-Status: PENDING
+Status: BLOCKED
 
 Branch: `feat/001-project-baseline`
 
@@ -222,9 +222,9 @@ Merge commit: —
 
 Tests executed: —
 
-Checklist: Manifest reconciled; implementation in progress.
+Checklist: Manifest reconciled; version inventory and documentation searches completed; durable DDD rule cannot be recorded without Boost MCP.
 
-Notes: Local `dev` equals `origin/dev` at `2d08caa54ac494d47c3915dced4bd6eda500bd0f`; GitHub PR API reported no existing PRs targeting `dev`. GitHub CLI is unavailable; use the GitHub API for PR verification in this session.
+Notes: Local `dev` equals `origin/dev` at `2d08caa54ac494d47c3915dced4bd6eda500bd0f`; GitHub PR API reported no existing PRs targeting `dev`. GitHub CLI is unavailable; use the GitHub API for PR verification in this session. BLOCKED: Laravel Boost `record-rule` MCP tool is not exposed, and AGENTS.md requires it instead of manual rule-file creation.
 
 ---
 
