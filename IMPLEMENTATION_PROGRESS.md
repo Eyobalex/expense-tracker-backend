@@ -1,8 +1,8 @@
 # Next-Gen Financial Tracker — Backend Implementation Progress
 
-Status: NOT STARTED
+Status: IN PROGRESS
 
-Last reconciled with implementation plan: NOT YET
+Last reconciled with implementation plan: 2026-08-12; plan phases 0–15 reconciled with the feature manifest, local `dev`, `origin/dev`, remote branches, and GitHub PR API (no existing PRs targeting `dev`).
 
 Integration branch: `dev`
 
@@ -94,19 +94,19 @@ The feature cannot safely continue until an external issue, dependency, requirem
 
 # Overall Progress
 
-Total planned features: TBD
+Total planned features: 18
 
 Merged: 0
 
-In progress: 0
+In progress: 1
 
 PR open: 0
 
 Blocked: 0
 
-Pending: TBD
+Pending: 17
 
-Overall status: NOT STARTED
+Overall status: IN PROGRESS
 
 ---
 
@@ -133,39 +133,39 @@ They may be split into additional independently reviewable features if required 
 
 | ID  | Feature                                                         | Implementation Plan Source            | Dependencies       | Branch                            | Status  | PR | Merge Commit | Tests / Gates | Notes                                                                          |
 | --- | --------------------------------------------------------------- | ------------------------------------- | ------------------ | --------------------------------- | ------- | -- | ------------ | ------------- | ------------------------------------------------------------------------------ |
-| 001 | Project governance and baseline                                 | Phase 0                               | None               | `feat/001-project-baseline`       | PENDING | —  | —            | —             | Confirm final implementation-plan numbering before start                       |
+| 001 | Project governance and baseline                                 | Phase 0                               | None               | `feat/001-project-baseline`       | IN_PROGRESS | —  | —            | Version inventory, docs search, baseline tests | Manifest reconciled; branch created from `origin/dev`                         |
 | 002 | PostgreSQL, Redis, MinIO and local runtime                      | Phase 1                               | 001                | `feat/002-runtime-infrastructure` | PENDING | —  | —            | —             | Production-shaped local/CI infrastructure                                      |
 | 003 | Laravel API shell, authentication and single-device enforcement | Phase 2                               | 002                | `feat/003-api-auth`               | PENDING | —  | —            | —             | May be split if final plan separates API foundation and auth                   |
 | 004 | DDD foundation and shared primitives                            | Phase 3                               | 003                | `feat/004-shared-primitives`      | PENDING | —  | —            | —             | Money, time, errors, audit, IDs                                                |
-| 005 | Identity, financial accounts, categories and onboarding backend | Phase 4                               | 004                | `feat/005-accounts-categories`    | PENDING | —  | —            | —             | Reconcile exact final phase name                                               |
-| 006 | Currency Core                                                   | Revised Currency Core Phase           | 005                | `feat/006-currency-core`          | PENDING | —  | —            | —             | Must precede ledger                                                            |
-| 007 | Transaction aggregate and double-entry ledger                   | Revised Ledger Phase                  | 006                | `feat/007-double-entry-ledger`    | PENDING | —  | —            | —             | Includes approved FX-aware accounting invariant                                |
-| 008 | Budget engine                                                   | Revised Budget Phase                  | 007                | `feat/008-budget-engine`          | PENDING | —  | —            | —             | Includes rollover, underflow, reallocation, borrowing, historical compensation |
-| 009 | Receipt storage and OCR infrastructure                          | Revised OCR Phase                     | 007, 002           | `feat/009-receipt-ocr`            | PENDING | —  | —            | —             | Exact split may change after final plan reconciliation                         |
-| 010 | Merchant and item normalization                                 | Revised Normalization Phase           | 009                | `feat/010-normalization`          | PENDING | —  | —            | —             | May split merchant and item normalization if large                             |
-| 011 | Duplicate detection                                             | Revised Normalization/Duplicate Phase | 009, 010           | `feat/011-duplicate-detection`    | PENDING | —  | —            | —             | User-controlled candidate resolution                                           |
-| 012 | FX provider operations and rate lifecycle                       | Revised FX Operations Phase           | 006, 007           | `feat/012-fx-operations`          | PENDING | —  | —            | —             | Provider jobs, stale policies, overrides                                       |
-| 013 | Offline synchronization API contract                            | Revised Sync Phase                    | 003, 007, 009      | `feat/013-sync-contract`          | PENDING | —  | —            | —             | Includes cursor expiry/full resync                                             |
-| 014 | Dashboard and forecasting                                       | Revised Insights Phase                | 007, 008, 012      | `feat/014-dashboard-forecasting`  | PENDING | —  | —            | —             | Product formulas must be approved before implementation                        |
-| 015 | Notifications backend                                           | Revised Insights/Notification Phase   | 014                | `feat/015-notifications`          | PENDING | —  | —            | —             | Exact MVP notification channels must match approved plan                       |
-| 016 | Reports and exports                                             | Revised Reporting Phase               | 007, 008, 012, 014 | `feat/016-reports-exports`        | PENDING | —  | —            | —             | PDF, XLSX, CSV, JSON/full export                                               |
-| 017 | Security, performance and operations hardening                  | Revised Hardening Phase               | 001-016            | `feat/017-release-hardening`      | PENDING | —  | —            | —             | RPO/RTO, retention, performance, restore drills                                |
-| 018 | MVP release validation                                          | Final Release Phase                   | 017                | `feat/018-mvp-release-validation` | PENDING | —  | —            | —             | No product features; final gates/runbooks                                      |
+| 005 | Identity, financial accounts, categories and onboarding backend | Phase 4                               | 004                | `feat/005-accounts-categories`    | PENDING | —  | —            | —             | Includes immutable user/account currency rules                                 |
+| 006 | Currency Core                                                   | Phase 5                               | 005                | `feat/006-currency-core`          | PENDING | —  | —            | —             | Must precede ledger                                                            |
+| 007 | Transaction aggregate and double-entry ledger                   | Phase 6                               | 006                | `feat/007-double-entry-ledger`    | PENDING | —  | —            | —             | Includes functional-currency invariant and inclusion matrix                    |
+| 008 | Budget engine                                                   | Phase 7                               | 007                | `feat/008-budget-engine`          | PENDING | —  | —            | —             | Includes lazy initialization, compensation, refunds, atomic borrowing          |
+| 009 | Receipt storage and OCR infrastructure                          | Phase 8                               | 008, 002, 006      | `feat/009-receipt-ocr`            | PENDING | —  | —            | —             | MinIO, preprocessing, PP-OCRv6, parser/security/lifecycle                     |
+| 010 | Merchant and item normalization                                 | Phase 9                               | 009                | `feat/010-normalization`          | PENDING | —  | —            | —             | Raw evidence remains immutable                                                  |
+| 011 | Duplicate detection                                             | Phase 9                               | 009, 010           | `feat/011-duplicate-detection`    | PENDING | —  | —            | —             | User-controlled candidate resolution                                           |
+| 012 | FX provider operations and rate lifecycle                       | Phase 10                              | 006, 007, 011      | `feat/012-fx-operations`          | PENDING | —  | —            | —             | Provider jobs, stale policies, overrides                                       |
+| 013 | Offline synchronization API contract                            | Phase 11                              | 003, 007, 009, 011, 012 | `feat/013-sync-contract` | PENDING | —  | —            | —             | Includes cursor expiry/full resync                                             |
+| 014 | Dashboard and forecasting                                       | Phase 12                              | 008, 012, 013      | `feat/014-dashboard-forecasting`  | PENDING | —  | —            | —             | Product formulas must be approved before implementation                        |
+| 015 | Notifications backend                                           | Phase 12                              | 014                | `feat/015-notifications`          | PENDING | —  | —            | —             | Approved notification channels only                                             |
+| 016 | Reports and exports                                             | Phase 13                              | 007, 008, 012, 014 | `feat/016-reports-exports`        | PENDING | —  | —            | —             | PDF, XLSX, CSV, Full JSON Data Export, full-account ZIP                        |
+| 017 | Security, performance and operations hardening                  | Phase 14                              | 001-016            | `feat/017-release-hardening`      | PENDING | —  | —            | —             | RPO/RTO, retention, constraints, correlation, restore drills                  |
+| 018 | MVP release validation                                          | Phase 15                              | 017                | `feat/018-mvp-release-validation` | PENDING | —  | —            | —             | No product features; final gates/runbooks                                      |
 | 999 | Progress finalization                                           | Administrative                        | 001-018            | `feat/999-progress-finalization`  | PENDING | —  | —            | —             | Use only after final feature merge if needed                                   |
 
 ---
 
 # Current Feature
 
-Feature ID: NONE
+Feature ID: 001
 
-Feature: NONE
+Feature: Project governance and baseline
 
-Branch: `dev`
+Branch: `feat/001-project-baseline`
 
-Status: NOT STARTED
+Status: IN_PROGRESS
 
-Started: —
+Started: 2026-08-12
 
 PR: —
 
@@ -222,9 +222,9 @@ Merge commit: —
 
 Tests executed: —
 
-Checklist: —
+Checklist: Manifest reconciled; implementation in progress.
 
-Notes: —
+Notes: Local `dev` equals `origin/dev` at `2d08caa54ac494d47c3915dced4bd6eda500bd0f`; GitHub PR API reported no existing PRs targeting `dev`. GitHub CLI is unavailable; use the GitHub API for PR verification in this session.
 
 ---
 
