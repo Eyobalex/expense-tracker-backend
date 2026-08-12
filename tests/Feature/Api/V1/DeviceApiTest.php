@@ -37,6 +37,7 @@ class DeviceApiTest extends TestCase
             ->assertJsonPath('data.revoked', true);
 
         $this->assertNotNull($device->fresh()->revoked_at);
-        $this->withToken($token->plainTextToken)->getJson('/api/v1/me')->assertUnauthorized();
+        $this->assertDatabaseMissing('personal_access_tokens', ['id' => $token->accessToken->getKey()]);
+        $this->flushHeaders()->withToken($token->plainTextToken)->getJson('/api/v1/me')->assertUnauthorized();
     }
 }

@@ -11,7 +11,7 @@ return new class extends Migration
         Schema::create('idempotency_operations', function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->foreignId('user_id')->nullable()->constrained()->nullOnDelete();
-            $table->char('scope_key', 64);
+            $table->char('scope_key', 128);
             $table->string('idempotency_key', 255);
             $table->string('method', 10);
             $table->string('path', 255);
