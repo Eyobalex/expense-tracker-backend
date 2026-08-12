@@ -1,6 +1,6 @@
 # Next-Gen Financial Tracker — Backend Implementation Progress
 
-Status: BLOCKED
+Status: IN PROGRESS
 
 Last reconciled with implementation plan: 2026-08-12; plan phases 0–15 reconciled with the feature manifest, local `dev`, `origin/dev`, remote branches, and GitHub PR API (no existing PRs targeting `dev`).
 
@@ -96,17 +96,17 @@ The feature cannot safely continue until an external issue, dependency, requirem
 
 Total planned features: 18
 
-Merged: 0
+Merged: 1
 
 In progress: 0
 
-PR open: 0
+PR open: 1
 
-Blocked: 1
+Blocked: 0
 
 Pending: 17
 
-Overall status: BLOCKED
+Overall status: IN PROGRESS
 
 ---
 
@@ -133,8 +133,8 @@ They may be split into additional independently reviewable features if required 
 
 | ID  | Feature                                                         | Implementation Plan Source            | Dependencies       | Branch                            | Status  | PR | Merge Commit | Tests / Gates | Notes                                                                          |
 | --- | --------------------------------------------------------------- | ------------------------------------- | ------------------ | --------------------------------- | ------- | -- | ------------ | ------------- | ------------------------------------------------------------------------------ |
-| 001 | Project governance and baseline                                 | Phase 0                               | None               | `feat/001-project-baseline`       | BLOCKED | —  | —            | Local validation complete | GitHub PR creation requires CLI or API authentication                         |
-| 002 | PostgreSQL, Redis, MinIO and local runtime                      | Phase 1                               | 001                | `feat/002-runtime-infrastructure` | PENDING | —  | —            | —             | Production-shaped local/CI infrastructure                                      |
+| 001 | Project governance and baseline | Phase 0 | None | feat/001-project-baseline | MERGED | 1 | 45b0e935b6de5cee44c0f2d57cfa3054884866f4 | CI passed | Merged into dev after PHP 8.5 CI correction |
+| 002 | PostgreSQL, Redis, MinIO and local runtime | Phase 1 | 001 | feat/002-runtime-infrastructure | PR_OPEN | 2 | — | Local checks passed; CI pending | PR #2 targets dev |
 | 003 | Laravel API shell, authentication and single-device enforcement | Phase 2                               | 002                | `feat/003-api-auth`               | PENDING | —  | —            | —             | May be split if final plan separates API foundation and auth                   |
 | 004 | DDD foundation and shared primitives                            | Phase 3                               | 003                | `feat/004-shared-primitives`      | PENDING | —  | —            | —             | Money, time, errors, audit, IDs                                                |
 | 005 | Identity, financial accounts, categories and onboarding backend | Phase 4                               | 004                | `feat/005-accounts-categories`    | PENDING | —  | —            | —             | Includes immutable user/account currency rules                                 |
@@ -157,25 +157,25 @@ They may be split into additional independently reviewable features if required 
 
 # Current Feature
 
-Feature ID: 001
+Feature ID: 002
 
-Feature: Project governance and baseline
+Feature: PostgreSQL, Redis, MinIO and local runtime
 
-Branch: `feat/001-project-baseline`
+Branch: `feat/002-runtime-infrastructure`
 
-Status: BLOCKED
+Status: IN PROGRESS
 
 Started: 2026-08-12
 
 PR: —
 
-Blocker: GitHub CLI is unavailable and no GitHub API token is configured to create the required PR.
+Blocker: —
 
 ---
 
 # Completed Features
 
-None.
+Feature 001 — Project governance and baseline — merged into dev via PR #1 (45b0e935b6de5cee44c0f2d57cfa3054884866f4).
 
 ---
 
@@ -210,21 +210,41 @@ Use this section for final per-feature records when useful.
 
 ## Feature 001
 
-Status: BLOCKED
+Status: MERGED
 
 Branch: `feat/001-project-baseline`
 
-Implementation plan coverage: TBD after final reconciliation
+Implementation plan coverage: Phase 0, steps 1-8; checklist and exit criteria.
 
-PR: —
+PR: #1 (merged into dev)
+
+Merge commit: 45b0e935b6de5cee44c0f2d57cfa3054884866f4
+
+Tests executed: GitHub CI passed on PHP 8.5.
+
+Checklist: Complete.
+
+Notes: PR #1 merged after CI passed; feature branch retained locally and remotely.
+
+## Feature 002
+
+Status: PR_OPEN
+
+Branch: `feat/002-runtime-infrastructure`
+
+Implementation plan coverage: Phase 1, steps 1-9; checklist and exit criteria pending GitHub Actions service-backed verification.
+
+PR: #2 (targets `dev`)
 
 Merge commit: —
 
-Tests executed: —
+Tests executed: focused PHPUnit configuration/command tests (4 passed, 14 assertions); complete local suite; Pint; PHPStan debug mode. GitHub Actions must still run the PostgreSQL/Redis/MinIO deep check and service-backed smoke test because Docker is unavailable locally.
 
-Checklist: Local Phase 0 baseline complete; branch pushed; PR creation blocked by unavailable GitHub API authentication.
+Checklist: locally complete; CI verification pending.
 
-Notes: Local `dev` equals `origin/dev` at `2d08caa54ac494d47c3915dced4bd6eda500bd0f`; GitHub PR API reported no existing PRs targeting `dev`. GitHub CLI is unavailable; use the GitHub API for PR verification in this session. Branch is pushed to origin. BLOCKED: GitHub CLI is unavailable and no GH_TOKEN or GITHUB_TOKEN is configured for GitHub PR creation.
+Notes: private MinIO, isolated PostgreSQL testing, Redis cache/queue/locks, Sail worker/scheduler, health command, CI services, and runbook are included.
+
+---
 
 ---
 
@@ -277,5 +297,3 @@ Post-MVP items remaining:
 * multi-device concurrent editing
 * bank/open-banking integration
 * other explicitly approved post-MVP features
-
-Final notes: —
