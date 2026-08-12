@@ -41,6 +41,11 @@
 - Run `./vendor/bin/sail artisan migrate`, `./vendor/bin/sail artisan test --compact`, and `./vendor/bin/sail artisan runtime:check --deep` after the services are healthy. The deep check opens PostgreSQL and Redis connections and performs a MinIO write/read/delete probe.
 - MinIO is private. Application code must use generated object keys and user-scoped authorization; never expose a public bucket, client-supplied path, or object listing endpoint. Receipts, derivatives, reports, and exports receive distinct prefixes when their bounded contexts are introduced.
 
+### Authentication API
+
+- API bearer tokens are issued by Laravel Sanctum and expire after `SANCTUM_EXPIRATION` minutes (30 days by default). A successful login revokes every existing personal access token and marks all prior device records revoked before creating the new device session.
+- API mutation retries use `Idempotency-Key`; the backend stores the applicable public or authenticated scope, request hash, and encrypted completed JSON response for replay. Profile changes require `If-Match` with the current resource version and return `STALE_VERSION` (409) when stale.
+
 ### Queue and scheduler operations
 
 - The local worker executes `queue:work redis --sleep=3 --tries=3 --backoff=3 --timeout=90 --max-time=3600`; the Redis retry window is 120 seconds, which exceeds the worker timeout. Failed jobs persist in PostgreSQL using the UUID driver.
