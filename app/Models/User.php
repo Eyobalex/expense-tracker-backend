@@ -60,6 +60,14 @@ class User extends Authenticatable implements PasskeyUser
     }
 
     /**
+     * @return HasMany<LedgerAccountMapping, $this>
+     */
+    public function ledgerAccountMappings(): HasMany
+    {
+        return $this->hasMany(LedgerAccountMapping::class);
+    }
+
+    /**
      * @return HasMany<Device, $this>
      */
     public function devices(): HasMany
