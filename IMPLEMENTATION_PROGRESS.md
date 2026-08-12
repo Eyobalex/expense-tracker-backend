@@ -98,9 +98,9 @@ Total planned features: 18
 
 Merged: 1
 
-In progress: 1
+In progress: 0
 
-PR open: 0
+PR open: 1
 
 Blocked: 0
 
@@ -134,7 +134,7 @@ They may be split into additional independently reviewable features if required 
 | ID  | Feature                                                         | Implementation Plan Source            | Dependencies       | Branch                            | Status  | PR | Merge Commit | Tests / Gates | Notes                                                                          |
 | --- | --------------------------------------------------------------- | ------------------------------------- | ------------------ | --------------------------------- | ------- | -- | ------------ | ------------- | ------------------------------------------------------------------------------ |
 | 001 | Project governance and baseline | Phase 0 | None | feat/001-project-baseline | MERGED | 1 | 45b0e935b6de5cee44c0f2d57cfa3054884866f4 | CI passed | Merged into dev after PHP 8.5 CI correction |
-| 002 | PostgreSQL, Redis, MinIO and local runtime | Phase 1 | 001 | feat/002-runtime-infrastructure | IN_PROGRESS | — | — | Environment/configuration/tests | Started from merged dev |
+| 002 | PostgreSQL, Redis, MinIO and local runtime | Phase 1 | 001 | feat/002-runtime-infrastructure | PR_OPEN | 2 | — | Local checks passed; CI pending | PR #2 targets dev |
 | 003 | Laravel API shell, authentication and single-device enforcement | Phase 2                               | 002                | `feat/003-api-auth`               | PENDING | —  | —            | —             | May be split if final plan separates API foundation and auth                   |
 | 004 | DDD foundation and shared primitives                            | Phase 3                               | 003                | `feat/004-shared-primitives`      | PENDING | —  | —            | —             | Money, time, errors, audit, IDs                                                |
 | 005 | Identity, financial accounts, categories and onboarding backend | Phase 4                               | 004                | `feat/005-accounts-categories`    | PENDING | —  | —            | —             | Includes immutable user/account currency rules                                 |
@@ -279,3 +279,4 @@ Post-MVP items remaining:
 * other explicitly approved post-MVP features
 
 Final notes: —
+\n\n---\n\n## Feature 002\n\nStatus: PR_OPEN\n\nBranch: `feat/002-runtime-infrastructure`\n\nImplementation plan coverage: Phase 1, steps 1-9; checklist and exit criteria pending GitHub Actions service-backed verification.\n\nPR: #2 (targets `dev`)\n\nMerge commit: —\n\nTests executed: focused PHPUnit configuration/command tests (4 passed, 14 assertions); complete local suite; Pint; PHPStan debug mode. GitHub Actions must still run the PostgreSQL/Redis/MinIO deep check and service-backed smoke test because Docker is unavailable locally.\n\nChecklist: locally complete; CI verification pending.\n\nNotes: private MinIO, isolated PostgreSQL testing, Redis cache/queue/locks, Sail worker/scheduler, health command, CI services, and runbook are included.\n
