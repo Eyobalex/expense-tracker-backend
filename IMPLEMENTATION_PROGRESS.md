@@ -226,6 +226,26 @@ Checklist: Complete.
 
 Notes: PR #1 merged after CI passed; feature branch retained locally and remotely.
 
+## Feature 002
+
+Status: PR_OPEN
+
+Branch: `feat/002-runtime-infrastructure`
+
+Implementation plan coverage: Phase 1, steps 1-9; checklist and exit criteria pending GitHub Actions service-backed verification.
+
+PR: #2 (targets `dev`)
+
+Merge commit: —
+
+Tests executed: focused PHPUnit configuration/command tests (4 passed, 14 assertions); complete local suite; Pint; PHPStan debug mode. GitHub Actions must still run the PostgreSQL/Redis/MinIO deep check and service-backed smoke test because Docker is unavailable locally.
+
+Checklist: locally complete; CI verification pending.
+
+Notes: private MinIO, isolated PostgreSQL testing, Redis cache/queue/locks, Sail worker/scheduler, health command, CI services, and runbook are included.
+
+---
+
 ---
 
 # Release Gates
@@ -277,6 +297,3 @@ Post-MVP items remaining:
 * multi-device concurrent editing
 * bank/open-banking integration
 * other explicitly approved post-MVP features
-
-Final notes: —
-\n\n---\n\n## Feature 002\n\nStatus: PR_OPEN\n\nBranch: `feat/002-runtime-infrastructure`\n\nImplementation plan coverage: Phase 1, steps 1-9; checklist and exit criteria pending GitHub Actions service-backed verification.\n\nPR: #2 (targets `dev`)\n\nMerge commit: —\n\nTests executed: focused PHPUnit configuration/command tests (4 passed, 14 assertions); complete local suite; Pint; PHPStan debug mode. GitHub Actions must still run the PostgreSQL/Redis/MinIO deep check and service-backed smoke test because Docker is unavailable locally.\n\nChecklist: locally complete; CI verification pending.\n\nNotes: private MinIO, isolated PostgreSQL testing, Redis cache/queue/locks, Sail worker/scheduler, health command, CI services, and runbook are included.\n
