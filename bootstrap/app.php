@@ -1,5 +1,6 @@
 <?php
 
+use App\Domain\Shared\Exceptions\DomainErrorCode;
 use App\Domain\Shared\Exceptions\DomainException;
 use App\Http\Middleware\AssignRequestId;
 use App\Http\Middleware\EnsureJsonRequest;
@@ -45,7 +46,7 @@ return Application::configure(basePath: dirname(__DIR__))
                     'fields' => (object) [],
                     'request_id' => $request->attributes->get('request_id'),
                 ],
-            ], 422);
+            ], $exception->errorCode() === DomainErrorCode::ConcurrencyConflict ? 409 : 422);
         });
 
         $exceptions->render(function (ValidationException $exception, Request $request): ?JsonResponse {

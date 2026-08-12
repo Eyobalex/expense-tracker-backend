@@ -24,6 +24,11 @@ use Laravel\Sanctum\HasApiTokens;
  * @property Carbon|null $email_verified_at
  * @property string $password
  * @property int $version
+ * @property string|null $base_currency_code
+ * @property string $timezone
+ * @property string $budget_timezone
+ * @property bool $onboarding_completed
+ * @property array<string, mixed>|null $notification_preferences
  * @property string|null $two_factor_secret
  * @property string|null $two_factor_recovery_codes
  * @property Carbon|null $two_factor_confirmed_at
@@ -31,12 +36,28 @@ use Laravel\Sanctum\HasApiTokens;
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
  */
-#[Fillable(['uuid', 'name', 'email', 'password', 'version'])]
+#[Fillable(['uuid', 'name', 'email', 'password', 'version', 'base_currency_code', 'timezone', 'budget_timezone', 'onboarding_completed', 'notification_preferences'])]
 #[Hidden(['password', 'two_factor_secret', 'two_factor_recovery_codes', 'remember_token'])]
 class User extends Authenticatable implements PasskeyUser
 {
     /** @use HasFactory<UserFactory> */
     use HasApiTokens, HasFactory, Notifiable, PasskeyAuthenticatable, TwoFactorAuthenticatable;
+
+    /**
+     * @return HasMany<FinancialAccount, $this>
+     */
+    public function financialAccounts(): HasMany
+    {
+        return $this->hasMany(FinancialAccount::class);
+    }
+
+    /**
+     * @return HasMany<Category, $this>
+     */
+    public function categories(): HasMany
+    {
+        return $this->hasMany(Category::class);
+    }
 
     /**
      * @return HasMany<Device, $this>
@@ -55,6 +76,8 @@ class User extends Authenticatable implements PasskeyUser
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
             'version' => 'integer',
+            'notification_preferences' => 'array',
+            'onboarding_completed' => 'boolean',
         ];
     }
 
