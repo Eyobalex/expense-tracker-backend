@@ -29,7 +29,9 @@ function budgetCategory(User $user, array $overrides = []): Category
 }
 
 test('budget reads lazily initialize a timezone-bound period and retries are idempotent', function (): void {
-    $user = User::factory()->create(['base_currency_code' => 'ETB', 'budget_timezone' => 'Africa/Addis_Ababa']);
+    $user = User::factory()->create(['base_currency_code' => 'ETB']);
+    $user->forceFill(['budget_timezone' => 'Africa/Addis_Ababa'])->save();
+    $user->refresh();
     $category = budgetCategory($user);
     $token = budgetToken($user);
 

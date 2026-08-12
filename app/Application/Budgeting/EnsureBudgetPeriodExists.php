@@ -67,7 +67,7 @@ final readonly class EnsureBudgetPeriodExists
     public function refresh(BudgetPeriod $period): BudgetPeriod
     {
         $actual = $this->actualSpent->calculate($period);
-        $adjustments = $period->adjustments()->get();
+        $adjustments = BudgetAdjustment::query()->where('budget_period_id', $period->getKey())->get();
         $borrowingDeduction = abs((int) $adjustments->where('type', BudgetAdjustmentType::BorrowingReserved->value)->sum('amount_minor_units'));
         $positiveRollover = max(0, (int) $adjustments->where('type', BudgetAdjustmentType::Rollover->value)->sum('amount_minor_units'));
         $negativeCarry = abs(min(0, (int) $adjustments->where('type', BudgetAdjustmentType::Underflow->value)->sum('amount_minor_units')));

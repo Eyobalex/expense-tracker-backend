@@ -18,7 +18,7 @@ final class BudgetActualSpentCalculator
             ->value('ledger_code');
 
         if (! is_string($ledgerCode)) {
-            return 0;
+            $ledgerCode = 'expense.category.'.$period->category_id;
         }
 
         $spent = DB::table('journal_lines')
