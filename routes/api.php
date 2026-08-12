@@ -6,7 +6,7 @@ use App\Http\Controllers\Api\V1\ProfileController;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('v1')
-    ->middleware(['request-id', 'api-json'])
+    ->middleware(['api-json'])
     ->group(function (): void {
         Route::prefix('auth')->middleware('throttle:auth-api')->group(function (): void {
             Route::post('register', [AuthController::class, 'register'])->middleware('idempotency');

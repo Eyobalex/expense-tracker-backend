@@ -13,11 +13,16 @@ class RegisterUserAction
      */
     public function execute(array $attributes): User
     {
-        return DB::transaction(fn (): User => User::query()->create([
-            'uuid' => (string) Str::uuid(),
-            'name' => $attributes['name'],
-            'email' => Str::lower($attributes['email']),
-            'password' => $attributes['password'],
-        ]));
+        return DB::transaction(function () use ($attributes): User {
+            $user = User::query()->create([
+                'uuid' => (string) Str::uuid(),
+                'name' => $attributes['name'],
+                'email' => Str::lower($attributes['email']),
+                'password' => $attributes['password'],
+            ]);
+            $user->refresh();
+
+            return $user;
+        });
     }
 }

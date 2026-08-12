@@ -38,6 +38,6 @@ class DeviceApiTest extends TestCase
 
         $this->assertNotNull($device->fresh()->revoked_at);
         $this->assertDatabaseMissing('personal_access_tokens', ['id' => $token->accessToken->getKey()]);
-        $this->flushHeaders()->withToken($token->plainTextToken)->getJson('/api/v1/me')->assertUnauthorized();
+        $this->actingAsGuest('sanctum')->flushHeaders()->withToken($token->plainTextToken)->getJson('/api/v1/me')->assertUnauthorized();
     }
 }
