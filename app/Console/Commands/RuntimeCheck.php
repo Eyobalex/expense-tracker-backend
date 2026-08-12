@@ -61,6 +61,9 @@ class RuntimeCheck extends Command
         return self::SUCCESS;
     }
 
+    /**
+     * @return array{app_key: mixed, database_default: mixed, cache_default: mixed, queue_default: mixed, filesystem_default: mixed, minio: array<string, mixed>}
+     */
     private function configuration(): array
     {
         return [

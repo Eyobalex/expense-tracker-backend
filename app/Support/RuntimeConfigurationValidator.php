@@ -4,6 +4,10 @@ namespace App\Support;
 
 class RuntimeConfigurationValidator
 {
+    /**
+     * @param  array<string, mixed>  $configuration
+     * @return array<string, string>
+     */
     public function validate(array $configuration): array
     {
         $errors = [];
