@@ -2,6 +2,10 @@
 
 namespace App\Providers;
 
+use App\Domain\Shared\Events\DomainEventBus;
+use App\Domain\Shared\Time\Clock;
+use App\Domain\Shared\Time\SystemClock;
+use App\Infrastructure\Events\LaravelDomainEventBus;
 use Carbon\CarbonImmutable;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
@@ -13,7 +17,11 @@ use Illuminate\Validation\Rules\Password;
 
 class AppServiceProvider extends ServiceProvider
 {
-    public function register(): void {}
+    public function register(): void
+    {
+        $this->app->singleton(Clock::class, SystemClock::class);
+        $this->app->singleton(DomainEventBus::class, LaravelDomainEventBus::class);
+    }
 
     public function boot(): void
     {

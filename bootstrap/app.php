@@ -1,5 +1,6 @@
 <?php
 
+use App\Domain\Shared\Exceptions\DomainException;
 use App\Http\Middleware\AssignRequestId;
 use App\Http\Middleware\EnsureJsonRequest;
 use App\Http\Middleware\IdempotencyMiddleware;
@@ -31,6 +32,21 @@ return Application::configure(basePath: dirname(__DIR__))
         $exceptions->shouldRenderJsonWhen(
             fn (Request $request) => $request->is('api/*') || $request->expectsJson(),
         );
+
+        $exceptions->render(function (DomainException $exception, Request $request): ?JsonResponse {
+            if (! $request->is('api/*')) {
+                return null;
+            }
+
+            return response()->json([
+                'error' => [
+                    'code' => $exception->errorCode()->value,
+                    'message' => $exception->getMessage(),
+                    'fields' => (object) [],
+                    'request_id' => $request->attributes->get('request_id'),
+                ],
+            ], 422);
+        });
 
         $exceptions->render(function (ValidationException $exception, Request $request): ?JsonResponse {
             if (! $request->is('api/*')) {
