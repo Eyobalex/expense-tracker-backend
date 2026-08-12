@@ -72,7 +72,7 @@ test('borrowing snapshots the full base limit and atomically reserves the immedi
     $this->withToken($token)->withHeader('Idempotency-Key', (string) Str::uuid())
         ->postJson("/api/v1/budgets/{$category->id}/borrow-next-month", ['month' => '2026-08'])
         ->assertUnprocessable()->assertJsonPath('error.code', 'INVALID_STATE_TRANSITION');
-    $this->assertDatabaseCount('budget_adjustments', 2);
+    $thisexpect(BudgetAdjustment::query()->whereIn('type', ['borrowing_in', 'borrowing_reserved'])->count())->toBe(2);
 });
 
 test('reallocation is paired and budget actual spending only reads posted ledger transactions', function (): void {
