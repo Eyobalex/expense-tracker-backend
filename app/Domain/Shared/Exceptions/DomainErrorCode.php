@@ -16,6 +16,9 @@ enum DomainErrorCode: string
     case InvalidStateTransition = 'INVALID_STATE_TRANSITION';
     case BaseCurrencyLocked = 'BASE_CURRENCY_LOCKED';
     case AccountCurrencyLocked = 'ACCOUNT_CURRENCY_LOCKED';
+    case UnsupportedCurrency = 'UNSUPPORTED_CURRENCY';
+    case InactiveCurrency = 'INACTIVE_CURRENCY';
+    case InvalidRateLock = 'INVALID_RATE_LOCK';
     case ConcurrencyConflict = 'CONCURRENCY_CONFLICT';
     case UnauthorizedAction = 'UNAUTHORIZED_ACTION';
     case ResourceNotFound = 'RESOURCE_NOT_FOUND';

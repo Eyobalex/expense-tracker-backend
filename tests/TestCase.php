@@ -2,11 +2,17 @@
 
 namespace Tests;
 
+use Database\Seeders\CurrencySeeder;
 use Illuminate\Foundation\Testing\TestCase as BaseTestCase;
 use Laravel\Fortify\Features;
 
 abstract class TestCase extends BaseTestCase
 {
+    protected function seedCurrencies(): void
+    {
+        $this->seed(CurrencySeeder::class);
+    }
+
     protected function skipUnlessFortifyHas(string $feature, ?string $message = null): void
     {
         if (! Features::enabled($feature)) {
