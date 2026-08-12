@@ -24,7 +24,9 @@ class FinancialAccountController extends Controller
 
     public function store(StoreFinancialAccountRequest $request, FinancialAccountService $accounts): JsonResponse
     {
-        $account = $accounts->create($request->user(), $request->validated());
+        /** @var array{name: string, type: string, currency_code: string, opening_balance_configured?: bool} $attributes */
+        $attributes = $request->validated();
+        $account = $accounts->create($request->user(), $attributes);
 
         return $this->success($request, (new FinancialAccountResource($account))->resolve($request), JsonResponse::HTTP_CREATED);
     }

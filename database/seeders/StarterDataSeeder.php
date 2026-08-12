@@ -11,7 +11,9 @@ class StarterDataSeeder extends Seeder
     public function run(StarterDataService $starterData): void
     {
         User::query()->whereNotNull('base_currency_code')->each(
-            fn (User $user): mixed => $starterData->seedFor($user),
+            function (User $user) use ($starterData): void {
+                $starterData->seedFor($user);
+            },
         );
     }
 }

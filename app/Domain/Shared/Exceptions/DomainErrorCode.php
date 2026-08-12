@@ -14,6 +14,8 @@ enum DomainErrorCode: string
     case InvalidPeriod = 'INVALID_PERIOD';
     case InvalidTimezone = 'INVALID_TIMEZONE';
     case InvalidStateTransition = 'INVALID_STATE_TRANSITION';
+    case BaseCurrencyLocked = 'BASE_CURRENCY_LOCKED';
+    case AccountCurrencyLocked = 'ACCOUNT_CURRENCY_LOCKED';
     case ConcurrencyConflict = 'CONCURRENCY_CONFLICT';
     case UnauthorizedAction = 'UNAUTHORIZED_ACTION';
     case ResourceNotFound = 'RESOURCE_NOT_FOUND';

@@ -43,7 +43,10 @@ class FinancialAccount extends Model
         return $this->belongsTo(User::class);
     }
 
-    /** @param Builder<self> $query @return Builder<self> */
+    /**
+     * @param  Builder<self>  $query
+     * @return Builder<self>
+     */
     public function scopeOwnedBy(Builder $query, User $user): Builder
     {
         return $query->where('user_id', $user->getKey());

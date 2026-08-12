@@ -24,7 +24,9 @@ class CategoryController extends Controller
 
     public function store(StoreCategoryRequest $request, CategoryService $categories): JsonResponse
     {
-        $category = $categories->create($request->user(), $request->validated());
+        /** @var array{name: string, kind: string, parent_id?: string|null, budget_enabled?: bool, base_limit_minor_units?: int|null, rollover_enabled?: bool, overspend_carry_enabled?: bool, borrowing_enabled?: bool} $attributes */
+        $attributes = $request->validated();
+        $category = $categories->create($request->user(), $attributes);
 
         return $this->success($request, (new CategoryResource($category))->resolve($request), JsonResponse::HTTP_CREATED);
     }

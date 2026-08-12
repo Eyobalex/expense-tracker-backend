@@ -61,7 +61,10 @@ class Category extends Model
         return $this->hasMany(self::class, 'parent_id');
     }
 
-    /** @param Builder<self> $query @return Builder<self> */
+    /**
+     * @param  Builder<self>  $query
+     * @return Builder<self>
+     */
     public function scopeOwnedBy(Builder $query, User $user): Builder
     {
         return $query->where('user_id', $user->getKey());
