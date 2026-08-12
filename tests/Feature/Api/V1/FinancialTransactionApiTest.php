@@ -176,8 +176,9 @@ test('manual adjustments require the explicit balance-correction subtype and rea
     $account = FinancialAccount::factory()->for($user)->create(['currency_code' => 'ETB']);
     $category = Category::factory()->for($user)->create(['kind' => 'expense']);
     $token = apiToken($user);
-    $draft = $this->withToken($token)->withHeader('Idempotency-Key', (string) Str::uuid())->postJson('/api/v1/transactions', transactionPayload($account, $category, ['type' => 'adjustment']))->json('data');
 
-    $this->withToken($token)->withHeader('If-Match', '1')->withHeader('Idempotency-Key', (string) Str::uuid())->postJson("/api/v1/transactions/{$draft['id']}/post")
-        ->assertUnprocessable()->assertJsonPath('error.code', 'UNAUTHORIZED_ACTION');
+    $this->withToken($token)->withHeader('Idempotency-Key', (string) Str::uuid())
+        ->postJson('/api/v1/transactions', transactionPayload($account, $category, ['type' => 'adjustment']))
+        ->assertUnprocessable()
+        ->assertJsonValidationErrors(['adjustment_subtype', 'adjustment_direction', 'reason']);
 });

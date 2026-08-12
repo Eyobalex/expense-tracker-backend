@@ -7,6 +7,22 @@ use App\Domain\Accounting\JournalLineDefinition;
 use App\Domain\Currency\ValueObjects\CurrencyCode;
 use App\Domain\Shared\Exceptions\DomainException;
 
+it('preserves functional-currency balance for deterministic cross-currency rounding cases', function (): void {
+    $etb = CurrencyCode::fromString('ETB');
+    $usd = CurrencyCode::fromString('USD');
+
+    foreach ([[100, 5500], [101, 5555], [9999, 549945]] as [$usdMinor, $etbMinor]) {
+        $entry = new JournalEntryDefinition(JournalType::Normal, $etb, [
+            JournalLineDefinition::debit('asset.etb', $etb, $etbMinor, $etb, $etbMinor),
+            JournalLineDefinition::credit('asset.usd', $usd, $usdMinor, $etb, $etbMinor),
+        ]);
+
+        app(JournalBalanceValidator::class)->assertBalanced($entry);
+    }
+
+    expect(true)->toBeTrue();
+});
+
 it('accepts a balanced functional-currency journal', function (): void {
     $etb = CurrencyCode::fromString('ETB');
     $entry = new JournalEntryDefinition(JournalType::Normal, $etb, [

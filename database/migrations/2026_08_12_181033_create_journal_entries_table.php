@@ -24,11 +24,13 @@ return new class extends Migration
 
             $table->foreign('financial_transaction_id')->references('id')->on('financial_transactions')->restrictOnDelete();
             $table->foreign('functional_currency_code')->references('code')->on('currencies')->restrictOnDelete();
-            $table->foreign('reversed_entry_id')->references('id')->on('journal_entries')->restrictOnDelete();
-            $table->foreign('correction_of_entry_id')->references('id')->on('journal_entries')->restrictOnDelete();
             $table->foreign('idempotency_operation_id')->references('id')->on('idempotency_operations')->nullOnDelete();
             $table->unique('financial_transaction_id');
             $table->unique('reversed_entry_id');
+        });
+        Schema::table('journal_entries', function (Blueprint $table): void {
+            $table->foreign('reversed_entry_id')->references('id')->on('journal_entries')->restrictOnDelete();
+            $table->foreign('correction_of_entry_id')->references('id')->on('journal_entries')->restrictOnDelete();
         });
 
         Schema::table('financial_transactions', function (Blueprint $table): void {
@@ -42,6 +44,9 @@ return new class extends Migration
 
     public function down(): void
     {
+        Schema::table('journal_entries', function (Blueprint $table): void {
+            $table->dropForeign(['reversed_entry_id', 'correction_of_entry_id']);
+        });
         Schema::table('financial_transactions', function (Blueprint $table): void {
             $table->dropForeign(['journal_entry_id', 'reversal_of_id', 'correction_of_id']);
         });
