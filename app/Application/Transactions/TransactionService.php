@@ -2,6 +2,7 @@
 
 namespace App\Application\Transactions;
 
+use App\Application\Budgeting\RecalculateBudgetChain;
 use App\Domain\Accounting\JournalEntryDefinition;
 use App\Domain\Shared\Exceptions\DomainErrorCode;
 use App\Domain\Shared\Exceptions\DomainException;
@@ -15,7 +16,7 @@ use Illuminate\Support\Facades\DB;
 
 final readonly class TransactionService
 {
-    public function __construct(private CanonicalJournalBuilder $journals) {}
+    public function __construct(private CanonicalJournalBuilder $journals, private RecalculateBudgetChain $budgets) {}
 
     /**
      * @param  array<string, mixed>  $attributes
@@ -97,6 +98,7 @@ final readonly class TransactionService
                 'posted_at' => $now, 'version' => $locked->version + 1,
             ])->save();
             $this->createHistoryLocks($user, $locked, $now);
+            $this->budgets->forTransaction($locked);
             $this->audit($user, 'transaction.posted', $locked, ['journal_entry_id' => $entry->getKey()]);
 
             return $locked->fresh()->load(['financialAccount', 'counterpartyAccount', 'category', 'relatedTransaction', 'splits.category', 'journalEntry.lines']);
@@ -137,6 +139,7 @@ final readonly class TransactionService
             $entry = $this->persistOppositeJournal($user, $original, $reversal);
             $reversal->forceFill(['state' => 'reversed', 'journal_entry_id' => $entry->getKey(), 'posted_at' => now()])->save();
             $original->forceFill(['state' => 'reversed', 'reversed_at' => now(), 'version' => $original->version + 1])->save();
+            $this->budgets->forTransactionEffectRemoved($original);
             $this->audit($user, 'transaction.reversed', $original, ['reversal_transaction_id' => $reversal->getKey(), 'reason' => $reason]);
 
             return $reversal->fresh()->load(['journalEntry.lines']);

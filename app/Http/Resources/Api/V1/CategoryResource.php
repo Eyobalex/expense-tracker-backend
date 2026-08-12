@@ -24,6 +24,7 @@ class CategoryResource extends JsonResource
             'is_system' => $category->is_system,
             'budget_enabled' => $category->budget_enabled,
             'base_limit_minor_units' => $category->base_limit_minor_units,
+            'budget_currency_code' => $category->budget_currency_code,
             'rollover_enabled' => $category->rollover_enabled,
             'overspend_carry_enabled' => $category->overspend_carry_enabled,
             'borrowing_enabled' => $category->borrowing_enabled,
