@@ -67,9 +67,19 @@ class User extends Authenticatable implements PasskeyUser
         return $this->hasMany(FinancialTransaction::class);
     }
 
-    /**
-     * @return HasMany<LedgerAccountMapping, $this>
-     */
+    /** @return HasMany<BudgetPeriod, $this> */
+    public function budgetPeriods(): HasMany
+    {
+        return $this->hasMany(BudgetPeriod::class);
+    }
+
+    /** @return HasMany<BudgetAdjustment, $this> */
+    public function budgetAdjustments(): HasMany
+    {
+        return $this->hasMany(BudgetAdjustment::class);
+    }
+
+    /** @return HasMany<LedgerAccountMapping, $this> */
     public function ledgerAccountMappings(): HasMany
     {
         return $this->hasMany(LedgerAccountMapping::class);

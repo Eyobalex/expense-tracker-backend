@@ -10,11 +10,12 @@ use Illuminate\Support\Facades\DB;
 
 final class CategoryService
 {
-    /** @param array{name: string, kind: string, parent_id?: string|null, budget_enabled?: bool, base_limit_minor_units?: int|null, rollover_enabled?: bool, overspend_carry_enabled?: bool, borrowing_enabled?: bool} $attributes */
+    /** @param array{name: string, kind: string, parent_id?: string|null, budget_enabled?: bool, base_limit_minor_units?: int|null, rollover_enabled?: bool, overspend_carry_enabled?: bool, borrowing_enabled?: bool, budget_currency_code?: string|null} $attributes */
     public function create(User $user, array $attributes): Category
     {
         return DB::transaction(function () use ($user, $attributes): Category {
             $this->assertValidParent($user, $attributes['parent_id'] ?? null, $attributes['kind']);
+            $this->assertBudgetCurrency($user, $attributes['budget_currency_code'] ?? $user->base_currency_code);
 
             $category = $user->categories()->create([
                 'name' => $attributes['name'],
@@ -25,13 +26,14 @@ final class CategoryService
                 'rollover_enabled' => $attributes['rollover_enabled'] ?? false,
                 'overspend_carry_enabled' => $attributes['overspend_carry_enabled'] ?? false,
                 'borrowing_enabled' => $attributes['borrowing_enabled'] ?? false,
+                'budget_currency_code' => $attributes['budget_currency_code'] ?? $user->base_currency_code,
             ]);
 
             return $category->refresh();
         });
     }
 
-    /** @param array{name?: string, kind?: string, parent_id?: string|null, budget_enabled?: bool, base_limit_minor_units?: int|null, rollover_enabled?: bool, overspend_carry_enabled?: bool, borrowing_enabled?: bool, is_active?: bool, archived_at?: mixed} $attributes */
+    /** @param array{name?: string, kind?: string, parent_id?: string|null, budget_enabled?: bool, base_limit_minor_units?: int|null, rollover_enabled?: bool, overspend_carry_enabled?: bool, borrowing_enabled?: bool, budget_currency_code?: string|null, is_active?: bool, archived_at?: mixed} $attributes */
     public function update(User $user, Category $category, int $expectedVersion, array $attributes): Category
     {
         if ($category->user_id !== $user->id) {
@@ -50,6 +52,9 @@ final class CategoryService
             throw DomainException::for(DomainErrorCode::InvalidStateTransition, 'A category cannot be assigned to one of its descendants.');
         }
         $this->assertValidParent($user, $parentId, $kind);
+        if (array_key_exists('budget_currency_code', $attributes)) {
+            $this->assertBudgetCurrency($user, $attributes['budget_currency_code']);
+        }
 
         $attributes['version'] = $expectedVersion + 1;
         $updated = Category::query()->ownedBy($user)->whereKey($category->getKey())->where('version', $expectedVersion)->update($attributes);
@@ -84,6 +89,13 @@ final class CategoryService
         }
 
         return false;
+    }
+
+    private function assertBudgetCurrency(User $user, ?string $currencyCode): void
+    {
+        if ($currencyCode !== null && $currencyCode !== $user->base_currency_code) {
+            throw DomainException::for(DomainErrorCode::CurrencyMismatch, 'Budget limits are maintained in the user base currency.');
+        }
     }
 
     private function assertValidParent(User $user, ?string $parentId, string $kind): void

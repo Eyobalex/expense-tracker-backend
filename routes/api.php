@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Api\V1\AuthController;
+use App\Http\Controllers\Api\V1\BudgetController;
 use App\Http\Controllers\Api\V1\CategoryController;
 use App\Http\Controllers\Api\V1\CurrencyController;
 use App\Http\Controllers\Api\V1\DeviceController;
@@ -48,6 +49,11 @@ Route::prefix('v1')
             Route::post('transactions/{transaction}/post', [TransactionController::class, 'post'])->middleware('idempotency');
             Route::post('transactions/{transaction}/reverse', [TransactionController::class, 'reverse'])->middleware('idempotency');
             Route::post('transactions/{transaction}/correct', [TransactionController::class, 'correct'])->middleware('idempotency');
+
+            Route::get('budgets', [BudgetController::class, 'index']);
+            Route::get('budgets/{category}/periods', [BudgetController::class, 'history']);
+            Route::post('budgets/{category}/reallocate', [BudgetController::class, 'reallocate'])->middleware('idempotency');
+            Route::post('budgets/{category}/borrow-next-month', [BudgetController::class, 'borrow'])->middleware('idempotency');
 
             Route::get('categories', [CategoryController::class, 'index']);
             Route::post('categories', [CategoryController::class, 'store'])->middleware('idempotency');

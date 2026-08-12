@@ -36,11 +36,11 @@ class Category extends Model
 
     protected $keyType = 'string';
 
-    protected $fillable = ['parent_id', 'name', 'kind', 'is_active', 'budget_enabled', 'base_limit_minor_units', 'rollover_enabled', 'overspend_carry_enabled', 'borrowing_enabled', 'archived_at', 'version'];
+    protected $fillable = ['parent_id', 'name', 'kind', 'is_active', 'budget_enabled', 'base_limit_minor_units', 'budget_currency_code', 'rollover_enabled', 'overspend_carry_enabled', 'borrowing_enabled', 'archived_at', 'version'];
 
     protected function casts(): array
     {
-        return ['is_active' => 'boolean', 'is_system' => 'boolean', 'budget_enabled' => 'boolean', 'rollover_enabled' => 'boolean', 'overspend_carry_enabled' => 'boolean', 'borrowing_enabled' => 'boolean', 'archived_at' => 'immutable_datetime', 'version' => 'integer'];
+        return ['is_active' => 'boolean', 'is_system' => 'boolean', 'budget_enabled' => 'boolean', 'budget_currency_code' => 'string', 'rollover_enabled' => 'boolean', 'overspend_carry_enabled' => 'boolean', 'borrowing_enabled' => 'boolean', 'archived_at' => 'immutable_datetime', 'version' => 'integer'];
     }
 
     /** @return BelongsTo<User, $this> */
@@ -53,6 +53,12 @@ class Category extends Model
     public function parent(): BelongsTo
     {
         return $this->belongsTo(self::class, 'parent_id');
+    }
+
+    /** @return HasMany<BudgetPeriod, $this> */
+    public function budgetPeriods(): HasMany
+    {
+        return $this->hasMany(BudgetPeriod::class);
     }
 
     /** @return HasMany<Category, $this> */
