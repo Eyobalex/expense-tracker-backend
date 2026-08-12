@@ -2,9 +2,11 @@
 
 namespace App\Http\Resources\Api\V1;
 
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
+/** @mixin User */
 class ProfileResource extends JsonResource
 {
     /**
@@ -12,13 +14,16 @@ class ProfileResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
+        /** @var User $user */
+        $user = $this->resource;
+
         return [
-            'id' => $this->uuid,
-            'name' => $this->name,
-            'email' => $this->email,
-            'version' => $this->version,
-            'created_at' => $this->created_at?->toISOString(),
-            'updated_at' => $this->updated_at?->toISOString(),
+            'id' => $user->uuid,
+            'name' => $user->name,
+            'email' => $user->email,
+            'version' => $user->version,
+            'created_at' => $user->created_at?->toISOString(),
+            'updated_at' => $user->updated_at?->toISOString(),
         ];
     }
 }

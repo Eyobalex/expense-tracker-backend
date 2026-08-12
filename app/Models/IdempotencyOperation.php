@@ -21,6 +21,9 @@ class IdempotencyOperation extends Model
         return ['response_body' => 'encrypted:array', 'completed_at' => 'immutable_datetime'];
     }
 
+    /**
+     * @return BelongsTo<User, $this>
+     */
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);

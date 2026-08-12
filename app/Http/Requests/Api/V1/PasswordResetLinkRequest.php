@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\Api\V1;
 
+use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 
 class PasswordResetLinkRequest extends FormRequest
@@ -11,6 +12,9 @@ class PasswordResetLinkRequest extends FormRequest
         return true;
     }
 
+    /**
+     * @return array<string, ValidationRule|array<mixed>|string>
+     */
     public function rules(): array
     {
         return ['email' => ['required', 'email']];

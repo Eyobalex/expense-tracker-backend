@@ -16,7 +16,9 @@ class LoginUserAction
     public function execute(User $user, array $deviceAttributes): array
     {
         return DB::transaction(function () use ($user, $deviceAttributes): array {
-            $user = User::query()->lockForUpdate()->findOrFail($user->getKey());
+            $lockedUser = User::query()->lockForUpdate()->findOrFail($user->getKey());
+            assert($lockedUser instanceof User);
+            $user = $lockedUser;
             $user->tokens()->delete();
             $user->devices()->whereNull('revoked_at')->update(['revoked_at' => now()]);
 
@@ -32,6 +34,7 @@ class LoginUserAction
                     'revoked_at' => null,
                 ],
             );
+            assert($device instanceof Device);
 
             return ['device' => $device, 'token' => $token];
         });

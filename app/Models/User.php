@@ -38,6 +38,9 @@ class User extends Authenticatable implements PasskeyUser
     /** @use HasFactory<UserFactory> */
     use HasApiTokens, HasFactory, Notifiable, PasskeyAuthenticatable, TwoFactorAuthenticatable;
 
+    /**
+     * @return HasMany<Device, $this>
+     */
     public function devices(): HasMany
     {
         return $this->hasMany(Device::class);

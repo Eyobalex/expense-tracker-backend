@@ -12,6 +12,7 @@ use App\Http\Requests\Api\V1\RegisterRequest;
 use App\Http\Requests\Api\V1\ResetPasswordRequest;
 use App\Http\Resources\Api\V1\DeviceResource;
 use App\Http\Resources\Api\V1\ProfileResource;
+use App\Models\Device;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -22,13 +23,16 @@ class AuthController extends Controller
 {
     public function register(RegisterRequest $request, RegisterUserAction $registerUser): JsonResponse
     {
-        $user = $registerUser->execute($request->validated());
+        /** @var array{name: string, email: string, password: string} $attributes */
+        $attributes = $request->validated();
+        $user = $registerUser->execute($attributes);
 
         return $this->success($request, (new ProfileResource($user))->resolve($request), JsonResponse::HTTP_CREATED);
     }
 
     public function login(LoginRequest $request, LoginUserAction $loginUser): JsonResponse
     {
+        /** @var array{email: string, password: string, client_device_id: string, platform: string, app_version?: string|null} $attributes */
         $attributes = $request->validated();
         $user = User::query()->where('email', mb_strtolower($attributes['email']))->first();
 
@@ -71,10 +75,10 @@ class AuthController extends Controller
         }
 
         $currentDevice = $user->devices()
-            ->where('personal_access_token_id', $user->currentAccessToken()?->getKey())
+            ->where('personal_access_token_id', $user->currentAccessToken()->getKey())
             ->first();
 
-        if ($currentDevice === null) {
+        if (! $currentDevice instanceof Device) {
             return $this->error($request, 'DEVICE_SESSION_NOT_FOUND', 'The active device session was not found.', JsonResponse::HTTP_UNAUTHORIZED);
         }
 
@@ -100,6 +104,7 @@ class AuthController extends Controller
 
     public function resetPassword(ResetPasswordRequest $request): JsonResponse
     {
+        /** @var array{token: string, email: string, password: string, password_confirmation: string} $attributes */
         $attributes = $request->validated();
         $status = Password::reset($attributes, function (User $user, string $password): void {
             $user->forceFill(['password' => $password])->save();
