@@ -34,7 +34,6 @@ class LoginUserAction
                     'revoked_at' => null,
                 ],
             );
-            assert($device instanceof Device);
 
             return ['device' => $device, 'token' => $token];
         });
