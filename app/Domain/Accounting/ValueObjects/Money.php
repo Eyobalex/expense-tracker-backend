@@ -43,6 +43,9 @@ final readonly class Money implements JsonSerializable
         return $this->minorUnits === 0;
     }
 
+    /**
+     * @return array{minor_units: int, currency: string}
+     */
     public function jsonSerialize(): array
     {
         return ['minor_units' => $this->minorUnits, 'currency' => $this->currency->toString()];

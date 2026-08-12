@@ -62,6 +62,9 @@ final readonly class MonthlyPeriod implements JsonSerializable
         return $normalized >= $this->startsAt() && $normalized < $this->endsAt();
     }
 
+    /**
+     * @return array{timezone: string, period_start_at: string, period_end_at: string}
+     */
     public function jsonSerialize(): array
     {
         return [
