@@ -96,15 +96,15 @@ The feature cannot safely continue until an external issue, dependency, requirem
 
 Total planned features: 18
 
-Merged: 2
+Merged: 3
 
-In progress: 0
+In progress: 1
 
-PR open: 1
+PR open: 0
 
 Blocked: 0
 
-Pending: 16
+Pending: 15
 
 Overall status: IN PROGRESS
 
@@ -135,8 +135,8 @@ They may be split into additional independently reviewable features if required 
 | --- | --------------------------------------------------------------- | ------------------------------------- | ------------------ | --------------------------------- | ------- | -- | ------------ | ------------- | ------------------------------------------------------------------------------ |
 | 001 | Project governance and baseline | Phase 0 | None | feat/001-project-baseline | MERGED | 1 | 45b0e935b6de5cee44c0f2d57cfa3054884866f4 | CI passed | Merged into dev after PHP 8.5 CI correction |
 | 002 | PostgreSQL, Redis, MinIO and local runtime | Phase 1 | 001 | feat/002-runtime-infrastructure | MERGED | 2 | 9142db0f5aecb950cf8d06861d492239036ba7fd | CI passed | Merged into dev after PostgreSQL/Redis/MinIO CI passed |
-| 003 | Laravel API shell, authentication and single-device enforcement | Phase 2 | 002 | feat/003-api-auth | PR_OPEN | 3 | — | Local lint/routes passed; CI pending | PR #3 targets dev |
-| 004 | DDD foundation and shared primitives                            | Phase 3                               | 003                | `feat/004-shared-primitives`      | PENDING | —  | —            | —             | Money, time, errors, audit, IDs                                                |
+| 003 | Laravel API shell, authentication and single-device enforcement | Phase 2 | 002 | feat/003-api-auth | MERGED | 3 | 0cbe65679e67d694f99733437a541c1a64a569af | CI passed | Merged into dev after PostgreSQL/Redis/MinIO-backed CI passed |
+| 004 | DDD foundation and shared primitives | Phase 3 | 003 | `feat/004-shared-primitives` | IN_PROGRESS | — | — | Pending | Money, time, errors, audit, IDs |
 | 005 | Identity, financial accounts, categories and onboarding backend | Phase 4                               | 004                | `feat/005-accounts-categories`    | PENDING | —  | —            | —             | Includes immutable user/account currency rules                                 |
 | 006 | Currency Core                                                   | Phase 5                               | 005                | `feat/006-currency-core`          | PENDING | —  | —            | —             | Must precede ledger                                                            |
 | 007 | Transaction aggregate and double-entry ledger                   | Phase 6                               | 006                | `feat/007-double-entry-ledger`    | PENDING | —  | —            | —             | Includes functional-currency invariant and inclusion matrix                    |
@@ -157,13 +157,13 @@ They may be split into additional independently reviewable features if required 
 
 # Current Feature
 
-Feature ID: 002
+Feature ID: 004
 
-Feature: PostgreSQL, Redis, MinIO and local runtime
+Feature: DDD foundation and shared primitives
 
-Branch: `feat/002-runtime-infrastructure`
+Branch: `feat/004-shared-primitives`
 
-Status: IN PROGRESS
+Status: IN_PROGRESS
 
 Started: 2026-08-12
 
@@ -178,6 +178,7 @@ Blocker: —
 Feature 001 — Project governance and baseline — merged into dev via PR #1 (45b0e935b6de5cee44c0f2d57cfa3054884866f4).
 
 Feature 002 — PostgreSQL, Redis, MinIO and local runtime — merged into dev via PR #2 (9142db0f5aecb950cf8d06861d492239036ba7fd).
+Feature 003 — Laravel API shell, authentication and single-device enforcement — merged into dev via PR #3 (0cbe65679e67d694f99733437a541c1a64a569af).
 
 ---
 
@@ -251,21 +252,40 @@ Notes: private MinIO, isolated PostgreSQL testing, Redis cache/queue/locks, Sail
 
 ## Feature 003
 
-Status: PR_OPEN
+Status: MERGED
 
 Branch: `feat/003-api-auth`
 
-Implementation plan coverage: Phase 2, steps 1-10; checklist and exit criteria pending PostgreSQL-backed GitHub Actions verification.
+Implementation plan coverage: Phase 2, steps 1-10; checklist and exit criteria complete.
 
-PR: #3 (targets `dev`)
+PR: #3 (merged into `dev`)
+
+Merge commit: 0cbe65679e67d694f99733437a541c1a64a569af
+
+Tests executed: GitHub Actions CI passed with PostgreSQL, Redis, MinIO, Pint, PHPStan, and PHPUnit.
+
+Checklist: Complete.
+
+Notes: Sanctum 4.3.3, device/token revocation, API v1 envelopes, request IDs, Redis throttling/idempotency, encrypted replay storage, policies, and profile optimistic concurrency included.
+---
+
+## Feature 004
+
+Status: IN_PROGRESS
+
+Branch: `feat/004-shared-primitives`
+
+Implementation plan coverage: Phase 3, steps 1-9.
+
+PR: —
 
 Merge commit: —
 
-Tests executed: local Pint, syntax, routes, and diff checks. Local PostgreSQL service is unavailable; GitHub Actions must run migrations, PHPUnit, and PHPStan.
+Tests executed: Pending.
 
-Checklist: implementation complete; CI verification pending.
+Checklist: In progress.
 
-Notes: Sanctum 4.3.3, device/token revocation, API v1 envelopes, request IDs, Redis throttling/idempotency, encrypted replay storage, policies, and profile optimistic concurrency included.
+Notes: Exact money/rate arithmetic, deterministic time, domain errors, audit redaction, contracts, enums, and event conventions.
 
 ---
 
