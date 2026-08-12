@@ -299,7 +299,7 @@ Branch: `feat/005-accounts-categories`
 
 Implementation plan coverage: Phase 4, steps 1-11.
 
-PR: —
+PR: #5 (targets `dev`)
 
 Merge commit: —
 
