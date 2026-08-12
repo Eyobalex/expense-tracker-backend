@@ -138,7 +138,7 @@ They may be split into additional independently reviewable features if required 
 | 003 | Laravel API shell, authentication and single-device enforcement | Phase 2 | 002 | feat/003-api-auth | MERGED | 3 | 0cbe65679e67d694f99733437a541c1a64a569af | CI passed | Merged into dev after PostgreSQL/Redis/MinIO-backed CI passed |
 | 004 | DDD foundation and shared primitives | Phase 3 | 003 | `feat/004-shared-primitives` | MERGED | 4 | 9a5aaa71d5d1323fe198203866b5fd7fe3484588 | CI passed | Merged into dev after PostgreSQL/Redis/MinIO-backed CI passed |
 | 005 | Identity, financial accounts, categories and onboarding backend | Phase 4 | 004 | `feat/005-accounts-categories` | MERGED | 5 | 1c3bba74d4486921c7cc41cc88308613aa47005b | CI passed | Merged into dev after PostgreSQL/Redis/MinIO-backed CI passed |
-| 006 | Currency Core | Phase 5 | 005 | `feat/006-currency-core` | IN_PROGRESS | — | — | Pending | Must precede ledger |
+| 006 | Currency Core | Phase 5 | 005 | `feat/006-currency-core` | PR_OPEN | 6 | — | CI pending | Must precede ledger |
 | 007 | Transaction aggregate and double-entry ledger                   | Phase 6                               | 006                | `feat/007-double-entry-ledger`    | PENDING | —  | —            | —             | Includes functional-currency invariant and inclusion matrix                    |
 | 008 | Budget engine                                                   | Phase 7                               | 007                | `feat/008-budget-engine`          | PENDING | —  | —            | —             | Includes lazy initialization, compensation, refunds, atomic borrowing          |
 | 009 | Receipt storage and OCR infrastructure                          | Phase 8                               | 008, 002, 006      | `feat/009-receipt-ocr`            | PENDING | —  | —            | —             | MinIO, preprocessing, PP-OCRv6, parser/security/lifecycle                     |
@@ -163,11 +163,11 @@ Feature: Currency Core
 
 Branch: `feat/006-currency-core`
 
-Status: IN_PROGRESS
+Status: PR_OPEN
 
 Started: 2026-08-12
 
-PR: —
+PR: #6 (targets dev)
 
 Blocker: —
 
