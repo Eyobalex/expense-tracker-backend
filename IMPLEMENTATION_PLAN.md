@@ -15,7 +15,7 @@ Every implementation task must follow the generated Laravel Boost AGENTS.md:
 - Inspect installed package versions before relying on package APIs.
 - Search version-specific Laravel documentation before code changes.
 - Use Artisan generators with --no-interaction for Laravel files.
-- Use PHPUnit classes and factories.
+- Use Pest closure tests and factories.
 - Run affected tests and Pint after PHP changes.
 - Inspect database schema before creating migrations/models.
 - Use the approved DDD directories instead of placing domain logic in controllers/models.
@@ -68,7 +68,7 @@ A change is not complete until all applicable items are true:
 - [ ] Database migration, indexes, constraints, factories, and seed data are present where needed.
 - [ ] Idempotency and optimistic concurrency behavior is defined for mutations.
 - [ ] Happy path, validation failure, authorization failure, retry, conflict, and boundary tests exist.
-- [ ] PHPUnit tests run successfully against an isolated PostgreSQL database.
+- [ ] Pest tests run successfully against an isolated PostgreSQL database.
 - [ ] Pint, static analysis, and relevant API contract checks pass.
 - [ ] Logs and telemetry contain request/job correlation but no tokens, raw images, raw OCR, or full financial payloads.
 - [ ] API resources, error codes, and documentation are updated.
@@ -116,7 +116,7 @@ Dependencies: none.
 - [ ] Boost documentation searches were performed before implementation begins.
 - [ ] CI commands and required local services are documented.
 
-Exit criteria: a new engineer can create a correctly structured class, migration, endpoint, and PHPUnit test without making architectural decisions.
+Exit criteria: a new engineer can create a correctly structured class, migration, endpoint, and Pest test without making architectural decisions.
 
 ---
 
@@ -193,7 +193,7 @@ Dependencies: Phase 1.
 - [ ] Rate limits cover auth and expensive endpoints.
 - [ ] Idempotent retries replay the original response without duplicate side effects.
 - [ ] Stale mutable-resource versions return HTTP 409.
-- [ ] PHPUnit feature tests cover auth success/failure, token revocation, ownership, throttling, and idempotency.
+- [ ] Pest feature tests cover auth success/failure, token revocation, ownership, throttling, and idempotency.
 
 Exit criteria: a protected, versioned, retry-safe API shell exists and is tested.
 
