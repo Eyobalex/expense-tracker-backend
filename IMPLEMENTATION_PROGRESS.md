@@ -96,7 +96,7 @@ The feature cannot safely continue until an external issue, dependency, requirem
 
 Total planned features: 18
 
-Merged: 3
+Merged: 4
 
 In progress: 1
 
@@ -104,7 +104,7 @@ PR open: 0
 
 Blocked: 0
 
-Pending: 15
+Pending: 14
 
 Overall status: IN PROGRESS
 
@@ -136,8 +136,8 @@ They may be split into additional independently reviewable features if required 
 | 001 | Project governance and baseline | Phase 0 | None | feat/001-project-baseline | MERGED | 1 | 45b0e935b6de5cee44c0f2d57cfa3054884866f4 | CI passed | Merged into dev after PHP 8.5 CI correction |
 | 002 | PostgreSQL, Redis, MinIO and local runtime | Phase 1 | 001 | feat/002-runtime-infrastructure | MERGED | 2 | 9142db0f5aecb950cf8d06861d492239036ba7fd | CI passed | Merged into dev after PostgreSQL/Redis/MinIO CI passed |
 | 003 | Laravel API shell, authentication and single-device enforcement | Phase 2 | 002 | feat/003-api-auth | MERGED | 3 | 0cbe65679e67d694f99733437a541c1a64a569af | CI passed | Merged into dev after PostgreSQL/Redis/MinIO-backed CI passed |
-| 004 | DDD foundation and shared primitives | Phase 3 | 003 | `feat/004-shared-primitives` | IN_PROGRESS | — | — | Pending | Money, time, errors, audit, IDs |
-| 005 | Identity, financial accounts, categories and onboarding backend | Phase 4                               | 004                | `feat/005-accounts-categories`    | PENDING | —  | —            | —             | Includes immutable user/account currency rules                                 |
+| 004 | DDD foundation and shared primitives | Phase 3 | 003 | `feat/004-shared-primitives` | MERGED | 4 | 9a5aaa71d5d1323fe198203866b5fd7fe3484588 | CI passed | Merged into dev after PostgreSQL/Redis/MinIO-backed CI passed |
+| 005 | Identity, financial accounts, categories and onboarding backend | Phase 4 | 004 | `feat/005-accounts-categories` | IN_PROGRESS | — | — | Pending | Includes immutable user/account currency rules |
 | 006 | Currency Core                                                   | Phase 5                               | 005                | `feat/006-currency-core`          | PENDING | —  | —            | —             | Must precede ledger                                                            |
 | 007 | Transaction aggregate and double-entry ledger                   | Phase 6                               | 006                | `feat/007-double-entry-ledger`    | PENDING | —  | —            | —             | Includes functional-currency invariant and inclusion matrix                    |
 | 008 | Budget engine                                                   | Phase 7                               | 007                | `feat/008-budget-engine`          | PENDING | —  | —            | —             | Includes lazy initialization, compensation, refunds, atomic borrowing          |
@@ -157,11 +157,11 @@ They may be split into additional independently reviewable features if required 
 
 # Current Feature
 
-Feature ID: 004
+Feature ID: 005
 
-Feature: DDD foundation and shared primitives
+Feature: Identity, financial accounts, categories and onboarding backend
 
-Branch: `feat/004-shared-primitives`
+Branch: `feat/005-accounts-categories`
 
 Status: IN_PROGRESS
 
@@ -179,6 +179,8 @@ Feature 001 — Project governance and baseline — merged into dev via PR #1 (4
 
 Feature 002 — PostgreSQL, Redis, MinIO and local runtime — merged into dev via PR #2 (9142db0f5aecb950cf8d06861d492239036ba7fd).
 Feature 003 — Laravel API shell, authentication and single-device enforcement — merged into dev via PR #3 (0cbe65679e67d694f99733437a541c1a64a569af).
+
+Feature 004 — DDD foundation and shared primitives — merged into dev via PR #4 (9a5aaa71d5d1323fe198203866b5fd7fe3484588).
 
 ---
 
@@ -271,13 +273,33 @@ Notes: Sanctum 4.3.3, device/token revocation, API v1 envelopes, request IDs, Re
 
 ## Feature 004
 
-Status: IN_PROGRESS
+Status: MERGED
 
 Branch: `feat/004-shared-primitives`
 
-Implementation plan coverage: Phase 3, steps 1-9.
+Implementation plan coverage: Phase 3, steps 1-9; checklist and exit criteria complete.
 
-PR: #4 (targets `dev`)
+PR: #4 (merged into `dev`)
+
+Merge commit: 9a5aaa71d5d1323fe198203866b5fd7fe3484588
+
+Tests executed: GitHub Actions CI passed with PostgreSQL, Redis, MinIO, Pint, PHPStan, and PHPUnit.
+
+Checklist: Complete.
+
+Notes: Exact money/rate arithmetic, deterministic time, domain errors, audit redaction, contracts, enums, and event conventions.
+
+---
+
+## Feature 005
+
+Status: IN_PROGRESS
+
+Branch: `feat/005-accounts-categories`
+
+Implementation plan coverage: Phase 4, steps 1-11.
+
+PR: —
 
 Merge commit: —
 
@@ -285,7 +307,7 @@ Tests executed: Pending.
 
 Checklist: In progress.
 
-Notes: Exact money/rate arithmetic, deterministic time, domain errors, audit redaction, contracts, enums, and event conventions.
+Notes: User financial settings, accounts, categories, onboarding, seed data, ownership, and currency locks.
 
 ---
 
