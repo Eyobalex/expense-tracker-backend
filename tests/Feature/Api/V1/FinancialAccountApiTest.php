@@ -13,6 +13,12 @@ class FinancialAccountApiTest extends TestCase
 {
     use RefreshDatabase;
 
+    protected function setUp(): void
+    {
+        parent::setUp();
+        $this->seedCurrencies();
+    }
+
     public function test_owner_can_create_archive_and_restore_an_account_with_idempotency_and_versions(): void
     {
         $user = User::factory()->create();

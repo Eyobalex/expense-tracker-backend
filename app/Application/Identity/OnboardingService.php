@@ -4,6 +4,7 @@ namespace App\Application\Identity;
 
 use App\Application\Accounts\FinancialHistoryInspector;
 use App\Application\Accounts\StarterDataService;
+use App\Application\Currency\CurrencyRegistry;
 use App\Domain\Shared\Exceptions\DomainErrorCode;
 use App\Domain\Shared\Exceptions\DomainException;
 use App\Models\User;
@@ -15,12 +16,14 @@ final readonly class OnboardingService
     public function __construct(
         private FinancialHistoryInspector $financialHistory,
         private StarterDataService $starterData,
+        private CurrencyRegistry $currencies,
     ) {}
 
     /** @param array{base_currency_code: string, timezone: string, budget_timezone: string, notification_preferences?: array<string, mixed>, seed_starter_data?: bool} $attributes */
     public function update(User $user, int $expectedVersion, array $attributes): User
     {
         $baseCurrency = strtoupper($attributes['base_currency_code']);
+        $this->currencies->activeMetadata($baseCurrency);
         if ($user->base_currency_code !== null
             && $baseCurrency !== $user->base_currency_code
             && $this->financialHistory->userHasPostedTransactions($user)) {

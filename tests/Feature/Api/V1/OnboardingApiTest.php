@@ -12,6 +12,12 @@ class OnboardingApiTest extends TestCase
 {
     use RefreshDatabase;
 
+    protected function setUp(): void
+    {
+        parent::setUp();
+        $this->seedCurrencies();
+    }
+
     public function test_onboarding_sets_financial_preferences_and_idempotently_seeds_starter_data(): void
     {
         $user = User::factory()->create();

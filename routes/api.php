@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Api\V1\AuthController;
 use App\Http\Controllers\Api\V1\CategoryController;
+use App\Http\Controllers\Api\V1\CurrencyController;
 use App\Http\Controllers\Api\V1\DeviceController;
 use App\Http\Controllers\Api\V1\FinancialAccountController;
 use App\Http\Controllers\Api\V1\OnboardingController;
@@ -27,6 +28,7 @@ Route::prefix('v1')
             Route::delete('devices/{device}', [DeviceController::class, 'destroy'])->middleware('idempotency');
 
             Route::get('onboarding', [OnboardingController::class, 'show']);
+            Route::get('currencies', [CurrencyController::class, 'index']);
             Route::put('onboarding', [OnboardingController::class, 'update'])->middleware('idempotency');
 
             Route::get('accounts', [FinancialAccountController::class, 'index']);

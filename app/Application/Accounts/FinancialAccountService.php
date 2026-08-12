@@ -2,6 +2,7 @@
 
 namespace App\Application\Accounts;
 
+use App\Application\Currency\CurrencyRegistry;
 use App\Domain\Shared\Exceptions\DomainErrorCode;
 use App\Domain\Shared\Exceptions\DomainException;
 use App\Models\FinancialAccount;
@@ -10,11 +11,16 @@ use Illuminate\Support\Facades\DB;
 
 final readonly class FinancialAccountService
 {
-    public function __construct(private FinancialHistoryInspector $financialHistory) {}
+    public function __construct(
+        private FinancialHistoryInspector $financialHistory,
+        private CurrencyRegistry $currencies,
+    ) {}
 
     /** @param array{name: string, type: string, currency_code: string, opening_balance_configured?: bool} $attributes */
     public function create(User $user, array $attributes): FinancialAccount
     {
+        $this->currencies->activeMetadata($attributes['currency_code']);
+
         return DB::transaction(function () use ($user, $attributes): FinancialAccount {
             $account = $user->financialAccounts()->create([
                 'name' => $attributes['name'],
@@ -39,6 +45,10 @@ final readonly class FinancialAccountService
             && strtoupper($attributes['currency_code']) !== $account->currency_code
             && $this->financialHistory->accountHasPostedJournalHistory($account)) {
             throw DomainException::for(DomainErrorCode::AccountCurrencyLocked, 'An account currency cannot change after posted journal history exists.');
+        }
+
+        if (array_key_exists('currency_code', $attributes)) {
+            $this->currencies->activeMetadata($attributes['currency_code']);
         }
 
         $updates = $attributes;
