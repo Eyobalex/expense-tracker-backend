@@ -156,12 +156,12 @@ This project has domain-specific skills available in `**/skills/**`. You MUST ac
 - If you have modified any PHP files, you must run `vendor/bin/pint --dirty --format agent` before finalizing changes to ensure your code matches the project's expected style.
 - Do not run `vendor/bin/pint --test --format agent`, simply run `vendor/bin/pint --format agent` to fix any formatting issues.
 
-=== phpunit/core rules ===
+=== pest/core rules ===
 
-# PHPUnit
+# Pest
 
-- This application uses PHPUnit for testing. All tests must be written as PHPUnit classes. Use `php artisan make:test --phpunit {name}` to create a new test.
-- If you see a test using "Pest", convert it to PHPUnit.
+- This application uses Pest for testing. All tests must use Pest closure syntax. Use `php artisan make:test --pest {name}` to create a new test.
+- If you see a class-style test, convert it to Pest.
 - Every time a test has been updated, run that singular test.
 - When the tests relating to your feature are passing, ask the user if they would like to also run the entire test suite to make sure everything is still passing.
 - Tests should cover all happy paths, failure paths, and edge cases.
