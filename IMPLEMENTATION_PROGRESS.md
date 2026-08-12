@@ -98,9 +98,9 @@ Total planned features: 18
 
 Merged: 2
 
-In progress: 1
+In progress: 0
 
-PR open: 0
+PR open: 1
 
 Blocked: 0
 
@@ -135,7 +135,7 @@ They may be split into additional independently reviewable features if required 
 | --- | --------------------------------------------------------------- | ------------------------------------- | ------------------ | --------------------------------- | ------- | -- | ------------ | ------------- | ------------------------------------------------------------------------------ |
 | 001 | Project governance and baseline | Phase 0 | None | feat/001-project-baseline | MERGED | 1 | 45b0e935b6de5cee44c0f2d57cfa3054884866f4 | CI passed | Merged into dev after PHP 8.5 CI correction |
 | 002 | PostgreSQL, Redis, MinIO and local runtime | Phase 1 | 001 | feat/002-runtime-infrastructure | MERGED | 2 | 9142db0f5aecb950cf8d06861d492239036ba7fd | CI passed | Merged into dev after PostgreSQL/Redis/MinIO CI passed |
-| 003 | Laravel API shell, authentication and single-device enforcement | Phase 2 | 002 | feat/003-api-auth | IN_PROGRESS | — | — | Sanctum 4.3.3 installed | Started from merged dev |
+| 003 | Laravel API shell, authentication and single-device enforcement | Phase 2 | 002 | feat/003-api-auth | PR_OPEN | 3 | — | Local lint/routes passed; CI pending | PR #3 targets dev |
 | 004 | DDD foundation and shared primitives                            | Phase 3                               | 003                | `feat/004-shared-primitives`      | PENDING | —  | —            | —             | Money, time, errors, audit, IDs                                                |
 | 005 | Identity, financial accounts, categories and onboarding backend | Phase 4                               | 004                | `feat/005-accounts-categories`    | PENDING | —  | —            | —             | Includes immutable user/account currency rules                                 |
 | 006 | Currency Core                                                   | Phase 5                               | 005                | `feat/006-currency-core`          | PENDING | —  | —            | —             | Must precede ledger                                                            |
@@ -247,6 +247,25 @@ Checklist: Complete.
 Notes: private MinIO, isolated PostgreSQL testing, Redis cache/queue/locks, Sail worker/scheduler, health command, CI services, and runbook are included.
 
 ---
+
+
+## Feature 003
+
+Status: PR_OPEN
+
+Branch: `feat/003-api-auth`
+
+Implementation plan coverage: Phase 2, steps 1-10; checklist and exit criteria pending PostgreSQL-backed GitHub Actions verification.
+
+PR: #3 (targets `dev`)
+
+Merge commit: —
+
+Tests executed: local Pint, syntax, routes, and diff checks. Local PostgreSQL service is unavailable; GitHub Actions must run migrations, PHPUnit, and PHPStan.
+
+Checklist: implementation complete; CI verification pending.
+
+Notes: Sanctum 4.3.3, device/token revocation, API v1 envelopes, request IDs, Redis throttling/idempotency, encrypted replay storage, policies, and profile optimistic concurrency included.
 
 ---
 
