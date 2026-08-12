@@ -43,11 +43,14 @@ final readonly class OnboardingService
                 throw DomainException::for(DomainErrorCode::ConcurrencyConflict, 'The onboarding version is stale.');
             }
 
+            $freshUser = $user->fresh();
+            assert($freshUser instanceof User);
+
             if ($attributes['seed_starter_data'] ?? true) {
-                $this->starterData->seedFor($user);
+                $this->starterData->seedFor($freshUser);
             }
 
-            return $user->refresh();
+            return $freshUser;
         });
     }
 
