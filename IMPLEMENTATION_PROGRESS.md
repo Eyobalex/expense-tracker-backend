@@ -277,7 +277,7 @@ Branch: `feat/004-shared-primitives`
 
 Implementation plan coverage: Phase 3, steps 1-9.
 
-PR: —
+PR: #4 (targets `dev`)
 
 Merge commit: —
 
