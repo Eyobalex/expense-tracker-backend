@@ -36,7 +36,7 @@ class RuntimeCheck extends Command
         if ($this->option('deep')) {
             try {
                 DB::connection('pgsql')->getPdo();
-                Redis::connection()->command(['ping']);
+                Redis::connection()->command('ping');
                 $key = 'runtime-checks/'.Str::uuid();
                 $disk = Storage::disk('minio');
 

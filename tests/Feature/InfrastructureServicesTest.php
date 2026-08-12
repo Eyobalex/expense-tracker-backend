@@ -16,7 +16,7 @@ class InfrastructureServicesTest extends TestCase
     public function test_postgresql_redis_queue_lock_and_private_minio_are_available(): void
     {
         $this->assertSame('pgsql', DB::connection()->getDriverName());
-        $this->assertNotFalse(Redis::connection()->command(['ping']));
+        $this->assertNotFalse(Redis::connection()->command('ping'));
 
         $lock = Cache::store('redis')->lock('infrastructure-test-lock', 5);
 
