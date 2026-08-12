@@ -3,7 +3,6 @@
 namespace Tests\Feature;
 
 use Illuminate\Contracts\Cache\LockTimeoutException;
-use Illuminate\Contracts\Queue\Job as QueueJob;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Queue;
@@ -27,10 +26,8 @@ class InfrastructureServicesTest extends TestCase
 
         Queue::pushRaw('{"uuid":"'.Str::uuid().'","displayName":"InfrastructureSmoke","job":"Illuminate\\Queue\\CallQueuedHandler@call","data":{"commandName":"","command":""}}', 'infrastructure-smoke');
 
-        $job = Queue::connection('redis')->pop('infrastructure-smoke');
-
-        $this->assertInstanceOf(QueueJob::class, $job);
-        $job->delete();
+        $this->assertSame(1, Queue::connection('redis')->size('infrastructure-smoke'));
+        Queue::connection('redis')->clear('infrastructure-smoke');
 
         $key = 'infrastructure-tests/'.Str::uuid();
         $disk = Storage::disk('minio');
