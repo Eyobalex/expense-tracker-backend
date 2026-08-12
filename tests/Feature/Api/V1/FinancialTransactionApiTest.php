@@ -167,8 +167,8 @@ test('refunds link to posted expenses and reduce the expense ledger instead of b
     $this->withToken($token)->withHeader('If-Match', '1')->withHeader('Idempotency-Key', (string) Str::uuid())->postJson("/api/v1/transactions/{$refund['id']}/post")->assertOk();
 
     expect(JournalLine::query()->where('ledger_code', 'like', 'income.%')->exists())->toBeFalse()
-        ->and(JournalLine::query()->where('ledger_code', 'like', 'expense.category.%')->sum('debit_minor_units'))->toBe(1250)
-        ->and(JournalLine::query()->where('ledger_code', 'like', 'expense.category.%')->sum('credit_minor_units'))->toBe(500);
+        ->and(JournalLine::query()->where('ledger_code', 'like', 'expense.category.%')->sum('debit_minor_units'))->toBe('1250')
+        ->and(JournalLine::query()->where('ledger_code', 'like', 'expense.category.%')->sum('credit_minor_units'))->toBe('500');
 });
 
 test('manual adjustments require the explicit balance-correction subtype and reason', function (): void {
@@ -180,5 +180,6 @@ test('manual adjustments require the explicit balance-correction subtype and rea
     $this->withToken($token)->withHeader('Idempotency-Key', (string) Str::uuid())
         ->postJson('/api/v1/transactions', transactionPayload($account, $category, ['type' => 'adjustment']))
         ->assertUnprocessable()
-        ->assertJsonValidationErrors(['adjustment_subtype', 'adjustment_direction', 'reason']);
+        ->assertJsonPath('error.code', 'VALIDATION_FAILED')
+        ->assertJsonStructure(['error' => ['fields' => ['adjustment_subtype', 'adjustment_direction', 'reason']]]);
 });
