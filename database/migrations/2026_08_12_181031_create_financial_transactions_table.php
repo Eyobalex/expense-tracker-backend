@@ -48,7 +48,6 @@ return new class extends Migration
             $table->foreign('financial_account_id')->references('id')->on('financial_accounts')->restrictOnDelete();
             $table->foreign('counterparty_account_id')->references('id')->on('financial_accounts')->restrictOnDelete();
             $table->foreign('category_id')->references('id')->on('categories')->restrictOnDelete();
-            $table->foreign('related_transaction_id')->references('id')->on('financial_transactions')->restrictOnDelete();
             $table->foreign('original_currency_code')->references('code')->on('currencies')->restrictOnDelete();
             $table->foreign('counterparty_currency_code')->references('code')->on('currencies')->restrictOnDelete();
             $table->foreign('base_currency_code')->references('code')->on('currencies')->restrictOnDelete();
@@ -56,6 +55,10 @@ return new class extends Migration
             $table->index(['user_id', 'financial_account_id', 'occurred_at']);
             $table->index(['user_id', 'category_id', 'occurred_at']);
             $table->unique('reversal_of_id');
+        });
+
+        Schema::table('financial_transactions', function (Blueprint $table): void {
+            $table->foreign('related_transaction_id')->references('id')->on('financial_transactions')->restrictOnDelete();
         });
 
         DB::statement('ALTER TABLE financial_transactions ADD CONSTRAINT financial_transactions_positive_original_amount CHECK (original_amount_minor_units > 0)');
