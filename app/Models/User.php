@@ -60,6 +60,14 @@ class User extends Authenticatable implements PasskeyUser
     }
 
     /**
+     * @return HasMany<FinancialTransaction, $this>
+     */
+    public function financialTransactions(): HasMany
+    {
+        return $this->hasMany(FinancialTransaction::class);
+    }
+
+    /**
      * @return HasMany<LedgerAccountMapping, $this>
      */
     public function ledgerAccountMappings(): HasMany

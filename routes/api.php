@@ -7,6 +7,7 @@ use App\Http\Controllers\Api\V1\DeviceController;
 use App\Http\Controllers\Api\V1\FinancialAccountController;
 use App\Http\Controllers\Api\V1\OnboardingController;
 use App\Http\Controllers\Api\V1\ProfileController;
+use App\Http\Controllers\Api\V1\TransactionController;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('v1')
@@ -37,6 +38,16 @@ Route::prefix('v1')
             Route::patch('accounts/{financialAccount}', [FinancialAccountController::class, 'update'])->middleware('idempotency');
             Route::post('accounts/{financialAccount}/archive', [FinancialAccountController::class, 'archive'])->middleware('idempotency');
             Route::post('accounts/{financialAccount}/restore', [FinancialAccountController::class, 'restore'])->middleware('idempotency');
+
+            Route::get('transactions', [TransactionController::class, 'index']);
+            Route::post('transactions', [TransactionController::class, 'store'])->middleware('idempotency');
+            Route::get('transactions/balances', [TransactionController::class, 'balances']);
+            Route::get('transactions/{transaction}', [TransactionController::class, 'show']);
+            Route::patch('transactions/{transaction}', [TransactionController::class, 'update'])->middleware('idempotency');
+            Route::delete('transactions/{transaction}', [TransactionController::class, 'destroy'])->middleware('idempotency');
+            Route::post('transactions/{transaction}/post', [TransactionController::class, 'post'])->middleware('idempotency');
+            Route::post('transactions/{transaction}/reverse', [TransactionController::class, 'reverse'])->middleware('idempotency');
+            Route::post('transactions/{transaction}/correct', [TransactionController::class, 'correct'])->middleware('idempotency');
 
             Route::get('categories', [CategoryController::class, 'index']);
             Route::post('categories', [CategoryController::class, 'store'])->middleware('idempotency');

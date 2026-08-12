@@ -96,15 +96,15 @@ The feature cannot safely continue until an external issue, dependency, requirem
 
 Total planned features: 18
 
-Merged: 5
+Merged: 6
 
-In progress: 1
+In progress: 0
 
-PR open: 0
+PR open: 1
 
 Blocked: 0
 
-Pending: 13
+Pending: 12
 
 Overall status: IN PROGRESS
 
@@ -138,8 +138,8 @@ They may be split into additional independently reviewable features if required 
 | 003 | Laravel API shell, authentication and single-device enforcement | Phase 2 | 002 | feat/003-api-auth | MERGED | 3 | 0cbe65679e67d694f99733437a541c1a64a569af | CI passed | Merged into dev after PostgreSQL/Redis/MinIO-backed CI passed |
 | 004 | DDD foundation and shared primitives | Phase 3 | 003 | `feat/004-shared-primitives` | MERGED | 4 | 9a5aaa71d5d1323fe198203866b5fd7fe3484588 | CI passed | Merged into dev after PostgreSQL/Redis/MinIO-backed CI passed |
 | 005 | Identity, financial accounts, categories and onboarding backend | Phase 4 | 004 | `feat/005-accounts-categories` | MERGED | 5 | 1c3bba74d4486921c7cc41cc88308613aa47005b | CI passed | Merged into dev after PostgreSQL/Redis/MinIO-backed CI passed |
-| 006 | Currency Core | Phase 5 | 005 | `feat/006-currency-core` | PR_OPEN | 6 | — | CI pending | Must precede ledger |
-| 007 | Transaction aggregate and double-entry ledger                   | Phase 6                               | 006                | `feat/007-double-entry-ledger`    | PENDING | —  | —            | —             | Includes functional-currency invariant and inclusion matrix                    |
+| 006 | Currency Core | Phase 5 | 005 | `feat/006-currency-core` | MERGED | 6 | 17df610cfa89da3cd8cb97f82786b1c4dc5270b3 | CI passed | Merged into dev after PostgreSQL/Redis/MinIO-backed CI passed |
+| 007 | Transaction aggregate and double-entry ledger | Phase 6 | 006 | `feat/007-double-entry-ledger` | PR_OPEN | 8 | — | CI passed | Includes functional-currency invariant and inclusion matrix |
 | 008 | Budget engine                                                   | Phase 7                               | 007                | `feat/008-budget-engine`          | PENDING | —  | —            | —             | Includes lazy initialization, compensation, refunds, atomic borrowing          |
 | 009 | Receipt storage and OCR infrastructure                          | Phase 8                               | 008, 002, 006      | `feat/009-receipt-ocr`            | PENDING | —  | —            | —             | MinIO, preprocessing, PP-OCRv6, parser/security/lifecycle                     |
 | 010 | Merchant and item normalization                                 | Phase 9                               | 009                | `feat/010-normalization`          | PENDING | —  | —            | —             | Raw evidence remains immutable                                                  |
@@ -157,17 +157,17 @@ They may be split into additional independently reviewable features if required 
 
 # Current Feature
 
-Feature ID: 006
+Feature ID: 007
 
-Feature: Currency Core
+Feature: Transaction aggregate and double-entry ledger
 
-Branch: `feat/006-currency-core`
+Branch: `feat/007-double-entry-ledger`
 
 Status: PR_OPEN
 
 Started: 2026-08-12
 
-PR: #6 (targets dev)
+PR: #8 (targets `dev`; CI passed)
 
 Blocker: —
 
@@ -183,6 +183,8 @@ Feature 003 — Laravel API shell, authentication and single-device enforcement 
 Feature 004 — DDD foundation and shared primitives — merged into dev via PR #4 (9a5aaa71d5d1323fe198203866b5fd7fe3484588).
 
 Feature 005 — Identity, financial accounts, categories and onboarding backend — merged into dev via PR #5 (1c3bba74d4486921c7cc41cc88308613aa47005b).
+
+Feature 006 — Currency Core — merged into dev via PR #6 (17df610cfa89da3cd8cb97f82786b1c4dc5270b3).
 
 ---
 
