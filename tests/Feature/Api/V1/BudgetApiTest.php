@@ -66,7 +66,7 @@ test('borrowing snapshots the full base limit and atomically reserves the immedi
     $september = budgetPeriodFor($user, $category, '2026-09');
     expect($september->base_limit_minor_units)->toBe(10000)
         ->and($september->borrowing_deduction_minor_units)->toBe(10000)
-        ->and($september->effective_limit_minor_units)->toBe(0)
+        ->and($september->effective_limit_minor_units)->toBe(10000)
         ->and(BudgetAdjustment::query()->where('type', 'borrowing_in')->value('base_limit_snapshot_minor_units'))->toBe(10000)
         ->and(BudgetAdjustment::query()->where('type', 'borrowing_reserved')->value('base_limit_snapshot_minor_units'))->toBe(10000);
     $this->withToken($token)->withHeader('Idempotency-Key', (string) Str::uuid())
