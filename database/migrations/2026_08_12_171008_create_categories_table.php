@@ -24,9 +24,12 @@ return new class extends Migration
             $table->timestampTz('archived_at')->nullable();
             $table->unsignedInteger('version')->default(1);
             $table->timestamps();
-            $table->foreign('parent_id')->references('id')->on('categories')->nullOnDelete();
             $table->unique(['user_id', 'parent_id', 'name']);
             $table->index(['user_id', 'kind', 'archived_at']);
+        });
+
+        Schema::table('categories', function (Blueprint $table): void {
+            $table->foreign('parent_id')->references('id')->on('categories')->nullOnDelete();
         });
     }
 
