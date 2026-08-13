@@ -34,7 +34,7 @@ test('catalog records are user scoped and merchant merges preserve source record
     $target = Merchant::factory()->for($user)->create(['display_name' => 'New Shop', 'normalized_search_key' => 'new shop']);
     $otherMerchant = Merchant::factory()->for($other)->create();
 
-    $this->withToken($other->createToken('other', ['api'])->plainTextToken)->getJson('/api/v1/merchants')->assertOk()->assertJsonCount(1, 'data.merchants');
+    $this->getJson('/api/v1/merchants', ['Authorization' => 'Bearer '.$other->createToken('other', ['api'])->plainTextToken])->assertOk()->assertJsonCount(1, 'data.merchants');
     $this->postJson("/api/v1/merchants/{$source->id}/merge", ['target_id' => $target->id], catalogHeaders($user))->assertOk()->assertJsonPath('data.merged_into_id', $target->id);
     $source->refresh();
     expect($source->is_active)->toBeFalse()->and($source->merged_into_id)->toBe($target->id);
