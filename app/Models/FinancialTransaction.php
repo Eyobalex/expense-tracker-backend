@@ -42,7 +42,7 @@ class FinancialTransaction extends Model
     protected $keyType = 'string';
 
     protected $fillable = [
-        'financial_account_id', 'counterparty_account_id', 'category_id', 'related_transaction_id', 'reversal_of_id', 'correction_of_id', 'type', 'state', 'source',
+        'financial_account_id', 'counterparty_account_id', 'category_id', 'merchant_id', 'raw_merchant_text', 'related_transaction_id', 'reversal_of_id', 'correction_of_id', 'type', 'state', 'source',
         'adjustment_subtype', 'adjustment_direction', 'reason', 'occurred_at', 'occurred_timezone', 'original_amount_minor_units',
         'original_currency_code', 'counterparty_amount_minor_units', 'counterparty_currency_code', 'reference_rate', 'used_rate', 'rate_date',
         'rate_source', 'rate_override_reason', 'rounding_mode', 'description', 'base_amount_minor_units', 'base_currency_code', 'version',
@@ -79,6 +79,12 @@ class FinancialTransaction extends Model
     public function category(): BelongsTo
     {
         return $this->belongsTo(Category::class);
+    }
+
+    /** @return BelongsTo<Merchant, $this> */
+    public function merchant(): BelongsTo
+    {
+        return $this->belongsTo(Merchant::class);
     }
 
     /** @return BelongsTo<JournalEntry, $this> */

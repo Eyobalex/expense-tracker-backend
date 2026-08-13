@@ -96,7 +96,7 @@ The feature cannot safely continue until an external issue, dependency, requirem
 
 Total planned features: 18
 
-Merged: 8
+Merged: 9
 
 In progress: 0
 
@@ -141,8 +141,8 @@ They may be split into additional independently reviewable features if required 
 | 006 | Currency Core | Phase 5 | 005 | `feat/006-currency-core` | MERGED | 6 | 17df610cfa89da3cd8cb97f82786b1c4dc5270b3 | CI passed | Merged into dev after PostgreSQL/Redis/MinIO-backed CI passed |
 | 007 | Transaction aggregate and double-entry ledger | Phase 6 | 006 | `feat/007-double-entry-ledger` | MERGED | 8 | 746c17072232df723b8778c89ab8926ca0c6edfa | CI passed | Merged into dev after PostgreSQL-backed CI passed |
 | 008 | Budget engine | Phase 7 | 007 | `feat/008-budget-engine` | MERGED | 9 | ae1ace1f4c5f9b16d1b9bb3b31ee93ab4429faae | CI passed | Merged into dev after PostgreSQL-backed CI passed |
-| 009 | Receipt storage and OCR infrastructure | Phase 8 | 008, 002, 006 | `feat/009-receipt-ocr` | PR_OPEN | 10 | — | CI passed | MinIO, preprocessing, PP-OCRv6, parser/security/lifecycle |
-| 010 | Merchant and item normalization                                 | Phase 9                               | 009                | `feat/010-normalization`          | PENDING | —  | —            | —             | Raw evidence remains immutable                                                  |
+| 009 | Receipt storage and OCR infrastructure | Phase 8 | 008, 002, 006 | `feat/009-receipt-ocr` | MERGED | 10 | d409a68a7d1f84b9947e9563a689b816938399f2 | CI passed | Merged into dev after PostgreSQL/Redis/MinIO-backed CI passed |
+| 010 | Merchant and item normalization | Phase 9 | 009 | `feat/010-normalization` | PR_OPEN | 11 | — | Unit parser/PHPStan/Pint pass; PostgreSQL CI pending | OCR locale/parser matrix approved 2026-08-14; automatic candidate suggestion enabled |
 | 011 | Duplicate detection                                             | Phase 9                               | 009, 010           | `feat/011-duplicate-detection`    | PENDING | —  | —            | —             | User-controlled candidate resolution                                           |
 | 012 | FX provider operations and rate lifecycle                       | Phase 10                              | 006, 007, 011      | `feat/012-fx-operations`          | PENDING | —  | —            | —             | Provider jobs, stale policies, overrides                                       |
 | 013 | Offline synchronization API contract                            | Phase 11                              | 003, 007, 009, 011, 012 | `feat/013-sync-contract` | PENDING | —  | —            | —             | Includes cursor expiry/full resync                                             |
@@ -157,19 +157,19 @@ They may be split into additional independently reviewable features if required 
 
 # Current Feature
 
-Feature ID: 009
+Feature ID: 010
 
-Feature: Receipt storage and OCR infrastructure
+Feature: Merchant and item normalization
 
-Branch: `feat/009-receipt-ocr`
+Branch: `feat/010-normalization`
 
 Status: PR_OPEN
 
 Started: 2026-08-13
 
-PR: #10 (CI passed)
+PR: #11 (targets `dev`)
 
-Blocker: —
+Blocker: None. Awaiting GitHub Actions PostgreSQL-backed CI for PR #11.
 
 ---
 
@@ -208,6 +208,10 @@ Examples may include:
 * approved RPO/RTO targets;
 * production retention periods;
 * supported OCR locale/language matrix;
+
+### OCR locale/parser matrix — APPROVED 2026-08-14
+
+MVP supports English (Latin) and Amharic (Ethiopic) scripts; ETB and USD only; the explicit number forms `1,250.50`, `1.250,50`, and `1 250,50`; ISO and unambiguous English textual dates; and date-only preservation pending user confirmation of timezone/time. Bare or ambiguous symbols (including `$` and `Br`), numeric dates, unsupported scripts/formats, and ambiguous numbers remain `needs_review`; Laravel does not guess. The persisted parser version is `locale-matrix-v1`.
 
 only if they are not already resolved in the approved source documents.
 

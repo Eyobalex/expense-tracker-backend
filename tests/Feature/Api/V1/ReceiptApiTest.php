@@ -3,6 +3,7 @@
 use App\Application\Receipts\ReceiptProcessingService;
 use App\Domain\Receipts\Contracts\ReceiptOcrProvider;
 use App\Domain\Receipts\ValueObjects\OcrResult;
+use App\Jobs\NormalizeReceiptEntities;
 use App\Jobs\ProcessReceiptOcr;
 use App\Models\FinancialAccount;
 use App\Models\Receipt;
@@ -58,7 +59,7 @@ test('upload rejects non-image content and a different user cannot access receip
     $this->actingAs($other, 'sanctum')->getJson("/api/v1/receipts/{$receipt->id}/download")->assertNotFound();
 });
 
-test('OCR persists raw and locale-gated normalized results without creating a financial transaction', function (): void {
+test('OCR persists approved-locale normalized results and queues user-controlled normalization without creating a financial transaction', function (): void {
     Queue::fake();
     $user = User::factory()->create(['base_currency_code' => 'ETB']);
     $receipt = Receipt::factory()->for($user)->create(['status' => 'uploaded']);
@@ -67,7 +68,7 @@ test('OCR persists raw and locale-gated normalized results without creating a fi
     {
         public function recognize(string $image, string $mimeType, string $receiptId, string $requestId): OcrResult
         {
-            return new OcrResult(['text' => '1.250,50 11/08/2026'], '1.250,50 11/08/2026', ['overall' => 0.91], 'fixture-provider', 'pp-ocrv6-fixture');
+            return new OcrResult(['text' => "Merchant: Café Market\nETB\nTotal: 1.250,50\n11/08/2026"], "Merchant: Café Market\nETB\nTotal: 1.250,50\n11/08/2026", ['overall' => 0.91], 'fixture-provider', 'pp-ocrv6-fixture');
         }
     });
 
@@ -77,9 +78,15 @@ test('OCR persists raw and locale-gated normalized results without creating a fi
     expect($receipt->status)->toBe('needs_review')
         ->and($receipt->derivatives)->toHaveCount(1)
         ->and($receipt->extractions)->toHaveCount(1)
-        ->and($receipt->extractions->first()->normalized_data['ambiguities'])->toContain('locale_parser_matrix_not_approved')
+        ->and($receipt->extractions->first()->parser_version)->toBe('locale-matrix-v1')
+        ->and($receipt->extractions->first()->locale)->toBe('en')
+        ->and($receipt->extractions->first()->normalized_data['parsed_fields']['merchant'])->toBe('Café Market')
+        ->and($receipt->extractions->first()->normalized_data['parsed_fields']['currency_code'])->toBe('ETB')
+        ->and($receipt->extractions->first()->normalized_data['parsed_fields']['total_decimal'])->toBe('1250.50')
+        ->and($receipt->extractions->first()->normalized_data['ambiguities'])->toContain('ambiguous_numeric_date')
         ->and($receipt->review_transaction_id)->toBeNull();
     $this->assertDatabaseCount('financial_transactions', 0);
+    Queue::assertPushed(NormalizeReceiptEntities::class, fn (NormalizeReceiptEntities $job): bool => $job->receiptId === $receipt->id);
 });
 
 test('review creates one ordinary pending-review transaction and OCR cannot post it automatically', function (): void {

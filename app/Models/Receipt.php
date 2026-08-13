@@ -72,6 +72,18 @@ class Receipt extends Model
         return $this->hasMany(ReceiptOcrExtraction::class);
     }
 
+    /** @return HasMany<LineItem, $this> */
+    public function lineItems(): HasMany
+    {
+        return $this->hasMany(LineItem::class);
+    }
+
+    /** @return HasMany<NormalizationCandidate, $this> */
+    public function normalizationCandidates(): HasMany
+    {
+        return $this->hasMany(NormalizationCandidate::class);
+    }
+
     /**
      * @param  Builder<self>  $query
      * @return Builder<self>

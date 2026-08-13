@@ -30,4 +30,10 @@ class TransactionSplit extends Model
     {
         return $this->belongsTo(Category::class);
     }
+
+    /** @return BelongsTo<Item, $this> */
+    public function canonicalItem(): BelongsTo
+    {
+        return $this->belongsTo(Item::class, 'canonical_item_id');
+    }
 }
