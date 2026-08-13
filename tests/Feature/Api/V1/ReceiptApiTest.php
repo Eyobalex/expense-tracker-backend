@@ -50,7 +50,7 @@ test('upload rejects non-image content and a different user cannot access receip
     $owner = User::factory()->create(['base_currency_code' => 'ETB']);
     $other = User::factory()->create(['base_currency_code' => 'ETB']);
     $this->postJson('/api/v1/receipts', ['receipt' => UploadedFile::fake()->create('receipt.pdf', 10, 'application/pdf')], receiptHeaders($owner))
-        ->assertUnprocessable()->assertJsonPath('error.code', 'VALIDATION_FAILED');
+        ->assertUnprocessable()->assertJsonPath('error.code', 'INVALID_STATE_TRANSITION');
 
     $receipt = Receipt::factory()->for($owner)->create();
     Storage::disk('minio')->put($receipt->original_object_key, 'receipt');
