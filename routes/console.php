@@ -9,3 +9,5 @@ Artisan::command('inspire', function () {
 })->purpose('Display an inspiring quote');
 
 Schedule::command('budget:initialize')->hourly()->onOneServer()->withoutOverlapping();
+Schedule::command('receipt:reconcile-storage')->daily()->onOneServer()->withoutOverlapping();
+Schedule::command('receipt:cleanup-artifacts')->daily()->onOneServer()->withoutOverlapping();

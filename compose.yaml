@@ -28,6 +28,23 @@ services:
                 condition: service_healthy
             minio-init:
                 condition: service_completed_successfully
+            ocr:
+                condition: service_healthy
+    ocr:
+        build:
+            context: './services/ocr'
+        environment:
+            PADDLE_OCR_MODEL_VERSION: ${PADDLE_OCR_MODEL_VERSION:-PP-OCRv6}
+        networks:
+            - sail
+        mem_limit: 2g
+        cpus: 1.0
+        healthcheck:
+            test: [CMD, python, -c, "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
+            interval: 30s
+            timeout: 5s
+            retries: 3
+
     queue:
         image: "sail-8.5/app"
         command: php artisan queue:work redis --sleep=3 --tries=3 --backoff=3 --timeout=90 --max-time=3600
@@ -44,6 +61,8 @@ services:
                 condition: service_healthy
             minio-init:
                 condition: service_completed_successfully
+            ocr:
+                condition: service_healthy
     scheduler:
         image: "sail-8.5/app"
         command: php artisan schedule:work
@@ -60,6 +79,8 @@ services:
                 condition: service_healthy
             minio-init:
                 condition: service_completed_successfully
+            ocr:
+                condition: service_healthy
     pgsql:
         image: 'postgres:18-alpine'
         ports:

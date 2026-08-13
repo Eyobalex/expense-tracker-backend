@@ -96,7 +96,7 @@ The feature cannot safely continue until an external issue, dependency, requirem
 
 Total planned features: 18
 
-Merged: 7
+Merged: 8
 
 In progress: 0
 
@@ -140,8 +140,8 @@ They may be split into additional independently reviewable features if required 
 | 005 | Identity, financial accounts, categories and onboarding backend | Phase 4 | 004 | `feat/005-accounts-categories` | MERGED | 5 | 1c3bba74d4486921c7cc41cc88308613aa47005b | CI passed | Merged into dev after PostgreSQL/Redis/MinIO-backed CI passed |
 | 006 | Currency Core | Phase 5 | 005 | `feat/006-currency-core` | MERGED | 6 | 17df610cfa89da3cd8cb97f82786b1c4dc5270b3 | CI passed | Merged into dev after PostgreSQL/Redis/MinIO-backed CI passed |
 | 007 | Transaction aggregate and double-entry ledger | Phase 6 | 006 | `feat/007-double-entry-ledger` | MERGED | 8 | 746c17072232df723b8778c89ab8926ca0c6edfa | CI passed | Merged into dev after PostgreSQL-backed CI passed |
-| 008 | Budget engine | Phase 7 | 007 | `feat/008-budget-engine` | PR_OPEN | 9 | c04e9a6 | CI passed | Includes lazy initialization, compensation, refunds, atomic borrowing |
-| 009 | Receipt storage and OCR infrastructure                          | Phase 8                               | 008, 002, 006      | `feat/009-receipt-ocr`            | PENDING | —  | —            | —             | MinIO, preprocessing, PP-OCRv6, parser/security/lifecycle                     |
+| 008 | Budget engine | Phase 7 | 007 | `feat/008-budget-engine` | MERGED | 9 | ae1ace1f4c5f9b16d1b9bb3b31ee93ab4429faae | CI passed | Merged into dev after PostgreSQL-backed CI passed |
+| 009 | Receipt storage and OCR infrastructure | Phase 8 | 008, 002, 006 | `feat/009-receipt-ocr` | PR_OPEN | 10 | — | CI passed | MinIO, preprocessing, PP-OCRv6, parser/security/lifecycle |
 | 010 | Merchant and item normalization                                 | Phase 9                               | 009                | `feat/010-normalization`          | PENDING | —  | —            | —             | Raw evidence remains immutable                                                  |
 | 011 | Duplicate detection                                             | Phase 9                               | 009, 010           | `feat/011-duplicate-detection`    | PENDING | —  | —            | —             | User-controlled candidate resolution                                           |
 | 012 | FX provider operations and rate lifecycle                       | Phase 10                              | 006, 007, 011      | `feat/012-fx-operations`          | PENDING | —  | —            | —             | Provider jobs, stale policies, overrides                                       |
@@ -157,21 +157,17 @@ They may be split into additional independently reviewable features if required 
 
 # Current Feature
 
-Feature ID: 008
+Feature ID: 009
 
-Feature: Budget engine
+Feature: Receipt storage and OCR infrastructure
 
-Branch: `feat/008-budget-engine`
+Branch: `feat/009-receipt-ocr`
 
 Status: PR_OPEN
 
-PR: #9
+Started: 2026-08-13
 
-CI: Passed
-
-Started: 2026-08-12
-
-PR: —
+PR: #10 (CI passed)
 
 Blocker: —
 

@@ -8,6 +8,7 @@ use App\Http\Controllers\Api\V1\DeviceController;
 use App\Http\Controllers\Api\V1\FinancialAccountController;
 use App\Http\Controllers\Api\V1\OnboardingController;
 use App\Http\Controllers\Api\V1\ProfileController;
+use App\Http\Controllers\Api\V1\ReceiptController;
 use App\Http\Controllers\Api\V1\TransactionController;
 use Illuminate\Support\Facades\Route;
 
@@ -54,6 +55,13 @@ Route::prefix('v1')
             Route::get('budgets/{category}/periods', [BudgetController::class, 'history']);
             Route::post('budgets/{category}/reallocate', [BudgetController::class, 'reallocate'])->middleware('idempotency');
             Route::post('budgets/{category}/borrow-next-month', [BudgetController::class, 'borrow'])->middleware('idempotency');
+
+            Route::get('receipts', [ReceiptController::class, 'index']);
+            Route::post('receipts', [ReceiptController::class, 'store'])->middleware(['idempotency', 'throttle:receipt-upload']);
+            Route::get('receipts/{receipt}', [ReceiptController::class, 'show']);
+            Route::get('receipts/{receipt}/download', [ReceiptController::class, 'download']);
+            Route::post('receipts/{receipt}/retry', [ReceiptController::class, 'retry'])->middleware(['idempotency', 'throttle:receipt-upload']);
+            Route::post('receipts/{receipt}/review-transaction', [ReceiptController::class, 'createReviewTransaction'])->middleware('idempotency');
 
             Route::get('categories', [CategoryController::class, 'index']);
             Route::post('categories', [CategoryController::class, 'store'])->middleware('idempotency');
