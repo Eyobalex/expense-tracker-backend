@@ -3,8 +3,10 @@ name: tests
 on:
   push:
     branches:
-      - main
+      - dev
   pull_request:
+    branches:
+      - dev
 
 permissions:
   contents: read
@@ -12,6 +14,51 @@ permissions:
 jobs:
   ci:
     runs-on: ubuntu-latest
+    env:
+      APP_ENV: testing
+      APP_KEY: base64:W0HedDaRRAAwPtIkfW6AZa6FnOcTaGJhG02OfPYBqw4=
+      APP_URL: http://localhost
+      DB_CONNECTION: pgsql
+      DB_HOST: 127.0.0.1
+      DB_PORT: 5432
+      DB_DATABASE: testing
+      DB_USERNAME: sail
+      DB_PASSWORD: password
+      CACHE_STORE: redis
+      QUEUE_CONNECTION: redis
+      REDIS_HOST: 127.0.0.1
+      REDIS_PORT: 6379
+      FILESYSTEM_DISK: minio
+      MINIO_ACCESS_KEY: sail
+      MINIO_SECRET_KEY: password
+      MINIO_REGION: us-east-1
+      MINIO_BUCKET: expense-tracker
+      MINIO_ENDPOINT: http://127.0.0.1:9000
+      MINIO_USE_PATH_STYLE_ENDPOINT: true
+
+    services:
+      pgsql:
+        image: postgres:18-alpine
+        env:
+          POSTGRES_DB: testing
+          POSTGRES_USER: sail
+          POSTGRES_PASSWORD: password
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U sail -d testing"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+      redis:
+        image: redis:8-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
 
     steps:
       - name: Checkout code
@@ -22,17 +69,37 @@ jobs:
       - name: Setup PHP
         uses: shivammathur/setup-php@f3e473d116dcccaddc5834248c87452386958240 # v2
         with:
-          php-version: '8.3'
+          php-version: "8.5"
           tools: composer:v2
           coverage: none
+          extensions: pdo_pgsql, redis
 
       - name: Setup Node
         uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
-          node-version: '22'
+          node-version: "22"
+
+      - name: Start private MinIO
+        run: >-
+          docker run --detach --name minio --network host
+          --env MINIO_ROOT_USER=sail --env MINIO_ROOT_PASSWORD=password
+          minio/minio:latest server /data
+
+      - name: Initialize private MinIO bucket
+        run: >-
+          docker run --rm --network host --entrypoint /bin/sh minio/mc:latest -c
+          "until mc alias set minio http://127.0.0.1:9000 sail password; do sleep 1; done;
+          mc mb --ignore-existing minio/expense-tracker;
+          mc anonymous set none minio/expense-tracker"
 
       - name: Setup Application
         run: composer setup
+
+      - name: Verify runtime dependencies
+        run: php artisan runtime:check --deep
+
+      - name: Run infrastructure service smoke test
+        run: php artisan test --compact tests/Feature/InfrastructureServicesTest.php
 
       - name: Run CI Checks
         run: composer ci:check

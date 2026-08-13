@@ -1,0 +1,158 @@
+services:
+    laravel.test:
+        build:
+            context: './vendor/laravel/sail/runtimes/8.5'
+            dockerfile: Dockerfile
+            args:
+                WWWGROUP: '${WWWGROUP}'
+        image: 'sail-8.5/app'
+        extra_hosts:
+            - 'host.docker.internal:host-gateway'
+        ports:
+            - '${APP_PORT:-80}:80'
+            - '${VITE_PORT:-5173}:${VITE_PORT:-5173}'
+        environment:
+            WWWUSER: '${WWWUSER}'
+            LARAVEL_SAIL: 1
+            XDEBUG_MODE: '${SAIL_XDEBUG_MODE:-off}'
+            XDEBUG_CONFIG: '${SAIL_XDEBUG_CONFIG:-client_host=host.docker.internal}'
+            IGNITION_LOCAL_SITES_PATH: '${PWD}'
+        volumes:
+            - '.:/var/www/html'
+        networks:
+            - sail
+        depends_on:
+            pgsql:
+                condition: service_healthy
+            redis:
+                condition: service_healthy
+            minio-init:
+                condition: service_completed_successfully
+            ocr:
+                condition: service_healthy
+    ocr:
+        build:
+            context: './services/ocr'
+        environment:
+            PADDLE_OCR_MODEL_VERSION: ${PADDLE_OCR_MODEL_VERSION:-PP-OCRv6}
+        networks:
+            - sail
+        mem_limit: 2g
+        cpus: 1.0
+        healthcheck:
+            test: [CMD, python, -c, "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
+            interval: 30s
+            timeout: 5s
+            retries: 3
+
+    queue:
+        image: "sail-8.5/app"
+        command: php artisan queue:work redis --sleep=3 --tries=3 --backoff=3 --timeout=90 --max-time=3600
+        environment:
+            LARAVEL_SAIL: 1
+        volumes:
+            - ".:/var/www/html"
+        networks:
+            - sail
+        depends_on:
+            pgsql:
+                condition: service_healthy
+            redis:
+                condition: service_healthy
+            minio-init:
+                condition: service_completed_successfully
+            ocr:
+                condition: service_healthy
+    scheduler:
+        image: "sail-8.5/app"
+        command: php artisan schedule:work
+        environment:
+            LARAVEL_SAIL: 1
+        volumes:
+            - ".:/var/www/html"
+        networks:
+            - sail
+        depends_on:
+            pgsql:
+                condition: service_healthy
+            redis:
+                condition: service_healthy
+            minio-init:
+                condition: service_completed_successfully
+            ocr:
+                condition: service_healthy
+    pgsql:
+        image: 'postgres:18-alpine'
+        ports:
+            - '${FORWARD_DB_PORT:-5432}:5432'
+        environment:
+            PGPASSWORD: '${DB_PASSWORD:-secret}'
+            POSTGRES_DB: '${DB_DATABASE}'
+            POSTGRES_USER: '${DB_USERNAME}'
+            POSTGRES_PASSWORD: '${DB_PASSWORD:-secret}'
+        volumes:
+            - 'sail-pgsql:/var/lib/postgresql'
+            - './vendor/laravel/sail/database/pgsql/create-testing-database.sql:/docker-entrypoint-initdb.d/10-create-testing-database.sql'
+        networks:
+            - sail
+        healthcheck:
+            test:
+                - CMD
+                - pg_isready
+                - '-q'
+                - '-d'
+                - '${DB_DATABASE}'
+                - '-U'
+                - '${DB_USERNAME}'
+            retries: 3
+            timeout: 5s
+    redis:
+        image: 'redis:8-alpine'
+        ports:
+            - '${FORWARD_REDIS_PORT:-6379}:6379'
+        volumes:
+            - 'sail-redis:/data'
+        networks:
+            - sail
+        healthcheck:
+            test:
+                - CMD
+                - redis-cli
+                - ping
+            retries: 3
+            timeout: 5s
+    minio:
+        image: 'minio/minio:latest'
+        ports:
+            - '${FORWARD_MINIO_PORT:-9000}:9000'
+            - '${FORWARD_MINIO_CONSOLE_PORT:-8900}:8900'
+        environment:
+            MINIO_ROOT_USER: ${MINIO_ACCESS_KEY:-sail}
+            MINIO_ROOT_PASSWORD: ${MINIO_SECRET_KEY:-password}
+        volumes:
+            - 'sail-minio:/data'
+        networks:
+            - sail
+        command: 'minio server /data --console-address ":8900"'
+    minio-init:
+        image: minio/mc:latest
+        environment:
+            MINIO_ACCESS_KEY: ${MINIO_ACCESS_KEY:-sail}
+            MINIO_SECRET_KEY: ${MINIO_SECRET_KEY:-password}
+            MINIO_BUCKET: ${MINIO_BUCKET:-expense-tracker}
+        command: >-
+            /bin/sh -c "until mc alias set minio http://minio:9000 $$MINIO_ACCESS_KEY $$MINIO_SECRET_KEY; do sleep 1; done; mc mb --ignore-existing minio/$$MINIO_BUCKET; mc anonymous set none minio/$$MINIO_BUCKET"
+        networks:
+            - sail
+        depends_on:
+            - minio
+networks:
+    sail:
+        driver: bridge
+volumes:
+    sail-pgsql:
+        driver: local
+    sail-redis:
+        driver: local
+    sail-minio:
+        driver: local
