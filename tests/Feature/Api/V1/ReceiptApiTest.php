@@ -54,8 +54,8 @@ test('upload rejects non-image content and a different user cannot access receip
 
     $receipt = Receipt::factory()->for($owner)->create();
     Storage::disk('minio')->put($receipt->original_object_key, 'receipt');
-    $this->getJson("/api/v1/receipts/{$receipt->id}", ['Accept' => 'application/json', 'Authorization' => 'Bearer '.receiptToken($other)])->assertNotFound();
-    $this->getJson("/api/v1/receipts/{$receipt->id}/download", ['Accept' => 'application/json', 'Authorization' => 'Bearer '.receiptToken($other)])->assertNotFound();
+    $this->withToken(receiptToken($other))->getJson("/api/v1/receipts/{$receipt->id}")->assertNotFound();
+    $this->withToken(receiptToken($other))->getJson("/api/v1/receipts/{$receipt->id}/download")->assertNotFound();
 });
 
 test('OCR persists raw and locale-gated normalized results without creating a financial transaction', function (): void {
