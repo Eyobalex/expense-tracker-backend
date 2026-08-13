@@ -102,7 +102,7 @@ In progress: 0
 
 PR open: 0
 
-Blocked: 0
+Blocked: 1
 
 Pending: 12
 
@@ -143,7 +143,7 @@ They may be split into additional independently reviewable features if required 
 | 008 | Budget engine | Phase 7 | 007 | `feat/008-budget-engine` | MERGED | 9 | ae1ace1f4c5f9b16d1b9bb3b31ee93ab4429faae | CI passed | Merged into dev after PostgreSQL-backed CI passed |
 | 009 | Receipt storage and OCR infrastructure | Phase 8 | 008, 002, 006 | `feat/009-receipt-ocr` | MERGED | 10 | d409a68a7d1f84b9947e9563a689b816938399f2 | CI passed | Merged into dev after PostgreSQL/Redis/MinIO-backed CI passed |
 | 010 | Merchant and item normalization | Phase 9 | 009 | `feat/010-normalization` | MERGED | 11 | 73f7fa742d1ed4497c6ab395b4e860cf7ccd4298 | CI passed | Merged into dev after PostgreSQL/Redis/MinIO-backed CI passed; OCR locale/parser matrix approved 2026-08-14 |
-| 011 | Duplicate detection                                             | Phase 9                               | 009, 010           | `feat/011-duplicate-detection`    | IN_PROGRESS | —  | —            | Duplicate scoring, decision, authorization, idempotency, and PostgreSQL tests required | Started from synchronized dev on 2026-08-14 |
+| 011 | Duplicate detection                                             | Phase 9                               | 009, 010           | `feat/011-duplicate-detection`    | BLOCKED | —  | —            | Awaiting product lifecycle decision | Define durable behavior for Replace pending draft and Cancel current import before implementation |
 | 012 | FX provider operations and rate lifecycle                       | Phase 10                              | 006, 007, 011      | `feat/012-fx-operations`          | PENDING | —  | —            | —             | Provider jobs, stale policies, overrides                                       |
 | 013 | Offline synchronization API contract                            | Phase 11                              | 003, 007, 009, 011, 012 | `feat/013-sync-contract` | PENDING | —  | —            | —             | Includes cursor expiry/full resync                                             |
 | 014 | Dashboard and forecasting                                       | Phase 12                              | 008, 012, 013      | `feat/014-dashboard-forecasting`  | PENDING | —  | —            | —             | Product formulas must be approved before implementation                        |
@@ -163,13 +163,13 @@ Feature: Duplicate detection
 
 Branch: `feat/011-duplicate-detection`
 
-Status: IN_PROGRESS
+Status: BLOCKED
 
 Started: 2026-08-14
 
 PR: —
 
-Blocker: None.
+Blocker: PRODUCT DECISION REQUIRED — define whether replacing/cancelling an unposted duplicate preserves it as a terminal auditable record or deletes it, and define receipt retention/link behavior. The approved PRD lists the decisions but does not define the state transition.
 
 ---
 
@@ -208,6 +208,10 @@ Examples may include:
 * approved RPO/RTO targets;
 * production retention periods;
 * supported OCR locale/language matrix;
+
+### Duplicate-resolution lifecycle — PRODUCT DECISION REQUIRED BEFORE FEATURE 011
+
+The approved PRD requires `View Existing`, `Keep Both`, `Replace pending draft with extracted version`, and `Cancel current import`, but does not specify the durable lifecycle effect. Recommended: retain cancelled/replaced unposted transactions as terminal, non-postable, auditable records; retain attached receipt originals and OCR evidence; never delete a receipt merely because an import is cancelled; and permit replacement only when the candidate transaction is unposted. This adds a `cancelled` transaction state and links the decision/audit event to both transactions. An alternative is an explicit user-triggered deletion of the unposted transaction while retaining receipt evidence and an audit event.
 
 ### OCR locale/parser matrix — APPROVED 2026-08-14
 
