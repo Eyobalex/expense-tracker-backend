@@ -38,7 +38,7 @@ class ReceiptController extends Controller
 
     public function show(Request $request, Receipt $receipt): JsonResponse
     {
-        if ($request->user()->cannot('view', $receipt)) {
+        if ($receipt->user_id !== $request->user()->getKey() || $request->user()->cannot('view', $receipt)) {
             return $this->notFound($request);
         }
 
@@ -47,7 +47,7 @@ class ReceiptController extends Controller
 
     public function download(Request $request, Receipt $receipt): StreamedResponse|JsonResponse
     {
-        if ($request->user()->cannot('view', $receipt)) {
+        if ($receipt->user_id !== $request->user()->getKey() || $request->user()->cannot('view', $receipt)) {
             return $this->notFound($request);
         }
 
@@ -56,7 +56,7 @@ class ReceiptController extends Controller
 
     public function retry(RetryReceiptOcrRequest $request, Receipt $receipt, ReceiptProcessingService $processing): JsonResponse
     {
-        if ($request->user()->cannot('retry', $receipt)) {
+        if ($receipt->user_id !== $request->user()->getKey() || $request->user()->cannot('retry', $receipt)) {
             return $this->notFound($request);
         }
         $receipt->forceFill(['status' => 'uploaded', 'failed_at' => null, 'failure_reason' => null])->save();
@@ -67,7 +67,7 @@ class ReceiptController extends Controller
 
     public function createReviewTransaction(UpdateReceiptReviewRequest $request, Receipt $receipt, ReceiptReviewService $review): JsonResponse
     {
-        if ($request->user()->cannot('update', $receipt)) {
+        if ($receipt->user_id !== $request->user()->getKey() || $request->user()->cannot('update', $receipt)) {
             return $this->notFound($request);
         }
         $transaction = $review->createTransaction($request->user(), $receipt, $request->validated());
