@@ -133,7 +133,7 @@ final readonly class TransactionService
                 throw DomainException::for(DomainErrorCode::InvalidStateTransition, 'A posted transaction may be reversed exactly once.');
             }
             $reversal = $user->financialTransactions()->create([
-                ...$original->only(['financial_account_id', 'counterparty_account_id', 'category_id', 'related_transaction_id', 'correction_of_id', 'type', 'source', 'adjustment_subtype', 'adjustment_direction', 'occurred_at', 'occurred_timezone', 'original_amount_minor_units', 'original_currency_code', 'counterparty_amount_minor_units', 'counterparty_currency_code', 'reference_rate', 'used_rate', 'rate_date', 'rate_source', 'rate_override_reason', 'rounding_mode', 'description']),
+                ...$original->only(['financial_account_id', 'counterparty_account_id', 'category_id', 'merchant_id', 'raw_merchant_text', 'related_transaction_id', 'correction_of_id', 'type', 'source', 'adjustment_subtype', 'adjustment_direction', 'occurred_at', 'occurred_timezone', 'original_amount_minor_units', 'original_currency_code', 'counterparty_amount_minor_units', 'counterparty_currency_code', 'reference_rate', 'used_rate', 'rate_date', 'rate_source', 'rate_override_reason', 'rounding_mode', 'description']),
                 'state' => 'draft', 'reason' => $reason, 'reversal_of_id' => $original->getKey(), 'base_amount_minor_units' => $original->base_amount_minor_units, 'base_currency_code' => $original->base_currency_code,
             ]);
             $entry = $this->persistOppositeJournal($user, $original, $reversal);
@@ -167,7 +167,7 @@ final readonly class TransactionService
      */
     private function transactionAttributes(array $attributes, bool $creating = true): array
     {
-        $keys = ['financial_account_id', 'counterparty_account_id', 'category_id', 'related_transaction_id', 'correction_of_id', 'type', 'state', 'source', 'adjustment_subtype', 'adjustment_direction', 'reason', 'occurred_at', 'occurred_timezone', 'original_amount_minor_units', 'original_currency_code', 'counterparty_amount_minor_units', 'counterparty_currency_code', 'reference_rate', 'used_rate', 'rate_date', 'rate_source', 'rate_override_reason', 'rounding_mode', 'description'];
+        $keys = ['financial_account_id', 'counterparty_account_id', 'category_id', 'merchant_id', 'raw_merchant_text', 'related_transaction_id', 'correction_of_id', 'type', 'state', 'source', 'adjustment_subtype', 'adjustment_direction', 'reason', 'occurred_at', 'occurred_timezone', 'original_amount_minor_units', 'original_currency_code', 'counterparty_amount_minor_units', 'counterparty_currency_code', 'reference_rate', 'used_rate', 'rate_date', 'rate_source', 'rate_override_reason', 'rounding_mode', 'description'];
         $values = array_intersect_key($attributes, array_flip($keys));
         if ($creating) {
             $values += ['state' => 'draft', 'source' => 'manual'];
@@ -195,6 +195,9 @@ final readonly class TransactionService
                 $this->assertAccount($user, (string) $attributes[$key]);
             }
         }
+        if (isset($attributes['merchant_id']) && ! $user->merchants()->whereKey($attributes['merchant_id'])->whereNull('merged_into_id')->where('is_active', true)->exists()) {
+            throw DomainException::for(DomainErrorCode::ResourceNotFound, 'The transaction merchant was not found.');
+        }
         if (isset($attributes['category_id']) && ! $user->categories()->whereKey($attributes['category_id'])->whereNull('archived_at')->exists()) {
             throw DomainException::for(DomainErrorCode::ResourceNotFound, 'The transaction category was not found.');
         }
@@ -204,6 +207,9 @@ final readonly class TransactionService
         foreach ($attributes['splits'] ?? [] as $split) {
             if (! isset($split['category_id']) || ! $user->categories()->whereKey($split['category_id'])->whereNull('archived_at')->exists()) {
                 throw DomainException::for(DomainErrorCode::ResourceNotFound, 'A transaction split category was not found.');
+            }
+            if (isset($split['canonical_item_id']) && ! $user->items()->whereKey($split['canonical_item_id'])->whereNull('merged_into_id')->where('is_active', true)->exists()) {
+                throw DomainException::for(DomainErrorCode::ResourceNotFound, 'A transaction split item was not found.');
             }
         }
     }

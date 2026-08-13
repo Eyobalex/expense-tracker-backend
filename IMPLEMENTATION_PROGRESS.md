@@ -98,11 +98,11 @@ Total planned features: 18
 
 Merged: 9
 
-In progress: 1
+In progress: 0
 
 PR open: 0
 
-Blocked: 0
+Blocked: 1
 
 Pending: 12
 
@@ -142,7 +142,7 @@ They may be split into additional independently reviewable features if required 
 | 007 | Transaction aggregate and double-entry ledger | Phase 6 | 006 | `feat/007-double-entry-ledger` | MERGED | 8 | 746c17072232df723b8778c89ab8926ca0c6edfa | CI passed | Merged into dev after PostgreSQL-backed CI passed |
 | 008 | Budget engine | Phase 7 | 007 | `feat/008-budget-engine` | MERGED | 9 | ae1ace1f4c5f9b16d1b9bb3b31ee93ab4429faae | CI passed | Merged into dev after PostgreSQL-backed CI passed |
 | 009 | Receipt storage and OCR infrastructure | Phase 8 | 008, 002, 006 | `feat/009-receipt-ocr` | MERGED | 10 | d409a68a7d1f84b9947e9563a689b816938399f2 | CI passed | Merged into dev after PostgreSQL/Redis/MinIO-backed CI passed |
-| 010 | Merchant and item normalization | Phase 9 | 009 | `feat/010-normalization` | IN_PROGRESS | — | — | — | Raw evidence remains immutable |
+| 010 | Merchant and item normalization | Phase 9 | 009 | `feat/010-normalization` | BLOCKED | — | — | Local Pint/PHPStan/focused Pest pass | Awaiting approved OCR locale/parser matrix; automatic OCR normalization remains disabled |
 | 011 | Duplicate detection                                             | Phase 9                               | 009, 010           | `feat/011-duplicate-detection`    | PENDING | —  | —            | —             | User-controlled candidate resolution                                           |
 | 012 | FX provider operations and rate lifecycle                       | Phase 10                              | 006, 007, 011      | `feat/012-fx-operations`          | PENDING | —  | —            | —             | Provider jobs, stale policies, overrides                                       |
 | 013 | Offline synchronization API contract                            | Phase 11                              | 003, 007, 009, 011, 012 | `feat/013-sync-contract` | PENDING | —  | —            | —             | Includes cursor expiry/full resync                                             |
@@ -163,13 +163,13 @@ Feature: Merchant and item normalization
 
 Branch: `feat/010-normalization`
 
-Status: IN_PROGRESS
+Status: BLOCKED
 
 Started: 2026-08-13
 
 PR: —
 
-Blocker: —
+Blocker: PRODUCT DECISION REQUIRED — approve the MVP OCR locale/parser matrix before OCR-derived merchant/item normalization can be enabled. The catalog foundation is committed on this branch; no PR is open.
 
 ---
 
@@ -208,6 +208,10 @@ Examples may include:
 * approved RPO/RTO targets;
 * production retention periods;
 * supported OCR locale/language matrix;
+
+### OCR locale/parser matrix — PRODUCT DECISION REQUIRED BEFORE PHASE 8/FEATURE 010 EXIT
+
+Approve the MVP matrix for languages/scripts, supported currencies and unambiguous symbols/names, decimal and thousands separators, date/time formats, timezone interpretation, and unsupported/ambiguous input handling. Until approved, Laravel persists OCR output as needs_review and does not derive merchant/item candidates from OCR text.
 
 only if they are not already resolved in the approved source documents.
 

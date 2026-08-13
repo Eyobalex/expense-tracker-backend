@@ -18,7 +18,7 @@ class FinancialTransactionResource extends JsonResource
         return [
             'id' => $transaction->id, 'type' => $transaction->type, 'state' => $transaction->state, 'source' => $transaction->source,
             'financial_account_id' => $transaction->financial_account_id, 'counterparty_account_id' => $transaction->counterparty_account_id,
-            'category_id' => $transaction->category_id, 'related_transaction_id' => $transaction->related_transaction_id,
+            'category_id' => $transaction->category_id, 'merchant_id' => $transaction->merchant_id, 'raw_merchant_text' => $transaction->raw_merchant_text, 'related_transaction_id' => $transaction->related_transaction_id,
             'original_amount_minor_units' => $transaction->original_amount_minor_units, 'original_currency_code' => $transaction->original_currency_code,
             'counterparty_amount_minor_units' => $transaction->counterparty_amount_minor_units, 'counterparty_currency_code' => $transaction->counterparty_currency_code,
             'base_amount_minor_units' => $transaction->base_amount_minor_units, 'base_currency_code' => $transaction->base_currency_code,
@@ -28,7 +28,7 @@ class FinancialTransactionResource extends JsonResource
             'occurred_timezone' => $transaction->occurred_timezone, 'posted_at' => $transaction->posted_at?->toISOString(), 'reversed_at' => $transaction->reversed_at?->toISOString(),
             'journal_entry_id' => $transaction->journal_entry_id, 'reversal_of_id' => $transaction->reversal_of_id, 'correction_of_id' => $transaction->correction_of_id,
             'version' => $transaction->version,
-            'splits' => $transaction->relationLoaded('splits') ? $transaction->splits->map(fn ($split): array => ['id' => $split->id, 'category_id' => $split->category_id, 'amount_minor_units' => $split->amount_minor_units, 'currency_code' => $split->currency_code, 'classification' => $split->classification, 'description' => $split->description, 'sequence' => $split->sequence])->all() : [],
+            'splits' => $transaction->relationLoaded('splits') ? $transaction->splits->map(fn ($split): array => ['id' => $split->id, 'category_id' => $split->category_id, 'canonical_item_id' => $split->canonical_item_id, 'raw_item_text' => $split->raw_item_text, 'amount_minor_units' => $split->amount_minor_units, 'currency_code' => $split->currency_code, 'classification' => $split->classification, 'description' => $split->description, 'sequence' => $split->sequence])->all() : [],
             'created_at' => $transaction->created_at?->toISOString(), 'updated_at' => $transaction->updated_at?->toISOString(),
         ];
     }

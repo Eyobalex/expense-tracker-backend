@@ -6,6 +6,9 @@ use App\Http\Controllers\Api\V1\CategoryController;
 use App\Http\Controllers\Api\V1\CurrencyController;
 use App\Http\Controllers\Api\V1\DeviceController;
 use App\Http\Controllers\Api\V1\FinancialAccountController;
+use App\Http\Controllers\Api\V1\ItemController;
+use App\Http\Controllers\Api\V1\MerchantController;
+use App\Http\Controllers\Api\V1\NormalizationCandidateController;
 use App\Http\Controllers\Api\V1\OnboardingController;
 use App\Http\Controllers\Api\V1\ProfileController;
 use App\Http\Controllers\Api\V1\ReceiptController;
@@ -55,6 +58,15 @@ Route::prefix('v1')
             Route::get('budgets/{category}/periods', [BudgetController::class, 'history']);
             Route::post('budgets/{category}/reallocate', [BudgetController::class, 'reallocate'])->middleware('idempotency');
             Route::post('budgets/{category}/borrow-next-month', [BudgetController::class, 'borrow'])->middleware('idempotency');
+
+            Route::get('merchants', [MerchantController::class, 'index']);
+            Route::post('merchants', [MerchantController::class, 'store'])->middleware('idempotency');
+            Route::post('merchants/{merchant}/merge', [MerchantController::class, 'merge'])->middleware('idempotency');
+            Route::get('items', [ItemController::class, 'index']);
+            Route::post('items', [ItemController::class, 'store'])->middleware('idempotency');
+            Route::get('normalization-candidates', [NormalizationCandidateController::class, 'index']);
+            Route::post('normalization-candidates/{candidate}/resolve', [NormalizationCandidateController::class, 'resolve'])->middleware('idempotency');
+            Route::post('items/{item}/merge', [ItemController::class, 'merge'])->middleware('idempotency');
 
             Route::get('receipts', [ReceiptController::class, 'index']);
             Route::post('receipts', [ReceiptController::class, 'store'])->middleware(['idempotency', 'throttle:receipt-upload']);
