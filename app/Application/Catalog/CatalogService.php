@@ -7,6 +7,7 @@ use App\Domain\Shared\Exceptions\DomainErrorCode;
 use App\Domain\Shared\Exceptions\DomainException;
 use App\Models\AuditEvent;
 use App\Models\Item;
+use App\Models\LineItem;
 use App\Models\Merchant;
 use App\Models\NormalizationCandidate;
 use App\Models\Receipt;
@@ -96,6 +97,28 @@ final readonly class CatalogService
         }
     }
 
+    public function normalizeLineItem(LineItem $lineItem): void
+    {
+        $key = $this->normalizer->normalize($lineItem->raw_description);
+        if ($key === '') {
+            return;
+        }
+        $items = Item::query()->where('user_id', $lineItem->user_id)->where('is_active', true)->whereNull('merged_into_id')->get();
+        foreach ($items as $item) {
+            if (! $this->normalizer->compatibleUnits($lineItem->unit_code, $item->unit_code, $lineItem->pack_size_unit, $item->pack_size_unit)) {
+                continue;
+            }
+            $score = $this->normalizer->similarity($key, $item->normalized_search_key);
+            if ($score < 0.65) {
+                continue;
+            }
+            NormalizationCandidate::query()->firstOrCreate(
+                ['line_item_id' => $lineItem->id, 'entity_type' => 'item', 'normalized_search_key' => $key, 'candidate_item_id' => $item->id],
+                ['user_id' => $lineItem->user_id, 'raw_value' => $lineItem->raw_description, 'score' => number_format($score, 6, '.', ''), 'normalization_version' => CatalogTextNormalizer::VERSION, 'status' => 'suggested'],
+            );
+        }
+    }
+
     private function requiredKey(string $value): string
     {
         $key = $this->normalizer->normalize($value);
@@ -116,6 +139,10 @@ final readonly class CatalogService
             $candidate->forceFill(['status' => $decision, 'resolved_at' => now()])->save();
             if ($decision === 'accepted') {
                 NormalizationCandidate::query()->where('user_id', $user->id)->where('receipt_id', $candidate->receipt_id)->where('entity_type', $candidate->entity_type)->where('id', '<>', $candidate->id)->where('status', 'suggested')->update(['status' => 'superseded', 'resolved_at' => now()]);
+                if ($candidate->entity_type === 'item' && $candidate->lineItem !== null) {
+                    $candidate->lineItem->forceFill(['canonical_item_id' => $candidate->candidate_item_id, 'normalization_version' => $candidate->normalization_version])->save();
+                    NormalizationCandidate::query()->where('user_id', $user->id)->where('line_item_id', $candidate->line_item_id)->where('entity_type', 'item')->where('id', '<>', $candidate->id)->where('status', 'suggested')->update(['status' => 'superseded', 'resolved_at' => now()]);
+                }
             }
             AuditEvent::query()->create(['actor_user_id' => $user->id, 'user_id' => $user->id, 'event_name' => 'catalog.normalization_candidate_resolved', 'aggregate_type' => 'normalization_candidate', 'aggregate_id' => $candidate->id, 'summary' => ['decision' => $decision, 'receipt_id' => $candidate->receipt_id, 'entity_type' => $candidate->entity_type]]);
 

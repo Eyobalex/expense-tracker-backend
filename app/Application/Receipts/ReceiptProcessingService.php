@@ -3,6 +3,7 @@
 namespace App\Application\Receipts;
 
 use App\Domain\Receipts\Contracts\ReceiptOcrProvider;
+use App\Jobs\NormalizeReceiptEntities;
 use App\Jobs\ProcessReceiptOcr;
 use App\Models\AuditEvent;
 use App\Models\Receipt;
@@ -40,7 +41,7 @@ final readonly class ReceiptProcessingService
             $extraction = $receipt->extractions()->create([
                 'receipt_derivative_id' => $derivative->getKey(), 'attempt' => $attempt, 'status' => 'processing',
                 'provider' => 'paddleocr', 'provider_version' => config('receipts.ocr.provider_version'), 'model_version' => config('receipts.ocr.model_version'),
-                'parser_version' => 'locale-gated-v1', 'request_id' => $requestId, 'job_id' => $jobId, 'started_at' => now(),
+                'parser_version' => config('receipts.parser.version'), 'request_id' => $requestId, 'job_id' => $jobId, 'started_at' => now(),
             ]);
 
             return [$receipt->getKey(), $derivative->getKey(), $extraction->getKey()];
@@ -54,21 +55,27 @@ final readonly class ReceiptProcessingService
         $image = Storage::disk((string) config('receipts.disk'))->get($derivative->object_key);
         $result = $this->ocr->recognize($image, $derivative->mime_type, $lockedReceiptId, $requestId);
 
-        DB::transaction(function () use ($lockedReceiptId, $extractionId, $result, $requestId, $jobId): void {
+        $normalizedReceiptId = DB::transaction(function () use ($lockedReceiptId, $extractionId, $result, $requestId, $jobId): ?string {
             /** @var Receipt|null $receipt */
             $receipt = Receipt::query()->whereKey($lockedReceiptId)->lockForUpdate()->first();
             /** @var ReceiptOcrExtraction|null $extraction */
             $extraction = ReceiptOcrExtraction::query()->whereKey($extractionId)->lockForUpdate()->first();
             if (! $receipt instanceof Receipt || ! $extraction instanceof ReceiptOcrExtraction || $extraction->status !== 'processing') {
-                return;
+                return null;
             }
+            $normalized = $this->normalizer->normalize($result);
             $extraction->forceFill([
                 'status' => 'needs_review', 'provider_version' => $result->providerVersion, 'model_version' => $result->modelVersion,
-                'raw_response' => $result->rawResponse, 'normalized_data' => $this->normalizer->normalize($result), 'confidence' => $result->confidence, 'completed_at' => now(),
+                'locale' => $normalized['locale'], 'raw_response' => $result->rawResponse, 'normalized_data' => $normalized, 'confidence' => $result->confidence, 'completed_at' => now(),
             ])->save();
             $receipt->forceFill(['status' => 'needs_review', 'processed_at' => now()])->save();
             AuditEvent::query()->create(['user_id' => $receipt->user_id, 'event_name' => 'receipt.ocr_completed', 'aggregate_type' => 'receipt', 'aggregate_id' => $receipt->getKey(), 'summary' => ['request_id' => $requestId, 'receipt_id' => $receipt->getKey(), 'extraction_id' => $extraction->getKey(), 'job_id' => $jobId]]);
+
+            return $receipt->getKey();
         }, attempts: 3);
+        if ($normalizedReceiptId !== null) {
+            NormalizeReceiptEntities::dispatch($normalizedReceiptId)->onQueue('normalization')->afterCommit();
+        }
     }
 
     public function failed(string $receiptId, string $requestId, ?string $jobId, \Throwable $exception): void

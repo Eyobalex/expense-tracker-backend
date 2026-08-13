@@ -2,6 +2,8 @@
 
 use App\Application\Catalog\CatalogService;
 use App\Domain\Catalog\CatalogTextNormalizer;
+use App\Models\Item;
+use App\Models\LineItem;
 use App\Models\Merchant;
 use App\Models\NormalizationCandidate;
 use App\Models\Receipt;
@@ -68,4 +70,25 @@ test('a user explicitly resolves a normalization candidate without mutating raw 
     $this->assertDatabaseHas('audit_events', ['event_name' => 'catalog.normalization_candidate_resolved', 'aggregate_id' => $candidate->id]);
     expect($receipt->fresh()->original_filename)->toBe('receipt.jpg')
         ->and($merchant->fresh()->display_name)->toBe('Café Market');
+});
+
+test('item candidates exclude incompatible units and only link the canonical item after explicit acceptance', function (): void {
+    $this->seedCurrencies();
+    $user = User::factory()->create();
+    $item = Item::factory()->for($user)->create(['canonical_name' => 'Coffee Beans', 'normalized_search_key' => 'coffee beans', 'unit_code' => 'g', 'pack_size_unit' => 'g']);
+    Item::factory()->for($user)->create(['canonical_name' => 'Coffee Beans Liquid', 'normalized_search_key' => 'coffee beans liquid', 'unit_code' => 'ml', 'pack_size_unit' => 'ml']);
+    $lineItem = LineItem::factory()->for($user)->create(['raw_description' => 'Coffee—Beans', 'unit_code' => 'g', 'pack_size_unit' => 'g']);
+
+    app(CatalogService::class)->normalizeLineItem($lineItem);
+
+    $candidate = NormalizationCandidate::query()->sole();
+    expect($candidate->candidate_item_id)->toBe($item->id)
+        ->and($candidate->raw_value)->toBe('Coffee—Beans')
+        ->and($lineItem->fresh()->canonical_item_id)->toBeNull();
+
+    $this->postJson("/api/v1/normalization-candidates/{$candidate->id}/resolve", ['decision' => 'accepted'], catalogHeaders($user))
+        ->assertOk()->assertJsonPath('data.status', 'accepted');
+
+    expect($lineItem->fresh()->canonical_item_id)->toBe($item->id)
+        ->and($lineItem->fresh()->raw_description)->toBe('Coffee—Beans');
 });

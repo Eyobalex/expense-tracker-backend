@@ -27,5 +27,10 @@ class NormalizeReceiptEntities implements ShouldQueue
         if ($receipt instanceof Receipt && is_string($rawMerchant)) {
             $catalog->normalizeReceiptMerchant($receipt, $rawMerchant);
         }
+        if ($receipt instanceof Receipt) {
+            $receipt->lineItems()->each(function ($lineItem) use ($catalog): void {
+                $catalog->normalizeLineItem($lineItem);
+            });
+        }
     }
 }
