@@ -142,7 +142,7 @@ test('a posted candidate cannot be replaced and another user cannot inspect dupl
     $this->withToken($token)->withHeader('Idempotency-Key', (string) Str::uuid())
         ->postJson("/api/v1/transactions/{$source['id']}/duplicate-decision", ['candidate_id' => $candidate->id, 'decision' => 'replace_pending_draft'])
         ->assertUnprocessable()->assertJsonPath('error.code', 'INVALID_STATE_TRANSITION');
-    $this->withToken(duplicateToken($otherUser))->getJson("/api/v1/transactions/{$source['id']}/duplicates")->assertNotFound();
+    $this->actingAs($otherUser, 'sanctum')->getJson("/api/v1/transactions/{$source['id']}/duplicates")->assertNotFound();
 });
 
 test('postgresql rejects a duplicate candidate that references the same transaction on both sides', function (): void {
