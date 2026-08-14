@@ -100,7 +100,7 @@ Merged: 10
 
 In progress: 1
 
-PR open: 0
+PR open: 1
 
 Blocked: 0
 
@@ -143,7 +143,7 @@ They may be split into additional independently reviewable features if required 
 | 008 | Budget engine | Phase 7 | 007 | `feat/008-budget-engine` | MERGED | 9 | ae1ace1f4c5f9b16d1b9bb3b31ee93ab4429faae | CI passed | Merged into dev after PostgreSQL-backed CI passed |
 | 009 | Receipt storage and OCR infrastructure | Phase 8 | 008, 002, 006 | `feat/009-receipt-ocr` | MERGED | 10 | d409a68a7d1f84b9947e9563a689b816938399f2 | CI passed | Merged into dev after PostgreSQL/Redis/MinIO-backed CI passed |
 | 010 | Merchant and item normalization | Phase 9 | 009 | `feat/010-normalization` | MERGED | 11 | 73f7fa742d1ed4497c6ab395b4e860cf7ccd4298 | CI passed | Merged into dev after PostgreSQL/Redis/MinIO-backed CI passed; OCR locale/parser matrix approved 2026-08-14 |
-| 011 | Duplicate detection                                             | Phase 9                               | 009, 010           | `feat/011-duplicate-detection`    | IN_PROGRESS | —  | —            | Duplicate lifecycle approved | Implementing weighted candidates, explicit decisions, and posting gate |
+| 011 | Duplicate detection                                             | Phase 9                               | 009, 010           | `feat/011-duplicate-detection`    | PR_OPEN | 13 | —            | PR #13; CI pending | Weighted candidates, explicit decisions, cancellation audit, and posting gate implemented |
 | 012 | FX provider operations and rate lifecycle                       | Phase 10                              | 006, 007, 011      | `feat/012-fx-operations`          | PENDING | —  | —            | —             | Provider jobs, stale policies, overrides                                       |
 | 013 | Offline synchronization API contract                            | Phase 11                              | 003, 007, 009, 011, 012 | `feat/013-sync-contract` | PENDING | —  | —            | —             | Includes cursor expiry/full resync                                             |
 | 014 | Dashboard and forecasting                                       | Phase 12                              | 008, 012, 013      | `feat/014-dashboard-forecasting`  | PENDING | —  | —            | —             | Product formulas must be approved before implementation                        |
@@ -163,13 +163,13 @@ Feature: Duplicate detection
 
 Branch: `feat/011-duplicate-detection`
 
-Status: IN_PROGRESS
+Status: PR_OPEN
 
 Started: 2026-08-14
 
-PR: —
+PR: #13 — https://github.com/Eyobalex/expense-tracker-backend/pull/13
 
-Blocker: None.
+Blocker: None. Awaiting required GitHub checks.
 
 ---
 
