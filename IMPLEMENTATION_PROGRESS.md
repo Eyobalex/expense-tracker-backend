@@ -96,15 +96,15 @@ The feature cannot safely continue until an external issue, dependency, requirem
 
 Total planned features: 18
 
-Merged: 10
+Merged: 11
 
-In progress: 1
+In progress: 0
 
-PR open: 1
+PR open: 0
 
-Blocked: 0
+Blocked: 1
 
-Pending: 12
+Pending: 11
 
 Overall status: IN PROGRESS
 
@@ -143,8 +143,8 @@ They may be split into additional independently reviewable features if required 
 | 008 | Budget engine | Phase 7 | 007 | `feat/008-budget-engine` | MERGED | 9 | ae1ace1f4c5f9b16d1b9bb3b31ee93ab4429faae | CI passed | Merged into dev after PostgreSQL-backed CI passed |
 | 009 | Receipt storage and OCR infrastructure | Phase 8 | 008, 002, 006 | `feat/009-receipt-ocr` | MERGED | 10 | d409a68a7d1f84b9947e9563a689b816938399f2 | CI passed | Merged into dev after PostgreSQL/Redis/MinIO-backed CI passed |
 | 010 | Merchant and item normalization | Phase 9 | 009 | `feat/010-normalization` | MERGED | 11 | 73f7fa742d1ed4497c6ab395b4e860cf7ccd4298 | CI passed | Merged into dev after PostgreSQL/Redis/MinIO-backed CI passed; OCR locale/parser matrix approved 2026-08-14 |
-| 011 | Duplicate detection                                             | Phase 9                               | 009, 010           | `feat/011-duplicate-detection`    | PR_OPEN | 13 | —            | PR #13; CI pending | Weighted candidates, explicit decisions, cancellation audit, and posting gate implemented |
-| 012 | FX provider operations and rate lifecycle                       | Phase 10                              | 006, 007, 011      | `feat/012-fx-operations`          | PENDING | —  | —            | —             | Provider jobs, stale policies, overrides                                       |
+| 011 | Duplicate detection                                             | Phase 9                               | 009, 010           | `feat/011-duplicate-detection`    | MERGED | 13 | b06fa689b5cea5696a5a8dbf36f8efef7b581692 | CI passed | Merged into dev after PostgreSQL/Redis/MinIO-backed CI passed |
+| 012 | FX provider operations and rate lifecycle                       | Phase 10                              | 006, 007, 011      | `feat/012-fx-operations`          | BLOCKED | —  | —            | Product decision required | Provider, pairs, quota, refresh cadence, stale threshold, and fallback policy are not approved |
 | 013 | Offline synchronization API contract                            | Phase 11                              | 003, 007, 009, 011, 012 | `feat/013-sync-contract` | PENDING | —  | —            | —             | Includes cursor expiry/full resync                                             |
 | 014 | Dashboard and forecasting                                       | Phase 12                              | 008, 012, 013      | `feat/014-dashboard-forecasting`  | PENDING | —  | —            | —             | Product formulas must be approved before implementation                        |
 | 015 | Notifications backend                                           | Phase 12                              | 014                | `feat/015-notifications`          | PENDING | —  | —            | —             | Approved notification channels only                                             |
@@ -157,19 +157,19 @@ They may be split into additional independently reviewable features if required 
 
 # Current Feature
 
-Feature ID: 011
+Feature ID: 012
 
-Feature: Duplicate detection
+Feature: FX provider operations and rate lifecycle
 
-Branch: `feat/011-duplicate-detection`
+Branch: `feat/012-fx-operations`
 
-Status: PR_OPEN
+Status: BLOCKED
 
 Started: 2026-08-14
 
-PR: #13 — https://github.com/Eyobalex/expense-tracker-backend/pull/13
+PR: —
 
-Blocker: None. Awaiting required GitHub checks.
+Blocker: PRODUCT DECISION REQUIRED BEFORE FEATURE 012 — approve the exchange-rate provider, ETB/USD supported pairs and direction, provider quota, refresh cadence, stale-rate threshold, and weekend/holiday fallback policy.
 
 ---
 
@@ -216,6 +216,10 @@ For `Replace pending draft with extracted version` and `Cancel current import`, 
 ### OCR locale/parser matrix — APPROVED 2026-08-14
 
 MVP supports English (Latin) and Amharic (Ethiopic) scripts; ETB and USD only; the explicit number forms `1,250.50`, `1.250,50`, and `1 250,50`; ISO and unambiguous English textual dates; and date-only preservation pending user confirmation of timezone/time. Bare or ambiguous symbols (including `$` and `Br`), numeric dates, unsupported scripts/formats, and ambiguous numbers remain `needs_review`; Laravel does not guess. The persisted parser version is `locale-matrix-v1`.
+
+### FX provider operations — PRODUCT DECISION REQUIRED BEFORE FEATURE 012
+
+The approved plan requires a concrete exchange-rate provider, provider-enabled ETB/USD pair direction(s), quota/credential arrangement, refresh cadence, maximum staleness threshold, and weekend/holiday fallback/block policy before Phase 10 can exit. The existing Currency Core is provider-independent and already supports exact historical locking; no external-rate behavior will be invented without this decision.
 
 only if they are not already resolved in the approved source documents.
 
