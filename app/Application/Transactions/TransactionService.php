@@ -16,14 +16,18 @@ use Illuminate\Support\Facades\DB;
 
 final readonly class TransactionService
 {
-    public function __construct(private CanonicalJournalBuilder $journals, private RecalculateBudgetChain $budgets) {}
+    public function __construct(
+        private CanonicalJournalBuilder $journals,
+        private RecalculateBudgetChain $budgets,
+        private DuplicateDetectionService $duplicates,
+    ) {}
 
     /**
      * @param  array<string, mixed>  $attributes
      */
     public function create(User $user, array $attributes): FinancialTransaction
     {
-        return DB::transaction(function () use ($user, $attributes): FinancialTransaction {
+        $transaction = DB::transaction(function () use ($user, $attributes): FinancialTransaction {
             $this->assertAccount($user, (string) $attributes['financial_account_id']);
             $this->assertRelatedOwnership($user, $attributes);
             $transaction = $user->financialTransactions()->create($this->transactionAttributes($attributes));
@@ -31,6 +35,10 @@ final readonly class TransactionService
 
             return $transaction->load(['financialAccount', 'counterpartyAccount', 'category', 'relatedTransaction', 'splits.category']);
         }, attempts: 3);
+
+        $this->duplicates->discover($user, $transaction);
+
+        return $transaction;
     }
 
     /**
@@ -45,7 +53,7 @@ final readonly class TransactionService
             throw DomainException::for(DomainErrorCode::InvalidStateTransition, 'Only draft or pending-review transactions can be edited.');
         }
 
-        return DB::transaction(function () use ($user, $transaction, $expectedVersion, $attributes): FinancialTransaction {
+        $updatedTransaction = DB::transaction(function () use ($user, $transaction, $expectedVersion, $attributes): FinancialTransaction {
             $this->assertRelatedOwnership($user, $attributes);
             $values = $this->transactionAttributes($attributes, false);
             $values['version'] = $expectedVersion + 1;
@@ -61,6 +69,10 @@ final readonly class TransactionService
 
             return $fresh->load(['financialAccount', 'counterpartyAccount', 'category', 'relatedTransaction', 'splits.category']);
         }, attempts: 3);
+
+        $this->duplicates->discover($user, $updatedTransaction);
+
+        return $updatedTransaction;
     }
 
     public function delete(User $user, FinancialTransaction $transaction, int $expectedVersion): void
@@ -88,6 +100,7 @@ final readonly class TransactionService
                 throw DomainException::for(DomainErrorCode::InvalidStateTransition, 'Only a draft or pending-review transaction can be posted.');
             }
             $locked->load(['financialAccount', 'counterpartyAccount', 'category', 'relatedTransaction.category', 'splits.category']);
+            $this->duplicates->assertNoUnresolvedCandidates($user, $locked);
             $this->assertPostable($user, $locked);
             $definition = $this->journals->build($user, $locked);
             $entry = $this->persistJournal($user, $locked, $definition);
@@ -133,7 +146,7 @@ final readonly class TransactionService
                 throw DomainException::for(DomainErrorCode::InvalidStateTransition, 'A posted transaction may be reversed exactly once.');
             }
             $reversal = $user->financialTransactions()->create([
-                ...$original->only(['financial_account_id', 'counterparty_account_id', 'category_id', 'merchant_id', 'raw_merchant_text', 'related_transaction_id', 'correction_of_id', 'type', 'source', 'adjustment_subtype', 'adjustment_direction', 'occurred_at', 'occurred_timezone', 'original_amount_minor_units', 'original_currency_code', 'counterparty_amount_minor_units', 'counterparty_currency_code', 'reference_rate', 'used_rate', 'rate_date', 'rate_source', 'rate_override_reason', 'rounding_mode', 'description']),
+                ...$original->only(['financial_account_id', 'counterparty_account_id', 'category_id', 'merchant_id', 'raw_merchant_text', 'related_transaction_id', 'correction_of_id', 'type', 'source', 'adjustment_subtype', 'adjustment_direction', 'occurred_at', 'occurred_timezone', 'original_amount_minor_units', 'original_currency_code', 'counterparty_amount_minor_units', 'counterparty_currency_code', 'reference_rate', 'used_rate', 'rate_date', 'rate_source', 'rate_override_reason', 'rounding_mode', 'description', 'reference_number']),
                 'state' => 'draft', 'reason' => $reason, 'reversal_of_id' => $original->getKey(), 'base_amount_minor_units' => $original->base_amount_minor_units, 'base_currency_code' => $original->base_currency_code,
             ]);
             $entry = $this->persistOppositeJournal($user, $original, $reversal);
@@ -167,7 +180,7 @@ final readonly class TransactionService
      */
     private function transactionAttributes(array $attributes, bool $creating = true): array
     {
-        $keys = ['financial_account_id', 'counterparty_account_id', 'category_id', 'merchant_id', 'raw_merchant_text', 'related_transaction_id', 'correction_of_id', 'type', 'state', 'source', 'adjustment_subtype', 'adjustment_direction', 'reason', 'occurred_at', 'occurred_timezone', 'original_amount_minor_units', 'original_currency_code', 'counterparty_amount_minor_units', 'counterparty_currency_code', 'reference_rate', 'used_rate', 'rate_date', 'rate_source', 'rate_override_reason', 'rounding_mode', 'description'];
+        $keys = ['financial_account_id', 'counterparty_account_id', 'category_id', 'merchant_id', 'raw_merchant_text', 'related_transaction_id', 'correction_of_id', 'type', 'state', 'source', 'adjustment_subtype', 'adjustment_direction', 'reason', 'occurred_at', 'occurred_timezone', 'original_amount_minor_units', 'original_currency_code', 'counterparty_amount_minor_units', 'counterparty_currency_code', 'reference_rate', 'used_rate', 'rate_date', 'rate_source', 'rate_override_reason', 'rounding_mode', 'description', 'reference_number'];
         $values = array_intersect_key($attributes, array_flip($keys));
         if ($creating) {
             $values += ['state' => 'draft', 'source' => 'manual'];
