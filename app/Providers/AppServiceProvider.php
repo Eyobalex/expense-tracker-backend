@@ -2,10 +2,14 @@
 
 namespace App\Providers;
 
+use App\Domain\Currency\Contracts\ExchangeRateProvider;
+use App\Domain\Currency\Contracts\HistoricalExchangeRateLookup;
 use App\Domain\Receipts\Contracts\ReceiptOcrProvider;
 use App\Domain\Shared\Events\DomainEventBus;
 use App\Domain\Shared\Time\Clock;
 use App\Domain\Shared\Time\SystemClock;
+use App\Infrastructure\Currency\DatabaseHistoricalExchangeRateLookup;
+use App\Infrastructure\Currency\OpenExchangeRatesProvider;
 use App\Infrastructure\Events\LaravelDomainEventBus;
 use App\Infrastructure\Ocr\HttpPaddleOcrProvider;
 use Carbon\CarbonImmutable;
@@ -24,6 +28,8 @@ class AppServiceProvider extends ServiceProvider
         $this->app->singleton(Clock::class, SystemClock::class);
         $this->app->singleton(DomainEventBus::class, LaravelDomainEventBus::class);
         $this->app->bind(ReceiptOcrProvider::class, HttpPaddleOcrProvider::class);
+        $this->app->bind(ExchangeRateProvider::class, OpenExchangeRatesProvider::class);
+        $this->app->bind(HistoricalExchangeRateLookup::class, DatabaseHistoricalExchangeRateLookup::class);
     }
 
     public function boot(): void

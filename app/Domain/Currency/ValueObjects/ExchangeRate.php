@@ -7,6 +7,7 @@ use App\Domain\Currency\Enums\RoundingMode;
 use App\Domain\Shared\Exceptions\DomainErrorCode;
 use App\Domain\Shared\Exceptions\DomainException;
 use Brick\Math\BigDecimal;
+use Brick\Math\RoundingMode as BrickRoundingMode;
 use JsonSerializable;
 
 final readonly class ExchangeRate implements JsonSerializable
@@ -46,6 +47,11 @@ final readonly class ExchangeRate implements JsonSerializable
     public function decimal(): string
     {
         return (string) $this->value;
+    }
+
+    public function reciprocal(): self
+    {
+        return self::fromDecimal((string) BigDecimal::one()->dividedBy($this->value, 18, BrickRoundingMode::HalfEven));
     }
 
     public function jsonSerialize(): string

@@ -2,7 +2,7 @@
 
 Status: IN PROGRESS
 
-Last reconciled with implementation plan: 2026-08-12; plan phases 0–15 reconciled with the feature manifest, local `dev`, `origin/dev`, remote branches, and GitHub PR API (no existing PRs targeting `dev`).
+Last reconciled with implementation plan: 2026-08-14; plan phases 0–15 reconciled with the feature manifest, local `dev`, `origin/dev`, remote branches, and GitHub PR API (no existing PRs targeting `dev`).
 
 Integration branch: `dev`
 
@@ -98,11 +98,11 @@ Total planned features: 18
 
 Merged: 11
 
-In progress: 0
+In progress: 1
 
 PR open: 0
 
-Blocked: 1
+Blocked: 0
 
 Pending: 11
 
@@ -144,7 +144,7 @@ They may be split into additional independently reviewable features if required 
 | 009 | Receipt storage and OCR infrastructure | Phase 8 | 008, 002, 006 | `feat/009-receipt-ocr` | MERGED | 10 | d409a68a7d1f84b9947e9563a689b816938399f2 | CI passed | Merged into dev after PostgreSQL/Redis/MinIO-backed CI passed |
 | 010 | Merchant and item normalization | Phase 9 | 009 | `feat/010-normalization` | MERGED | 11 | 73f7fa742d1ed4497c6ab395b4e860cf7ccd4298 | CI passed | Merged into dev after PostgreSQL/Redis/MinIO-backed CI passed; OCR locale/parser matrix approved 2026-08-14 |
 | 011 | Duplicate detection                                             | Phase 9                               | 009, 010           | `feat/011-duplicate-detection`    | MERGED | 13 | b06fa689b5cea5696a5a8dbf36f8efef7b581692 | CI passed | Merged into dev after PostgreSQL/Redis/MinIO-backed CI passed |
-| 012 | FX provider operations and rate lifecycle                       | Phase 10                              | 006, 007, 011      | `feat/012-fx-operations`          | BLOCKED | —  | —            | Product decision required | Provider, pairs, quota, refresh cadence, stale threshold, and fallback policy are not approved |
+| 012 | FX provider operations and rate lifecycle                       | Phase 10                              | 006, 007, 011      | `feat/012-fx-operations`          | IN_PROGRESS | —  | —            | FX policy approved | Implementing Open Exchange Rates integration, storage, refresh, fallback, overrides, and observability |
 | 013 | Offline synchronization API contract                            | Phase 11                              | 003, 007, 009, 011, 012 | `feat/013-sync-contract` | PENDING | —  | —            | —             | Includes cursor expiry/full resync                                             |
 | 014 | Dashboard and forecasting                                       | Phase 12                              | 008, 012, 013      | `feat/014-dashboard-forecasting`  | PENDING | —  | —            | —             | Product formulas must be approved before implementation                        |
 | 015 | Notifications backend                                           | Phase 12                              | 014                | `feat/015-notifications`          | PENDING | —  | —            | —             | Approved notification channels only                                             |
@@ -163,13 +163,13 @@ Feature: FX provider operations and rate lifecycle
 
 Branch: `feat/012-fx-operations`
 
-Status: BLOCKED
+Status: IN_PROGRESS
 
 Started: 2026-08-14
 
 PR: —
 
-Blocker: PRODUCT DECISION REQUIRED BEFORE FEATURE 012 — approve the exchange-rate provider, ETB/USD supported pairs and direction, provider quota, refresh cadence, stale-rate threshold, and weekend/holiday fallback policy.
+Blocker: None.
 
 ---
 
@@ -217,9 +217,9 @@ For `Replace pending draft with extracted version` and `Cancel current import`, 
 
 MVP supports English (Latin) and Amharic (Ethiopic) scripts; ETB and USD only; the explicit number forms `1,250.50`, `1.250,50`, and `1 250,50`; ISO and unambiguous English textual dates; and date-only preservation pending user confirmation of timezone/time. Bare or ambiguous symbols (including `$` and `Br`), numeric dates, unsupported scripts/formats, and ambiguous numbers remain `needs_review`; Laravel does not guess. The persisted parser version is `locale-matrix-v1`.
 
-### FX provider operations — PRODUCT DECISION REQUIRED BEFORE FEATURE 012
+### FX provider operations — APPROVED 2026-08-14
 
-The approved plan requires a concrete exchange-rate provider, provider-enabled ETB/USD pair direction(s), quota/credential arrangement, refresh cadence, maximum staleness threshold, and weekend/holiday fallback/block policy before Phase 10 can exit. The existing Currency Core is provider-independent and already supports exact historical locking; no external-rate behavior will be invented without this decision.
+Use Open Exchange Rates Free with the user-provided `OPEN_EXCHANGE_RATES_APP_ID`. Store provider USD→ETB daily rates and derive ETB→USD exactly from the reciprocal. Refresh daily at 00:30 UTC with three exponential-backoff retries. Alert at 24 hours; accept a latest-valid rate through 48 hours. On weekends/holidays, use the latest valid prior daily rate inside that 48-hour window. Beyond 48 hours, block automatic foreign-currency posting and require an explicit audited manual rate override. Credentials remain server-only and never appear in API responses or logs.
 
 only if they are not already resolved in the approved source documents.
 
