@@ -13,6 +13,7 @@ use App\Http\Controllers\Api\V1\OnboardingController;
 use App\Http\Controllers\Api\V1\ProfileController;
 use App\Http\Controllers\Api\V1\ReceiptController;
 use App\Http\Controllers\Api\V1\TransactionController;
+use App\Http\Controllers\Api\V1\TransactionDuplicateController;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('v1')
@@ -47,6 +48,8 @@ Route::prefix('v1')
             Route::get('transactions', [TransactionController::class, 'index']);
             Route::post('transactions', [TransactionController::class, 'store'])->middleware('idempotency');
             Route::get('transactions/balances', [TransactionController::class, 'balances']);
+            Route::get('transactions/{transaction}/duplicates', [TransactionDuplicateController::class, 'index']);
+            Route::post('transactions/{transaction}/duplicate-decision', [TransactionDuplicateController::class, 'resolve'])->middleware('idempotency');
             Route::get('transactions/{transaction}', [TransactionController::class, 'show']);
             Route::patch('transactions/{transaction}', [TransactionController::class, 'update'])->middleware('idempotency');
             Route::delete('transactions/{transaction}', [TransactionController::class, 'destroy'])->middleware('idempotency');
