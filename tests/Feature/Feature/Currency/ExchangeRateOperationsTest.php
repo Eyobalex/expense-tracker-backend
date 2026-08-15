@@ -135,8 +135,9 @@ test('posting automatically locks a fresh provider rate and blocks stale automat
     ]))->assertCreated()->json('data');
     $this->withToken($token)->withHeader('If-Match', '1')->withHeader('Idempotency-Key', (string) Str::uuid())
         ->postJson("/api/v1/transactions/{$override['id']}/post")->assertOk()
-        ->assertJsonPath('data.used_rate', '56')
-        ->assertJsonPath('data.reference_rate', '55');
+        ->assertJsonPath('data.used_rate', '56.000000000000000000')
+        ->assertJsonPath('data.reference_rate', '55.000000000000000000')
+        ->assertJsonPath('data.rate_source', 'manual_override');
     expect($user->auditEvents()->where('action', 'transaction.fx_rate_overridden')->count())->toBe(1);
 
     $staleDraft = $this->withToken($token)->withHeader('Idempotency-Key', (string) Str::uuid())->postJson('/api/v1/transactions', fxTransactionPayload($account, $category, [
@@ -159,7 +160,8 @@ test('rate source and rounding mode are server-controlled', function (): void {
             'rounding_mode' => 'UP',
         ]))
         ->assertUnprocessable()
-        ->assertJsonValidationErrors(['rate_source', 'rounding_mode']);
+        ->assertJsonPath('error.code', 'VALIDATION_FAILED')
+        ->assertJsonStructure(['error' => ['fields' => ['rate_source', 'rounding_mode']]]);
 });
 
 test('the refresh command dispatches the retryable job for the selected UTC date', function (): void {
