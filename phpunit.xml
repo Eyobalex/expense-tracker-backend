@@ -18,6 +18,7 @@
         </include>
     </source>
     <php>
+        <ini name="memory_limit" value="2048M"/>
         <env name="APP_ENV" value="testing"/>
         <env name="API_DOCS_ENABLED" value="true"/>
         <env name="APP_MAINTENANCE_DRIVER" value="file"/>
