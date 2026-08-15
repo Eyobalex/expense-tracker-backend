@@ -105,7 +105,7 @@ final readonly class SyncService
 
         $pageSize = min(max($requestedPageSize ?? (int) config('sync.page_size'), 1), (int) config('sync.maximum_page_size'));
         $snapshotAt = $cursor?->lastChangedAt === null ? CarbonImmutable::now() : $cursor->snapshotAt;
-        $sinceAt = $cursor?->sinceAt ?? ($fullResync ? CarbonImmutable::createFromTimestampUTC(0) : CarbonImmutable::now());
+        $sinceAt = $cursor instanceof SyncCursor ? $cursor->sinceAt : ($fullResync ? CarbonImmutable::createFromTimestampUTC(0) : CarbonImmutable::now());
         $effectiveCursor = $cursor ?? new SyncCursor($sinceAt, $snapshotAt, fullResync: $fullResync);
         $changes = $this->changes($user, $effectiveCursor, $pageSize + 1);
         $hasMore = count($changes) > $pageSize;
@@ -145,9 +145,12 @@ final readonly class SyncService
     private function applyAccount(User $user, string $action, ?string $serverId, ?int $expectedVersion, array $payload): FinancialAccount
     {
         if ($action === 'create') {
-            return $this->accounts->create($user, $this->validated($payload, new StoreFinancialAccountRequest));
+            /** @var array{name: string, type: string, currency_code: string, opening_balance_configured?: bool} $attributes */
+            $attributes = $this->validated($payload, new StoreFinancialAccountRequest);
+
+            return $this->accounts->create($user, $attributes);
         }
-        $account = $this->owned($user, FinancialAccount::class, $serverId, 'financial account');
+        $account = $this->account($user, $serverId);
 
         return match ($action) {
             'update' => $this->accounts->update($user, $account, $this->requiredVersion($expectedVersion), $this->validated($payload, new UpdateFinancialAccountRequest)),
@@ -161,9 +164,12 @@ final readonly class SyncService
     private function applyCategory(User $user, string $action, ?string $serverId, ?int $expectedVersion, array $payload): Category
     {
         if ($action === 'create') {
-            return $this->categories->create($user, $this->validated($payload, new StoreCategoryRequest));
+            /** @var array{name: string, kind: string, parent_id?: string|null, budget_enabled?: bool, base_limit_minor_units?: int|null, rollover_enabled?: bool, overspend_carry_enabled?: bool, borrowing_enabled?: bool, budget_currency_code?: string|null} $attributes */
+            $attributes = $this->validated($payload, new StoreCategoryRequest);
+
+            return $this->categories->create($user, $attributes);
         }
-        $category = $this->owned($user, Category::class, $serverId, 'category');
+        $category = $this->category($user, $serverId);
 
         return match ($action) {
             'update' => $this->categories->update($user, $category, $this->requiredVersion($expectedVersion), $this->validated($payload, new UpdateCategoryRequest)),
@@ -201,7 +207,7 @@ final readonly class SyncService
 
             return $this->transactions->create($user, $this->validated($payload, new StoreFinancialTransactionRequest));
         }
-        $transaction = $this->owned($user, FinancialTransaction::class, $serverId, 'transaction');
+        $transaction = $this->transaction($user, $serverId);
         if ($action === 'update') {
             $this->assertTransactionDependencies($user, $payload);
 
@@ -255,7 +261,8 @@ final readonly class SyncService
             });
         }
 
-        return $feed->limit($limit)->get()->map(function (object $row) use ($user): SyncChange {
+        /** @var list<SyncChange> $changes */
+        $changes = $feed->limit($limit)->get()->map(function (object $row) use ($user): SyncChange {
             $changedAt = CarbonImmutable::parse($row->changed_at);
             if ($row->resource_type === 'transaction' && ! FinancialTransaction::query()->ownedBy($user)->whereKey($row->resource_id)->exists()) {
                 return new SyncChange('transaction', $row->resource_id, 'delete', (int) $row->version, $changedAt, null);
@@ -271,7 +278,9 @@ final readonly class SyncService
             }
 
             return new SyncChange((string) $row->resource_type, (string) $row->resource_id, 'delete', (int) $row->version, $changedAt, null);
-        })->all();
+        })->values()->all();
+
+        return $changes;
     }
 
     /** @return array<string, array{model: class-string<Model>, resource: class-string}> */
@@ -308,6 +317,30 @@ final readonly class SyncService
         return $version;
     }
 
+    private function account(User $user, ?string $id): FinancialAccount
+    {
+        $resource = $this->owned($user, FinancialAccount::class, $id, 'financial account');
+        assert($resource instanceof FinancialAccount);
+
+        return $resource;
+    }
+
+    private function category(User $user, ?string $id): Category
+    {
+        $resource = $this->owned($user, Category::class, $id, 'category');
+        assert($resource instanceof Category);
+
+        return $resource;
+    }
+
+    private function transaction(User $user, ?string $id): FinancialTransaction
+    {
+        $resource = $this->owned($user, FinancialTransaction::class, $id, 'transaction');
+        assert($resource instanceof FinancialTransaction);
+
+        return $resource;
+    }
+
     /** @param array<string, mixed> $payload */
     private function assertTransactionDependencies(User $user, array $payload): void
     {
@@ -330,8 +363,11 @@ final readonly class SyncService
         }
     }
 
-    /** @param array<string, mixed> $payload @param object{rules: callable(): array<string, mixed>} $request @return array<string, mixed> */
-    private function validated(array $payload, object $request): array
+    /**
+     * @param  array<string, mixed>  $payload
+     * @return array<string, mixed>
+     */
+    private function validated(array $payload, StoreCategoryRequest|StoreFinancialAccountRequest|StoreFinancialTransactionRequest|StoreItemRequest|StoreMerchantRequest|UpdateCategoryRequest|UpdateFinancialAccountRequest|UpdateFinancialTransactionRequest $request): array
     {
         return Validator::make($payload, $request->rules())->validate();
     }
@@ -339,15 +375,16 @@ final readonly class SyncService
     /** @return array<string, mixed> */
     private function resourceData(Model $resource): array
     {
-        foreach ($this->resourceMap() as $definition) {
-            if ($resource instanceof $definition['model']) {
-                $class = $definition['resource'];
-
-                return (new $class($resource))->resolve(request());
-            }
-        }
-
-        return [];
+        return match (true) {
+            $resource instanceof FinancialAccount => (new FinancialAccountResource($resource))->resolve(request()),
+            $resource instanceof Category => (new CategoryResource($resource))->resolve(request()),
+            $resource instanceof BudgetPeriod => (new BudgetPeriodResource($resource))->resolve(request()),
+            $resource instanceof Merchant => (new MerchantResource($resource))->resolve(request()),
+            $resource instanceof Item => (new ItemResource($resource))->resolve(request()),
+            $resource instanceof Receipt => (new ReceiptResource($resource))->resolve(request()),
+            $resource instanceof FinancialTransaction => (new FinancialTransactionResource($resource))->resolve(request()),
+            default => [],
+        };
     }
 
     /** @param array<string, mixed> $attributes */

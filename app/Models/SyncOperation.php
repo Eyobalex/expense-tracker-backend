@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Carbon\CarbonImmutable;
 use Database\Factories\SyncOperationFactory;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
@@ -9,6 +10,10 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+/**
+ * @property CarbonImmutable|null $client_occurred_at
+ * @property CarbonImmutable|null $completed_at
+ */
 class SyncOperation extends Model
 {
     /** @use HasFactory<SyncOperationFactory> */
@@ -37,7 +42,10 @@ class SyncOperation extends Model
         return $this->belongsTo(Device::class);
     }
 
-    /** @param Builder<self> $query */
+    /**
+     * @param  Builder<self>  $query
+     * @return Builder<self>
+     */
     public function scopeOwnedBy(Builder $query, User $user): Builder
     {
         return $query->where('user_id', $user->getKey());
