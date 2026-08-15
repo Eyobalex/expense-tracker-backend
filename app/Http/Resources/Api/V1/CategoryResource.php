@@ -23,6 +23,7 @@ class CategoryResource extends JsonResource
             'is_active' => $category->is_active,
             'is_system' => $category->is_system,
             'budget_enabled' => $category->budget_enabled,
+            'forecast_behavior' => $category->forecast_behavior,
             'base_limit_minor_units' => $category->base_limit_minor_units,
             'budget_currency_code' => $category->budget_currency_code,
             'rollover_enabled' => $category->rollover_enabled,

@@ -94,6 +94,12 @@ class User extends Authenticatable implements PasskeyUser
         return $this->hasMany(SyncTombstone::class);
     }
 
+    /** @return HasMany<InsightSnapshot, $this> */
+    public function insightSnapshots(): HasMany
+    {
+        return $this->hasMany(InsightSnapshot::class);
+    }
+
     /** @return array<string, string> */
     protected function casts(): array
     {

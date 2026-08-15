@@ -232,6 +232,31 @@ Idempotency-Key: {{$guid}}
 
 {"month":"2026-08"}
 
+### Dashboard and financial insights
+GET {{baseUrl}}/dashboard?month=2026-08
+Accept: application/json
+Authorization: Bearer {{token}}
+
+### Safe-to-Spend is a current authoritative budget metric; it is unavailable when no active expense budget exists.
+GET {{baseUrl}}/insights/safe-to-spend?month=2026-08
+Accept: application/json
+Authorization: Bearer {{token}}
+
+### Category-aware month-end forecast; no global daily-run-rate projection is used.
+GET {{baseUrl}}/insights/forecast?month=2026-08
+Accept: application/json
+Authorization: Bearer {{token}}
+
+### Versioned 12-month income-source HHI.
+GET {{baseUrl}}/insights/income-concentration
+Accept: application/json
+Authorization: Bearer {{token}}
+
+### Compare one posted receipt line to its immediately previous compatible purchase.
+GET {{baseUrl}}/insights/item-prices?line_item_id={{lineItemId}}
+Accept: application/json
+Authorization: Bearer {{token}}
+
 ### Merchants and items
 GET {{baseUrl}}/merchants?q=market
 Accept: application/json
