@@ -31,10 +31,11 @@ class SyncController extends Controller
 
     public function show(Request $request, SyncOperation $operation): JsonResponse
     {
-        if ($operation->user_id !== $request->user()->id) {
+        $ownedOperation = SyncOperation::query()->ownedBy($request->user())->find($operation->getKey());
+        if (! $ownedOperation instanceof SyncOperation) {
             return $this->error($request, 'RESOURCE_NOT_FOUND', 'The requested resource was not found.', JsonResponse::HTTP_NOT_FOUND);
         }
 
-        return $this->success($request, (new SyncOperationResource($operation))->resolve($request));
+        return $this->success($request, (new SyncOperationResource($ownedOperation))->resolve($request));
     }
 }

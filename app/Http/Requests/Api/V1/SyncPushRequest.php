@@ -27,7 +27,7 @@ class SyncPushRequest extends FormRequest
             'local_id' => ['nullable', 'uuid'],
             'server_id' => ['nullable', 'uuid'],
             'expected_version' => ['nullable', 'integer', 'min:1'],
-            'payload' => ['required', 'array'],
+            'payload' => ['present', 'array'],
             'client_occurred_at' => ['nullable', 'date'],
         ];
     }
