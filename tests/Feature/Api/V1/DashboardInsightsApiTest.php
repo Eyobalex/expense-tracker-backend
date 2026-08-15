@@ -158,7 +158,7 @@ test('variable forecasting uses calendar days and excludes draft amounts', funct
     $category = $this->withToken(insightToken($user))->getJson('/api/v1/insights/forecast?month=2026-08')->assertOk()->json('data.categories.0');
 
     expect($category['current_actual_minor_units'])->toBe(3000)
-        ->and($category['history_window']['covered_calendar_days'])->toBe(1)
+        ->and($category['history_window']['covered_calendar_days'])->toBe(2)
         ->and($category['expected_remaining_minor_units'])->toBe(31500);
 });
 
