@@ -138,7 +138,7 @@ test('posting automatically locks a fresh provider rate and blocks stale automat
         ->assertJsonPath('data.used_rate', '56.000000000000000000')
         ->assertJsonPath('data.reference_rate', '55.000000000000000000')
         ->assertJsonPath('data.rate_source', 'manual_override');
-    expect($user->auditEvents()->where('action', 'transaction.fx_rate_overridden')->count())->toBe(1);
+    expect($user->auditEvents()->where('event_name', 'transaction.fx_rate_overridden')->count())->toBe(1);
 
     $staleDraft = $this->withToken($token)->withHeader('Idempotency-Key', (string) Str::uuid())->postJson('/api/v1/transactions', fxTransactionPayload($account, $category, [
         'occurred_at' => '2026-08-20T10:00:00+03:00',
