@@ -421,3 +421,27 @@ Idempotency-Key: {{$guid}}
 GET {{baseUrl}}/exchange-rates
 Accept: application/json
 Authorization: Bearer {{token}}
+
+### Synchronization — Laravel is authoritative; persist data.operation_id and data.server_id locally
+POST {{baseUrl}}/sync/push
+Accept: application/json
+Content-Type: application/json
+Authorization: Bearer {{token}}
+Idempotency-Key: {{$guid}}
+
+{"operation_id":"{{$guid}}","device_id":"{{deviceId}}","entity":"account","action":"create","local_id":"{{$guid}}","payload":{"name":"Offline cash","type":"cash","currency_code":"ETB"},"client_occurred_at":"2026-08-16T10:00:00+03:00"}
+
+### Incremental sync — on SYNC_CURSOR_EXPIRED, begin a full authoritative sync
+GET {{baseUrl}}/sync/pull?cursor={{syncCursor}}&limit=100
+Accept: application/json
+Authorization: Bearer {{token}}
+
+### Full resync — includes current archived resources, retained tombstones, and pending server-side states
+GET {{baseUrl}}/sync/pull?full=1&limit=100
+Accept: application/json
+Authorization: Bearer {{token}}
+
+### Recorded sync operation — only visible to its owner
+GET {{baseUrl}}/sync/operations/{{syncOperationId}}
+Accept: application/json
+Authorization: Bearer {{token}}

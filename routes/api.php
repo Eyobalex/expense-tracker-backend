@@ -13,6 +13,7 @@ use App\Http\Controllers\Api\V1\NormalizationCandidateController;
 use App\Http\Controllers\Api\V1\OnboardingController;
 use App\Http\Controllers\Api\V1\ProfileController;
 use App\Http\Controllers\Api\V1\ReceiptController;
+use App\Http\Controllers\Api\V1\SyncController;
 use App\Http\Controllers\Api\V1\TransactionController;
 use App\Http\Controllers\Api\V1\TransactionDuplicateController;
 use Illuminate\Support\Facades\Route;
@@ -79,6 +80,10 @@ Route::prefix('v1')
             Route::get('receipts/{receipt}/download', [ReceiptController::class, 'download']);
             Route::post('receipts/{receipt}/retry', [ReceiptController::class, 'retry'])->middleware(['idempotency', 'throttle:receipt-upload']);
             Route::post('receipts/{receipt}/review-transaction', [ReceiptController::class, 'createReviewTransaction'])->middleware('idempotency');
+
+            Route::post('sync/push', [SyncController::class, 'push'])->middleware('idempotency');
+            Route::get('sync/pull', [SyncController::class, 'pull']);
+            Route::get('sync/operations/{operation}', [SyncController::class, 'show']);
 
             Route::get('categories', [CategoryController::class, 'index']);
             Route::post('categories', [CategoryController::class, 'store'])->middleware('idempotency');
