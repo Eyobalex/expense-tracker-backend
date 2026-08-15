@@ -80,7 +80,7 @@ test('sync requires an active owned device and preserves user isolation', functi
 
     $operation = $user->syncOperations()->create(['device_id' => $device->id, 'client_operation_id' => (string) Str::uuid(), 'entity' => 'account', 'action' => 'create', 'payload_hash' => hash('sha256', 'one'), 'status' => 'succeeded']);
     $other = User::factory()->create();
-    $this->withToken($other->createToken('sync-other', ['api'])->plainTextToken)->getJson("/api/v1/sync/operations/{$operation->id}")
+    $this->flushHeaders()->withToken($other->createToken('sync-other', ['api'])->plainTextToken)->getJson("/api/v1/sync/operations/{$operation->id}")
         ->assertNotFound()->assertJsonPath('error.code', 'RESOURCE_NOT_FOUND');
 });
 

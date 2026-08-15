@@ -18,7 +18,7 @@ class SyncTombstone extends Model
 
     protected $keyType = 'string';
 
-    protected $fillable = ['resource_type', 'resource_id', 'version', 'deleted_at'];
+    protected $fillable = ['user_id', 'resource_type', 'resource_id', 'version', 'deleted_at'];
 
     protected function casts(): array
     {
