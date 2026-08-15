@@ -2,7 +2,7 @@
 
 Status: IN PROGRESS
 
-Last reconciled with implementation plan: 2026-08-14; plan phases 0–15 reconciled with the feature manifest, local `dev`, `origin/dev`, remote branches, and GitHub PR API (no existing PRs targeting `dev`).
+Last reconciled with implementation plan: 2026-08-15; reconciled with Feature 019 merged into `dev` via PR #15 and open PR #14 for Feature 012 awaiting its conflict-resolution CI run.
 
 Integration branch: `dev`
 
@@ -94,15 +94,15 @@ The feature cannot safely continue until an external issue, dependency, requirem
 
 # Overall Progress
 
-Total planned features: 18
+Total planned features: 19
 
-Merged: 11
+Merged: 12
 
 In progress: 0
 
-PR open: 0
+PR open: 1
 
-Blocked: 1
+Blocked: 0
 
 Pending: 6
 
@@ -144,13 +144,14 @@ They may be split into additional independently reviewable features if required 
 | 009 | Receipt storage and OCR infrastructure | Phase 8 | 008, 002, 006 | `feat/009-receipt-ocr` | MERGED | 10 | d409a68a7d1f84b9947e9563a689b816938399f2 | CI passed | Merged into dev after PostgreSQL/Redis/MinIO-backed CI passed |
 | 010 | Merchant and item normalization | Phase 9 | 009 | `feat/010-normalization` | MERGED | 11 | 73f7fa742d1ed4497c6ab395b4e860cf7ccd4298 | CI passed | Merged into dev after PostgreSQL/Redis/MinIO-backed CI passed; OCR locale/parser matrix approved 2026-08-14 |
 | 011 | Duplicate detection                                             | Phase 9                               | 009, 010           | `feat/011-duplicate-detection`    | MERGED | 13 | b06fa689b5cea5696a5a8dbf36f8efef7b581692 | CI passed | Merged into dev after PostgreSQL/Redis/MinIO-backed CI passed |
-| 012 | FX provider operations and rate lifecycle                       | Phase 10                              | 006, 007, 011      | `feat/012-fx-operations`          | BLOCKED | —  | —            | Local gates pass; GitHub CI pending | Completed locally at `c6709b1`; GitHub SSH and `gh` commands stall in the Codex execution environment |
+| 012 | FX provider operations and rate lifecycle                       | Phase 10                              | 006, 007, 011      | `feat/012-fx-operations`          | PR_OPEN | 14 | — | CI passed before merge conflict; rerun required after conflict resolution | Open Exchange Rates integration; merge resolution preserves documentation and dedicated PostgreSQL test database |
 | 013 | Offline synchronization API contract                            | Phase 11                              | 003, 007, 009, 011, 012 | `feat/013-sync-contract` | PENDING | —  | —            | —             | Includes cursor expiry/full resync                                             |
 | 014 | Dashboard and forecasting                                       | Phase 12                              | 008, 012, 013      | `feat/014-dashboard-forecasting`  | PENDING | —  | —            | —             | Product formulas must be approved before implementation                        |
 | 015 | Notifications backend                                           | Phase 12                              | 014                | `feat/015-notifications`          | PENDING | —  | —            | —             | Approved notification channels only                                             |
 | 016 | Reports and exports                                             | Phase 13                              | 007, 008, 012, 014 | `feat/016-reports-exports`        | PENDING | —  | —            | —             | PDF, XLSX, CSV, Full JSON Data Export, full-account ZIP                        |
 | 017 | Security, performance and operations hardening                  | Phase 14                              | 001-016            | `feat/017-release-hardening`      | PENDING | —  | —            | —             | RPO/RTO, retention, constraints, correlation, restore drills                  |
 | 018 | MVP release validation                                          | Phase 15                              | 017                | `feat/018-mvp-release-validation` | PENDING | —  | —            | —             | No product features; final gates/runbooks                                      |
+| 019 | OpenAPI/Swagger documentation and REST endpoint scenarios      | API contract support                  | 003                | `feat/019-api-documentation`       | MERGED | 15 | db2c8f9775710dda79d9881f0037d17f885b3bab | CI passed | OpenAPI documentation, docs gate, and REST scenarios merged into dev |
 | 999 | Progress finalization                                           | Administrative                        | 001-018            | `feat/999-progress-finalization`  | PENDING | —  | —            | —             | Use only after final feature merge if needed                                   |
 
 ---
@@ -163,13 +164,13 @@ Feature: FX provider operations and rate lifecycle
 
 Branch: `feat/012-fx-operations`
 
-Status: BLOCKED
+Status: PR_OPEN
 
 Started: 2026-08-14
 
-PR: —
+PR: #14 — https://github.com/Eyobalex/expense-tracker-backend/pull/14
 
-Blocker: GitHub SSH and GitHub CLI commands stall in the Codex execution environment, preventing the required push, PR, and PostgreSQL-backed CI verification. The feature must remain unmerged until those operations complete.
+Blocker: GitHub CI must rerun and pass after this feature-branch conflict resolution before merge.
 
 ---
 
@@ -192,7 +193,7 @@ Feature 007 — Transaction aggregate and double-entry ledger — merged into de
 
 # Blockers
 
-Feature 012: GitHub SSH and GitHub CLI commands stall in the Codex execution environment. Commit `c6709b1` is local on `feat/012-fx-operations`; local Pint, PHPStan, route, and scheduler checks pass, but the PostgreSQL-backed Pest suite must run in GitHub Actions after the branch is pushed.
+Feature 012: PR #14 is open against `dev`. The previous CI run passed; the conflict-resolution merge must be pushed and its CI run must pass before merge.
 
 ---
 
