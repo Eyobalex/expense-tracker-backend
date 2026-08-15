@@ -19,6 +19,9 @@ enum DomainErrorCode: string
     case UnsupportedCurrency = 'UNSUPPORTED_CURRENCY';
     case InactiveCurrency = 'INACTIVE_CURRENCY';
     case InvalidRateLock = 'INVALID_RATE_LOCK';
+    case SyncCursorExpired = 'SYNC_CURSOR_EXPIRED';
+    case SyncDependencyUnresolved = 'SYNC_DEPENDENCY_UNRESOLVED';
+    case SyncDeviceInvalid = 'SYNC_DEVICE_INVALID';
     case ConcurrencyConflict = 'CONCURRENCY_CONFLICT';
     case UnauthorizedAction = 'UNAUTHORIZED_ACTION';
     case ResourceNotFound = 'RESOURCE_NOT_FOUND';

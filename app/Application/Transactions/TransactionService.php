@@ -11,6 +11,7 @@ use App\Models\AuditEvent;
 use App\Models\FinancialAccount;
 use App\Models\FinancialTransaction;
 use App\Models\JournalEntry;
+use App\Models\SyncTombstone;
 use App\Models\TransactionSplit;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
@@ -80,6 +81,14 @@ final readonly class TransactionService
     public function delete(User $user, FinancialTransaction $transaction, int $expectedVersion): void
     {
         DB::transaction(function () use ($user, $transaction, $expectedVersion): void {
+            $locked = FinancialTransaction::query()->ownedBy($user)->whereKey($transaction->getKey())->whereIn('state', ['draft', 'pending_review'])->where('version', $expectedVersion)->lockForUpdate()->first();
+            if (! $locked instanceof FinancialTransaction) {
+                throw DomainException::for(DomainErrorCode::ConcurrencyConflict, 'The transaction is stale or cannot be deleted after posting.');
+            }
+            SyncTombstone::query()->updateOrCreate(
+                ['user_id' => $user->id, 'resource_type' => 'transaction', 'resource_id' => $locked->getKey()],
+                ['version' => $locked->version + 1, 'deleted_at' => now()],
+            );
             $deleted = FinancialTransaction::query()->ownedBy($user)->whereKey($transaction->getKey())->whereIn('state', ['draft', 'pending_review'])->where('version', $expectedVersion)->delete();
             if ($deleted !== 1) {
                 throw DomainException::for(DomainErrorCode::ConcurrencyConflict, 'The transaction is stale or cannot be deleted after posting.');

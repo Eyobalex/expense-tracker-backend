@@ -82,6 +82,18 @@ class User extends Authenticatable implements PasskeyUser
         return $this->hasMany(AuditEvent::class);
     }
 
+    /** @return HasMany<SyncOperation, $this> */
+    public function syncOperations(): HasMany
+    {
+        return $this->hasMany(SyncOperation::class);
+    }
+
+    /** @return HasMany<SyncTombstone, $this> */
+    public function syncTombstones(): HasMany
+    {
+        return $this->hasMany(SyncTombstone::class);
+    }
+
     /** @return array<string, string> */
     protected function casts(): array
     {
