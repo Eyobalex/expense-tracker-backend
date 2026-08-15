@@ -2,17 +2,23 @@
 
 namespace App\Providers;
 
+use App\Domain\Currency\Contracts\ExchangeRateProvider;
+use App\Domain\Currency\Contracts\HistoricalExchangeRateLookup;
 use App\Domain\Receipts\Contracts\ReceiptOcrProvider;
 use App\Domain\Shared\Events\DomainEventBus;
 use App\Domain\Shared\Time\Clock;
 use App\Domain\Shared\Time\SystemClock;
+use App\Infrastructure\Currency\DatabaseHistoricalExchangeRateLookup;
+use App\Infrastructure\Currency\OpenExchangeRatesProvider;
 use App\Infrastructure\Events\LaravelDomainEventBus;
 use App\Infrastructure\Ocr\HttpPaddleOcrProvider;
+use App\Models\User;
 use Carbon\CarbonImmutable;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Validation\Rules\Password;
@@ -24,12 +30,15 @@ class AppServiceProvider extends ServiceProvider
         $this->app->singleton(Clock::class, SystemClock::class);
         $this->app->singleton(DomainEventBus::class, LaravelDomainEventBus::class);
         $this->app->bind(ReceiptOcrProvider::class, HttpPaddleOcrProvider::class);
+        $this->app->bind(ExchangeRateProvider::class, OpenExchangeRatesProvider::class);
+        $this->app->bind(HistoricalExchangeRateLookup::class, DatabaseHistoricalExchangeRateLookup::class);
     }
 
     public function boot(): void
     {
         $this->configureDefaults();
         $this->configureApiRateLimits();
+        $this->configureApiDocumentation();
     }
 
     protected function configureDefaults(): void
@@ -54,5 +63,10 @@ class AppServiceProvider extends ServiceProvider
         RateLimiter::for('auth-api', fn (Request $request): Limit => Limit::perMinute(5)->by(mb_strtolower((string) $request->input('email', '')).'|'.$request->ip()));
         RateLimiter::for('api', fn (Request $request): Limit => Limit::perMinute(120)->by((string) ($request->user()?->getKey() ?? $request->ip())));
         RateLimiter::for('receipt-upload', fn (Request $request): Limit => Limit::perMinute(10)->by((string) ($request->user()?->getKey() ?? $request->ip())));
+    }
+
+    private function configureApiDocumentation(): void
+    {
+        Gate::define('viewApiDocs', fn (?User $user = null): bool => (bool) config('api_docs.enabled'));
     }
 }

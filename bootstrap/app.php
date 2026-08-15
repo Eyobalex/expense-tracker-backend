@@ -46,7 +46,7 @@ return Application::configure(basePath: dirname(__DIR__))
                     'fields' => (object) [],
                     'request_id' => $request->attributes->get('request_id'),
                 ],
-            ], $exception->errorCode() === DomainErrorCode::ConcurrencyConflict ? 409 : 422);
+            ], in_array($exception->errorCode(), [DomainErrorCode::ConcurrencyConflict, DomainErrorCode::SyncCursorExpired], true) ? 409 : 422);
         });
 
         $exceptions->render(function (ValidationException $exception, Request $request): ?JsonResponse {

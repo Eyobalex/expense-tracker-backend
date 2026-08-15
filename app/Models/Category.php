@@ -20,6 +20,7 @@ use Illuminate\Support\Carbon;
  * @property bool $is_active
  * @property bool $is_system
  * @property bool $budget_enabled
+ * @property string $forecast_behavior
  * @property int|null $base_limit_minor_units
  * @property bool $rollover_enabled
  * @property bool $overspend_carry_enabled
@@ -36,7 +37,7 @@ class Category extends Model
 
     protected $keyType = 'string';
 
-    protected $fillable = ['parent_id', 'name', 'kind', 'is_active', 'budget_enabled', 'base_limit_minor_units', 'budget_currency_code', 'rollover_enabled', 'overspend_carry_enabled', 'borrowing_enabled', 'archived_at', 'version'];
+    protected $fillable = ['parent_id', 'name', 'kind', 'is_active', 'budget_enabled', 'forecast_behavior', 'base_limit_minor_units', 'budget_currency_code', 'rollover_enabled', 'overspend_carry_enabled', 'borrowing_enabled', 'archived_at', 'version'];
 
     protected function casts(): array
     {

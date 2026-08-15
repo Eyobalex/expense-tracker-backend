@@ -46,4 +46,9 @@ class FinancialTransactionPolicy
     {
         return $this->reverse($user, $transaction);
     }
+
+    public function resolveDuplicate(User $user, FinancialTransaction $transaction): bool
+    {
+        return $this->update($user, $transaction);
+    }
 }

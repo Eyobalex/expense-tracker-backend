@@ -4,15 +4,20 @@ use App\Http\Controllers\Api\V1\AuthController;
 use App\Http\Controllers\Api\V1\BudgetController;
 use App\Http\Controllers\Api\V1\CategoryController;
 use App\Http\Controllers\Api\V1\CurrencyController;
+use App\Http\Controllers\Api\V1\DashboardController;
 use App\Http\Controllers\Api\V1\DeviceController;
+use App\Http\Controllers\Api\V1\ExchangeRateController;
 use App\Http\Controllers\Api\V1\FinancialAccountController;
+use App\Http\Controllers\Api\V1\InsightController;
 use App\Http\Controllers\Api\V1\ItemController;
 use App\Http\Controllers\Api\V1\MerchantController;
 use App\Http\Controllers\Api\V1\NormalizationCandidateController;
 use App\Http\Controllers\Api\V1\OnboardingController;
 use App\Http\Controllers\Api\V1\ProfileController;
 use App\Http\Controllers\Api\V1\ReceiptController;
+use App\Http\Controllers\Api\V1\SyncController;
 use App\Http\Controllers\Api\V1\TransactionController;
+use App\Http\Controllers\Api\V1\TransactionDuplicateController;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('v1')
@@ -35,6 +40,7 @@ Route::prefix('v1')
 
             Route::get('onboarding', [OnboardingController::class, 'show']);
             Route::get('currencies', [CurrencyController::class, 'index']);
+            Route::get('exchange-rates', [ExchangeRateController::class, 'index']);
             Route::put('onboarding', [OnboardingController::class, 'update'])->middleware('idempotency');
 
             Route::get('accounts', [FinancialAccountController::class, 'index']);
@@ -47,6 +53,8 @@ Route::prefix('v1')
             Route::get('transactions', [TransactionController::class, 'index']);
             Route::post('transactions', [TransactionController::class, 'store'])->middleware('idempotency');
             Route::get('transactions/balances', [TransactionController::class, 'balances']);
+            Route::get('transactions/{transaction}/duplicates', [TransactionDuplicateController::class, 'index']);
+            Route::post('transactions/{transaction}/duplicate-decision', [TransactionDuplicateController::class, 'resolve'])->middleware('idempotency');
             Route::get('transactions/{transaction}', [TransactionController::class, 'show']);
             Route::patch('transactions/{transaction}', [TransactionController::class, 'update'])->middleware('idempotency');
             Route::delete('transactions/{transaction}', [TransactionController::class, 'destroy'])->middleware('idempotency');
@@ -58,6 +66,12 @@ Route::prefix('v1')
             Route::get('budgets/{category}/periods', [BudgetController::class, 'history']);
             Route::post('budgets/{category}/reallocate', [BudgetController::class, 'reallocate'])->middleware('idempotency');
             Route::post('budgets/{category}/borrow-next-month', [BudgetController::class, 'borrow'])->middleware('idempotency');
+
+            Route::get('dashboard', [DashboardController::class, 'show']);
+            Route::get('insights/safe-to-spend', [InsightController::class, 'safeToSpend']);
+            Route::get('insights/forecast', [InsightController::class, 'forecast']);
+            Route::get('insights/income-concentration', [InsightController::class, 'incomeConcentration']);
+            Route::get('insights/item-prices', [InsightController::class, 'itemPrices']);
 
             Route::get('merchants', [MerchantController::class, 'index']);
             Route::post('merchants', [MerchantController::class, 'store'])->middleware('idempotency');
@@ -74,6 +88,10 @@ Route::prefix('v1')
             Route::get('receipts/{receipt}/download', [ReceiptController::class, 'download']);
             Route::post('receipts/{receipt}/retry', [ReceiptController::class, 'retry'])->middleware(['idempotency', 'throttle:receipt-upload']);
             Route::post('receipts/{receipt}/review-transaction', [ReceiptController::class, 'createReviewTransaction'])->middleware('idempotency');
+
+            Route::post('sync/push', [SyncController::class, 'push'])->middleware('idempotency');
+            Route::get('sync/pull', [SyncController::class, 'pull']);
+            Route::get('sync/operations/{operation}', [SyncController::class, 'show']);
 
             Route::get('categories', [CategoryController::class, 'index']);
             Route::post('categories', [CategoryController::class, 'store'])->middleware('idempotency');

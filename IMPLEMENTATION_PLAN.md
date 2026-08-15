@@ -692,7 +692,9 @@ Dependencies: Phase 7; Phase 10; Phase 11.
 
 ### Formula decision gate
 
-Before Phase 12 exits, obtain approved/versioned formulas for safe-to-spend numerator/denominator, whether today is included, zero remaining days, negative remaining budget, borrowing/rollover/underflow, known future obligations, projected month-end spend, income concentration/diversification, and item inflation/deflation baseline, compatible-unit rule, dates, and percentage formula. If the source documents do not define the formulas, label PRODUCT DECISION REQUIRED BEFORE PHASE 12 and do not invent business semantics. Implement formula-version storage and deterministic tests only after approval.
+Approved Feature 014 formula contract: formulas are named/versioned `safe_to_spend/1`, `category_aware_projected_spend/1`, `income_concentration/1`, and `item_price_movement/1`. Safe-to-spend is active expense-budget effective limit less authoritative posted budget spending, aggregated across categories, divided by remaining calendar days including today (minimum denominator one). Global positive remaining may offset a negative category, but negative category remaining remains visible; no active expense budget returns `not_available`, not zero. Existing effective limits already include rollover, underflow, reallocation, borrowing, and budget correction effects. Future obligations are excluded in V1.
+
+The rejected global formula `total_actual_spend / elapsed_days × total_days` must never be implemented. Projected month-end is the sum of category-aware projections: FIXED uses the median of up to three prior completed qualifying budget periods and never daily-multiplies fixed payments; PERIODIC uses a 120-day history of positive posted purchase occurrences, grouped by local day for cadence, median occurrence amount and median positive interval; VARIABLE uses posted 30-calendar-day recent spending and a calendar-day denominator. Forecast alerts are eligible from elapsed budget day five; actual budget overspend eligibility remains immediate. Income concentration is a versioned 12-month HHI using canonical source, normalized source, then `Unattributed`; suppress a strong classification when unattributed share exceeds 20%. Item Price Movement compares only same-canonical-item, compatible normalized-unit, same-original-currency posted receipt lines by occurrence date. It uses explicit line amount only and does not allocate receipt-level tax/fees/tips/discounts. No item-price notification threshold is assumed until approved as a setting.
 
 ### Steps
 
@@ -899,4 +901,3 @@ The implementation is complete only when:
 - [ ] All API contracts and external-consumer DTO fixtures are versioned.
 - [ ] All production services are monitored and recoverable.
 - [ ] The deployed system preserves the accounting invariant under retries, concurrency, offline sync, corrections, and provider failures.
-

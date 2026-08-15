@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\DB;
 
 final class CategoryService
 {
-    /** @param array{name: string, kind: string, parent_id?: string|null, budget_enabled?: bool, base_limit_minor_units?: int|null, rollover_enabled?: bool, overspend_carry_enabled?: bool, borrowing_enabled?: bool, budget_currency_code?: string|null} $attributes */
+    /** @param array{name: string, kind: string, parent_id?: string|null, budget_enabled?: bool, forecast_behavior?: string, base_limit_minor_units?: int|null, rollover_enabled?: bool, overspend_carry_enabled?: bool, borrowing_enabled?: bool, budget_currency_code?: string|null} $attributes */
     public function create(User $user, array $attributes): Category
     {
         return DB::transaction(function () use ($user, $attributes): Category {
@@ -22,6 +22,7 @@ final class CategoryService
                 'kind' => $attributes['kind'],
                 'parent_id' => $attributes['parent_id'] ?? null,
                 'budget_enabled' => $attributes['budget_enabled'] ?? false,
+                'forecast_behavior' => $attributes['forecast_behavior'] ?? 'variable',
                 'base_limit_minor_units' => $attributes['base_limit_minor_units'] ?? null,
                 'rollover_enabled' => $attributes['rollover_enabled'] ?? false,
                 'overspend_carry_enabled' => $attributes['overspend_carry_enabled'] ?? false,
@@ -33,7 +34,7 @@ final class CategoryService
         });
     }
 
-    /** @param array{name?: string, kind?: string, parent_id?: string|null, budget_enabled?: bool, base_limit_minor_units?: int|null, rollover_enabled?: bool, overspend_carry_enabled?: bool, borrowing_enabled?: bool, budget_currency_code?: string|null, is_active?: bool, archived_at?: mixed} $attributes */
+    /** @param array{name?: string, kind?: string, parent_id?: string|null, budget_enabled?: bool, forecast_behavior?: string, base_limit_minor_units?: int|null, rollover_enabled?: bool, overspend_carry_enabled?: bool, borrowing_enabled?: bool, budget_currency_code?: string|null, is_active?: bool, archived_at?: mixed} $attributes */
     public function update(User $user, Category $category, int $expectedVersion, array $attributes): Category
     {
         if ($category->user_id !== $user->id) {

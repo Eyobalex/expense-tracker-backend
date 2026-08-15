@@ -2,7 +2,7 @@
 
 Status: IN PROGRESS
 
-Last reconciled with implementation plan: 2026-08-12; plan phases 0–15 reconciled with the feature manifest, local `dev`, `origin/dev`, remote branches, and GitHub PR API (no existing PRs targeting `dev`).
+Last reconciled with implementation plan: 2026-08-16; reconciled with Feature 013 merged into `dev` via PR #16 (`af015b6bc8a01f952fb22b5eab2ff33215974b28`).
 
 Integration branch: `dev`
 
@@ -94,17 +94,17 @@ The feature cannot safely continue until an external issue, dependency, requirem
 
 # Overall Progress
 
-Total planned features: 18
+Total planned features: 19
 
-Merged: 9
+Merged: 14
 
-In progress: 0
+In progress: 1
 
-PR open: 1
+PR open: 0
 
 Blocked: 0
 
-Pending: 12
+Pending: 4
 
 Overall status: IN PROGRESS
 
@@ -142,34 +142,35 @@ They may be split into additional independently reviewable features if required 
 | 007 | Transaction aggregate and double-entry ledger | Phase 6 | 006 | `feat/007-double-entry-ledger` | MERGED | 8 | 746c17072232df723b8778c89ab8926ca0c6edfa | CI passed | Merged into dev after PostgreSQL-backed CI passed |
 | 008 | Budget engine | Phase 7 | 007 | `feat/008-budget-engine` | MERGED | 9 | ae1ace1f4c5f9b16d1b9bb3b31ee93ab4429faae | CI passed | Merged into dev after PostgreSQL-backed CI passed |
 | 009 | Receipt storage and OCR infrastructure | Phase 8 | 008, 002, 006 | `feat/009-receipt-ocr` | MERGED | 10 | d409a68a7d1f84b9947e9563a689b816938399f2 | CI passed | Merged into dev after PostgreSQL/Redis/MinIO-backed CI passed |
-| 010 | Merchant and item normalization | Phase 9 | 009 | `feat/010-normalization` | PR_OPEN | 11 | — | Unit parser/PHPStan/Pint pass; PostgreSQL CI pending | OCR locale/parser matrix approved 2026-08-14; automatic candidate suggestion enabled |
-| 011 | Duplicate detection                                             | Phase 9                               | 009, 010           | `feat/011-duplicate-detection`    | PENDING | —  | —            | —             | User-controlled candidate resolution                                           |
-| 012 | FX provider operations and rate lifecycle                       | Phase 10                              | 006, 007, 011      | `feat/012-fx-operations`          | PENDING | —  | —            | —             | Provider jobs, stale policies, overrides                                       |
-| 013 | Offline synchronization API contract                            | Phase 11                              | 003, 007, 009, 011, 012 | `feat/013-sync-contract` | PENDING | —  | —            | —             | Includes cursor expiry/full resync                                             |
-| 014 | Dashboard and forecasting                                       | Phase 12                              | 008, 012, 013      | `feat/014-dashboard-forecasting`  | PENDING | —  | —            | —             | Product formulas must be approved before implementation                        |
+| 010 | Merchant and item normalization | Phase 9 | 009 | `feat/010-normalization` | MERGED | 11 | 73f7fa742d1ed4497c6ab395b4e860cf7ccd4298 | CI passed | Merged into dev after PostgreSQL/Redis/MinIO-backed CI passed; OCR locale/parser matrix approved 2026-08-14 |
+| 011 | Duplicate detection                                             | Phase 9                               | 009, 010           | `feat/011-duplicate-detection`    | MERGED | 13 | b06fa689b5cea5696a5a8dbf36f8efef7b581692 | CI passed | Merged into dev after PostgreSQL/Redis/MinIO-backed CI passed |
+| 012 | FX provider operations and rate lifecycle                       | Phase 10                              | 006, 007, 011      | `feat/012-fx-operations`          | MERGED | 14 | 8b3eb9f87607d14b04c7d23081b70bee89a10397 | CI passed | Open Exchange Rates integration merged into dev after conflict-resolution CI passed |
+| 013 | Offline synchronization API contract                            | Phase 11                              | 003, 007, 009, 011, 012 | `feat/013-sync-contract` | MERGED | 16 | af015b6bc8a01f952fb22b5eab2ff33215974b28 | CI passed | Authoritative cursor/full-resync contract merged into dev                      |
+| 014 | Dashboard and forecasting                                       | Phase 12                              | 008, 012, 013      | `feat/014-dashboard-forecasting`  | PR_OPEN | 17 | —            | CI pending | PR #17 targets dev; PostgreSQL-backed CI pending                                |
 | 015 | Notifications backend                                           | Phase 12                              | 014                | `feat/015-notifications`          | PENDING | —  | —            | —             | Approved notification channels only                                             |
 | 016 | Reports and exports                                             | Phase 13                              | 007, 008, 012, 014 | `feat/016-reports-exports`        | PENDING | —  | —            | —             | PDF, XLSX, CSV, Full JSON Data Export, full-account ZIP                        |
 | 017 | Security, performance and operations hardening                  | Phase 14                              | 001-016            | `feat/017-release-hardening`      | PENDING | —  | —            | —             | RPO/RTO, retention, constraints, correlation, restore drills                  |
 | 018 | MVP release validation                                          | Phase 15                              | 017                | `feat/018-mvp-release-validation` | PENDING | —  | —            | —             | No product features; final gates/runbooks                                      |
+| 019 | OpenAPI/Swagger documentation and REST endpoint scenarios      | API contract support                  | 003                | `feat/019-api-documentation`       | MERGED | 15 | db2c8f9775710dda79d9881f0037d17f885b3bab | CI passed | OpenAPI documentation, docs gate, and REST scenarios merged into dev |
 | 999 | Progress finalization                                           | Administrative                        | 001-018            | `feat/999-progress-finalization`  | PENDING | —  | —            | —             | Use only after final feature merge if needed                                   |
 
 ---
 
 # Current Feature
 
-Feature ID: 010
+Feature ID: 014
 
-Feature: Merchant and item normalization
+Feature: Dashboard and forecasting
 
-Branch: `feat/010-normalization`
+Branch: `feat/014-dashboard-forecasting`
 
 Status: PR_OPEN
 
-Started: 2026-08-13
+Started: 2026-08-16
 
-PR: #11 (targets `dev`)
+PR: #17 — https://github.com/Eyobalex/expense-tracker-backend/pull/17
 
-Blocker: None. Awaiting GitHub Actions PostgreSQL-backed CI for PR #11.
+Blocker: CI pending. Local PostgreSQL-focused test execution is unavailable in the Codex filesystem sandbox; static analysis and REST route-contract checks passed.
 
 ---
 
@@ -192,7 +193,16 @@ Feature 007 — Transaction aggregate and double-entry ledger — merged into de
 
 # Blockers
 
-None.
+## Feature 014 — PRODUCT DECISION REQUIRED BEFORE PHASE 12
+
+The implementation plan prohibits inventing the following business semantics:
+
+* Safe-to-spend numerator and denominator, whether today is included, zero-remaining-day behavior, negative budget behavior, and treatment of borrowing, rollover, underflow, and known future obligations.
+* Projected month-end spend formula and its forecast method/version.
+* Income concentration/diversification formula and interpretation.
+* Item inflation/deflation baseline, compatible-unit comparison dates, and percentage formula.
+
+Feature 014 may resume on `feat/014-dashboard-forecasting` after these formulas are approved and versioned.
 
 ---
 
@@ -209,9 +219,17 @@ Examples may include:
 * production retention periods;
 * supported OCR locale/language matrix;
 
+### Duplicate-resolution lifecycle — APPROVED 2026-08-14
+
+For `Replace pending draft with extracted version` and `Cancel current import`, retain the affected unposted transaction as a terminal, non-postable, auditable `cancelled` record. Preserve attached receipt originals and OCR evidence, never delete a receipt solely because an import is cancelled, and permit replacement only when the selected candidate is unposted. Record links between the duplicate decision, its source/candidate transactions, and audit event.
+
 ### OCR locale/parser matrix — APPROVED 2026-08-14
 
 MVP supports English (Latin) and Amharic (Ethiopic) scripts; ETB and USD only; the explicit number forms `1,250.50`, `1.250,50`, and `1 250,50`; ISO and unambiguous English textual dates; and date-only preservation pending user confirmation of timezone/time. Bare or ambiguous symbols (including `$` and `Br`), numeric dates, unsupported scripts/formats, and ambiguous numbers remain `needs_review`; Laravel does not guess. The persisted parser version is `locale-matrix-v1`.
+
+### FX provider operations — APPROVED 2026-08-14
+
+Use Open Exchange Rates Free with the user-provided `OPEN_EXCHANGE_RATES_APP_ID`. Store provider USD→ETB daily rates and derive ETB→USD exactly from the reciprocal. Refresh daily at 00:30 UTC with three exponential-backoff retries. Alert at 24 hours; accept a latest-valid rate through 48 hours. On weekends/holidays, use the latest valid prior daily rate inside that 48-hour window. Beyond 48 hours, block automatic foreign-currency posting and require an explicit audited manual rate override. Credentials remain server-only and never appear in API responses or logs.
 
 only if they are not already resolved in the approved source documents.
 

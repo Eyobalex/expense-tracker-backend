@@ -9,4 +9,5 @@ enum TransactionState: string
     case Posted = 'posted';
     case Reversed = 'reversed';
     case SyncConflict = 'sync_conflict';
+    case Cancelled = 'cancelled';
 }
