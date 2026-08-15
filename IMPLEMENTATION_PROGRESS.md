@@ -2,7 +2,7 @@
 
 Status: IN PROGRESS
 
-Last reconciled with implementation plan: 2026-08-12; plan phases 0–15 reconciled with the feature manifest, local `dev`, `origin/dev`, remote branches, and GitHub PR API (no existing PRs targeting `dev`).
+Last reconciled with implementation plan: 2026-08-15; reconciled with merged PRs through Feature 011, open PR #14 for Feature 012, and the approved independent API-documentation support feature.
 
 Integration branch: `dev`
 
@@ -94,17 +94,17 @@ The feature cannot safely continue until an external issue, dependency, requirem
 
 # Overall Progress
 
-Total planned features: 18
+Total planned features: 19
 
-Merged: 10
+Merged: 11
 
 In progress: 1
 
 PR open: 1
 
-Blocked: 0
+Blocked: 1
 
-Pending: 12
+Pending: 6
 
 Overall status: IN PROGRESS
 
@@ -143,33 +143,34 @@ They may be split into additional independently reviewable features if required 
 | 008 | Budget engine | Phase 7 | 007 | `feat/008-budget-engine` | MERGED | 9 | ae1ace1f4c5f9b16d1b9bb3b31ee93ab4429faae | CI passed | Merged into dev after PostgreSQL-backed CI passed |
 | 009 | Receipt storage and OCR infrastructure | Phase 8 | 008, 002, 006 | `feat/009-receipt-ocr` | MERGED | 10 | d409a68a7d1f84b9947e9563a689b816938399f2 | CI passed | Merged into dev after PostgreSQL/Redis/MinIO-backed CI passed |
 | 010 | Merchant and item normalization | Phase 9 | 009 | `feat/010-normalization` | MERGED | 11 | 73f7fa742d1ed4497c6ab395b4e860cf7ccd4298 | CI passed | Merged into dev after PostgreSQL/Redis/MinIO-backed CI passed; OCR locale/parser matrix approved 2026-08-14 |
-| 011 | Duplicate detection                                             | Phase 9                               | 009, 010           | `feat/011-duplicate-detection`    | PR_OPEN | 13 | —            | PR #13; CI pending | Weighted candidates, explicit decisions, cancellation audit, and posting gate implemented |
-| 012 | FX provider operations and rate lifecycle                       | Phase 10                              | 006, 007, 011      | `feat/012-fx-operations`          | PENDING | —  | —            | —             | Provider jobs, stale policies, overrides                                       |
+| 011 | Duplicate detection                                             | Phase 9                               | 009, 010           | `feat/011-duplicate-detection`    | MERGED | 13 | b06fa689b5cea5696a5a8dbf36f8efef7b581692 | CI passed | Weighted candidates, explicit decisions, cancellation audit, and posting gate merged into dev |
+| 012 | FX provider operations and rate lifecycle                       | Phase 10                              | 006, 007, 011      | `feat/012-fx-operations`          | PR_OPEN | 14 | — | CI failing | Open Exchange Rates integration; current CI failure must be resolved before merge |
 | 013 | Offline synchronization API contract                            | Phase 11                              | 003, 007, 009, 011, 012 | `feat/013-sync-contract` | PENDING | —  | —            | —             | Includes cursor expiry/full resync                                             |
 | 014 | Dashboard and forecasting                                       | Phase 12                              | 008, 012, 013      | `feat/014-dashboard-forecasting`  | PENDING | —  | —            | —             | Product formulas must be approved before implementation                        |
 | 015 | Notifications backend                                           | Phase 12                              | 014                | `feat/015-notifications`          | PENDING | —  | —            | —             | Approved notification channels only                                             |
 | 016 | Reports and exports                                             | Phase 13                              | 007, 008, 012, 014 | `feat/016-reports-exports`        | PENDING | —  | —            | —             | PDF, XLSX, CSV, Full JSON Data Export, full-account ZIP                        |
 | 017 | Security, performance and operations hardening                  | Phase 14                              | 001-016            | `feat/017-release-hardening`      | PENDING | —  | —            | —             | RPO/RTO, retention, constraints, correlation, restore drills                  |
 | 018 | MVP release validation                                          | Phase 15                              | 017                | `feat/018-mvp-release-validation` | PENDING | —  | —            | —             | No product features; final gates/runbooks                                      |
+| 019 | OpenAPI/Swagger documentation and REST endpoint scenarios      | API contract support                  | 003                | `feat/019-api-documentation`       | IN_PROGRESS | — | — | Scramble install pending | Generated OpenAPI UI plus editor-run REST scenarios; independent of Feature 012 |
 | 999 | Progress finalization                                           | Administrative                        | 001-018            | `feat/999-progress-finalization`  | PENDING | —  | —            | —             | Use only after final feature merge if needed                                   |
 
 ---
 
 # Current Feature
 
-Feature ID: 011
+Feature ID: 019
 
-Feature: Duplicate detection
+Feature: OpenAPI/Swagger documentation and REST endpoint scenarios
 
-Branch: `feat/011-duplicate-detection`
+Branch: `feat/019-api-documentation`
 
-Status: PR_OPEN
+Status: IN_PROGRESS
 
-Started: 2026-08-14
+Started: 2026-08-15
 
-PR: #13 — https://github.com/Eyobalex/expense-tracker-backend/pull/13
+PR: —
 
-Blocker: None. Awaiting required GitHub checks.
+Blocker: Scramble installation is pending because the sandbox permission review/network operation did not complete. REST endpoint scenarios can proceed independently.
 
 ---
 
@@ -192,7 +193,9 @@ Feature 007 — Transaction aggregate and double-entry ledger — merged into de
 
 # Blockers
 
-None.
+Feature 012: PR #14 is open against `dev`. The latest CI run remains failed; merge is prohibited until the current failed log is reviewed and the PostgreSQL-backed suite passes.
+
+Feature 019: Scramble installation is pending because the sandbox permission review/network operation did not complete. The implementation will resume after the package is available.
 
 ---
 

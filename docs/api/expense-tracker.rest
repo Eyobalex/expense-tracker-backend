@@ -1,0 +1,423 @@
+# Next-Gen Financial Tracker API scenarios
+#
+# Run with VS Code REST Client (humao.rest-client) or a compatible client.
+# Replace every placeholder after each create response. Successful responses use
+# { data, meta, links }; failures use { error: { code, message, fields,
+# request_id } }. Every mutation uses a fresh Idempotency-Key; requests that
+# change a versioned resource also require its current If-Match value.
+
+@baseUrl = http://localhost:8000/api/v1
+@email = api-tester@example.test
+@password = ChangeThisPassword!123
+@token = replace-with-login-data-token
+@deviceId = 11111111-1111-4111-8111-111111111111
+@accountId = replace-with-account-uuid
+@categoryId = replace-with-category-uuid
+@targetCategoryId = replace-with-second-category-uuid
+@merchantId = replace-with-merchant-uuid
+@targetMerchantId = replace-with-target-merchant-uuid
+@itemId = replace-with-item-uuid
+@targetItemId = replace-with-target-item-uuid
+@transactionId = replace-with-transaction-uuid
+@receiptId = replace-with-receipt-uuid
+@deviceRecordId = replace-with-device-record-uuid
+@candidateId = replace-with-normalization-candidate-uuid
+@duplicateCandidateId = replace-with-duplicate-candidate-uuid
+@receiptPath = ./fixtures/receipt.jpg
+
+### Register
+POST {{baseUrl}}/auth/register
+Accept: application/json
+Content-Type: application/json
+Idempotency-Key: {{$guid}}
+
+{"name":"API Tester","email":"{{email}}","password":"{{password}}","password_confirmation":"{{password}}","client_device_id":"{{deviceId}}","platform":"android","app_version":"0.1.0"}
+
+### Login — copy data.token into @token
+# @name login
+POST {{baseUrl}}/auth/login
+Accept: application/json
+Content-Type: application/json
+Idempotency-Key: {{$guid}}
+
+{"email":"{{email}}","password":"{{password}}","client_device_id":"{{deviceId}}","platform":"android","app_version":"0.1.0"}
+
+### Password reset request
+POST {{baseUrl}}/auth/forgot-password
+Accept: application/json
+Content-Type: application/json
+Idempotency-Key: {{$guid}}
+
+{"email":"{{email}}"}
+
+### Password reset — replace token
+POST {{baseUrl}}/auth/reset-password
+Accept: application/json
+Content-Type: application/json
+Idempotency-Key: {{$guid}}
+
+{"email":"{{email}}","token":"replace-with-reset-token","password":"{{password}}","password_confirmation":"{{password}}"}
+
+### Profile, devices, and session lifecycle
+GET {{baseUrl}}/me
+Accept: application/json
+Authorization: Bearer {{token}}
+
+###
+PATCH {{baseUrl}}/me
+Accept: application/json
+Content-Type: application/json
+Authorization: Bearer {{token}}
+Idempotency-Key: {{$guid}}
+If-Match: 1
+
+{"name":"API Tester","email":"{{email}}"}
+
+###
+GET {{baseUrl}}/devices
+Accept: application/json
+Authorization: Bearer {{token}}
+
+###
+DELETE {{baseUrl}}/devices/{{deviceRecordId}}
+Accept: application/json
+Authorization: Bearer {{token}}
+Idempotency-Key: {{$guid}}
+
+###
+POST {{baseUrl}}/auth/refresh-or-revoke
+Accept: application/json
+Content-Type: application/json
+Authorization: Bearer {{token}}
+Idempotency-Key: {{$guid}}
+
+{"action":"refresh"}
+
+###
+POST {{baseUrl}}/auth/logout
+Accept: application/json
+Authorization: Bearer {{token}}
+Idempotency-Key: {{$guid}}
+
+### Currencies and onboarding
+GET {{baseUrl}}/currencies
+Accept: application/json
+Authorization: Bearer {{token}}
+
+###
+GET {{baseUrl}}/onboarding
+Accept: application/json
+Authorization: Bearer {{token}}
+
+###
+PUT {{baseUrl}}/onboarding
+Accept: application/json
+Content-Type: application/json
+Authorization: Bearer {{token}}
+Idempotency-Key: {{$guid}}
+
+{"base_currency_code":"ETB","timezone":"Africa/Addis_Ababa","budget_timezone":"Africa/Addis_Ababa","notification_preferences":{},"seed_starter_data":true}
+
+### Accounts
+GET {{baseUrl}}/accounts
+Accept: application/json
+Authorization: Bearer {{token}}
+
+###
+POST {{baseUrl}}/accounts
+Accept: application/json
+Content-Type: application/json
+Authorization: Bearer {{token}}
+Idempotency-Key: {{$guid}}
+
+{"name":"Cash wallet","type":"cash","currency_code":"ETB","opening_balance_configured":false}
+
+###
+GET {{baseUrl}}/accounts/{{accountId}}
+Accept: application/json
+Authorization: Bearer {{token}}
+
+###
+PATCH {{baseUrl}}/accounts/{{accountId}}
+Accept: application/json
+Content-Type: application/json
+Authorization: Bearer {{token}}
+Idempotency-Key: {{$guid}}
+If-Match: 1
+
+{"name":"Daily cash wallet"}
+
+###
+POST {{baseUrl}}/accounts/{{accountId}}/archive
+Accept: application/json
+Authorization: Bearer {{token}}
+Idempotency-Key: {{$guid}}
+If-Match: 2
+
+###
+POST {{baseUrl}}/accounts/{{accountId}}/restore
+Accept: application/json
+Authorization: Bearer {{token}}
+Idempotency-Key: {{$guid}}
+If-Match: 3
+
+### Categories and budgets
+GET {{baseUrl}}/categories
+Accept: application/json
+Authorization: Bearer {{token}}
+
+###
+POST {{baseUrl}}/categories
+Accept: application/json
+Content-Type: application/json
+Authorization: Bearer {{token}}
+Idempotency-Key: {{$guid}}
+
+{"name":"Food","kind":"expense","budget_enabled":true,"base_limit_minor_units":100000,"budget_currency_code":"ETB","rollover_enabled":true,"overspend_carry_enabled":true,"borrowing_enabled":true}
+
+###
+GET {{baseUrl}}/categories/{{categoryId}}
+Accept: application/json
+Authorization: Bearer {{token}}
+
+###
+PATCH {{baseUrl}}/categories/{{categoryId}}
+Accept: application/json
+Content-Type: application/json
+Authorization: Bearer {{token}}
+Idempotency-Key: {{$guid}}
+If-Match: 1
+
+{"base_limit_minor_units":120000}
+
+###
+POST {{baseUrl}}/categories/{{categoryId}}/archive
+Accept: application/json
+Authorization: Bearer {{token}}
+Idempotency-Key: {{$guid}}
+If-Match: 2
+
+###
+POST {{baseUrl}}/categories/{{categoryId}}/restore
+Accept: application/json
+Authorization: Bearer {{token}}
+Idempotency-Key: {{$guid}}
+If-Match: 3
+
+###
+GET {{baseUrl}}/budgets?month=2026-08
+Accept: application/json
+Authorization: Bearer {{token}}
+
+###
+GET {{baseUrl}}/budgets/{{categoryId}}/periods
+Accept: application/json
+Authorization: Bearer {{token}}
+
+###
+POST {{baseUrl}}/budgets/{{categoryId}}/reallocate
+Accept: application/json
+Content-Type: application/json
+Authorization: Bearer {{token}}
+Idempotency-Key: {{$guid}}
+
+{"month":"2026-08","target_category_id":"{{targetCategoryId}}","amount_minor_units":1000}
+
+###
+POST {{baseUrl}}/budgets/{{categoryId}}/borrow-next-month
+Accept: application/json
+Content-Type: application/json
+Authorization: Bearer {{token}}
+Idempotency-Key: {{$guid}}
+
+{"month":"2026-08"}
+
+### Merchants and items
+GET {{baseUrl}}/merchants?q=market
+Accept: application/json
+Authorization: Bearer {{token}}
+
+###
+POST {{baseUrl}}/merchants
+Accept: application/json
+Content-Type: application/json
+Authorization: Bearer {{token}}
+Idempotency-Key: {{$guid}}
+
+{"display_name":"Example Market","location":"Addis Ababa"}
+
+###
+POST {{baseUrl}}/merchants/{{merchantId}}/merge
+Accept: application/json
+Content-Type: application/json
+Authorization: Bearer {{token}}
+Idempotency-Key: {{$guid}}
+
+{"target_id":"{{targetMerchantId}}"}
+
+###
+GET {{baseUrl}}/items?q=coffee
+Accept: application/json
+Authorization: Bearer {{token}}
+
+###
+POST {{baseUrl}}/items
+Accept: application/json
+Content-Type: application/json
+Authorization: Bearer {{token}}
+Idempotency-Key: {{$guid}}
+
+{"canonical_name":"Coffee","unit_code":"each"}
+
+###
+POST {{baseUrl}}/items/{{itemId}}/merge
+Accept: application/json
+Content-Type: application/json
+Authorization: Bearer {{token}}
+Idempotency-Key: {{$guid}}
+
+{"target_id":"{{targetItemId}}"}
+
+### Normalization candidates
+GET {{baseUrl}}/normalization-candidates
+Accept: application/json
+Authorization: Bearer {{token}}
+
+###
+POST {{baseUrl}}/normalization-candidates/{{candidateId}}/resolve
+Accept: application/json
+Content-Type: application/json
+Authorization: Bearer {{token}}
+Idempotency-Key: {{$guid}}
+
+{"decision":"accepted"}
+
+### Transactions
+GET {{baseUrl}}/transactions?state=draft
+Accept: application/json
+Authorization: Bearer {{token}}
+
+###
+POST {{baseUrl}}/transactions
+Accept: application/json
+Content-Type: application/json
+Authorization: Bearer {{token}}
+Idempotency-Key: {{$guid}}
+
+{"financial_account_id":"{{accountId}}","category_id":"{{categoryId}}","type":"expense","occurred_at":"2026-08-15T10:00:00+03:00","occurred_timezone":"Africa/Addis_Ababa","original_amount_minor_units":1250,"original_currency_code":"ETB","description":"Market purchase"}
+
+###
+GET {{baseUrl}}/transactions/balances
+Accept: application/json
+Authorization: Bearer {{token}}
+
+###
+GET {{baseUrl}}/transactions/{{transactionId}}
+Accept: application/json
+Authorization: Bearer {{token}}
+
+###
+PATCH {{baseUrl}}/transactions/{{transactionId}}
+Accept: application/json
+Content-Type: application/json
+Authorization: Bearer {{token}}
+Idempotency-Key: {{$guid}}
+If-Match: 1
+
+{"description":"Corrected market purchase"}
+
+###
+POST {{baseUrl}}/transactions/{{transactionId}}/post
+Accept: application/json
+Authorization: Bearer {{token}}
+Idempotency-Key: {{$guid}}
+If-Match: 2
+
+###
+POST {{baseUrl}}/transactions/{{transactionId}}/reverse
+Accept: application/json
+Content-Type: application/json
+Authorization: Bearer {{token}}
+Idempotency-Key: {{$guid}}
+If-Match: 3
+
+{"reason":"Entered in error"}
+
+###
+POST {{baseUrl}}/transactions/{{transactionId}}/correct
+Accept: application/json
+Content-Type: application/json
+Authorization: Bearer {{token}}
+Idempotency-Key: {{$guid}}
+If-Match: 3
+
+{"reason":"Correct category","financial_account_id":"{{accountId}}","category_id":"{{categoryId}}","type":"expense","occurred_at":"2026-08-15T10:00:00+03:00","occurred_timezone":"Africa/Addis_Ababa","original_amount_minor_units":1250,"original_currency_code":"ETB"}
+
+###
+DELETE {{baseUrl}}/transactions/{{transactionId}}
+Accept: application/json
+Authorization: Bearer {{token}}
+Idempotency-Key: {{$guid}}
+If-Match: 1
+
+###
+GET {{baseUrl}}/transactions/{{transactionId}}/duplicates
+Accept: application/json
+Authorization: Bearer {{token}}
+
+###
+POST {{baseUrl}}/transactions/{{transactionId}}/duplicate-decision
+Accept: application/json
+Content-Type: application/json
+Authorization: Bearer {{token}}
+Idempotency-Key: {{$guid}}
+
+{"candidate_id":"{{duplicateCandidateId}}","decision":"keep_both"}
+
+### Receipts — provide a real local image/PDF path in @receiptPath
+POST {{baseUrl}}/receipts
+Accept: application/json
+Authorization: Bearer {{token}}
+Idempotency-Key: {{$guid}}
+Content-Type: multipart/form-data; boundary=RestClientBoundary
+
+--RestClientBoundary
+Content-Disposition: form-data; name="receipt"; filename="receipt.jpg"
+Content-Type: image/jpeg
+
+< {{receiptPath}}
+--RestClientBoundary--
+
+###
+GET {{baseUrl}}/receipts
+Accept: application/json
+Authorization: Bearer {{token}}
+
+###
+GET {{baseUrl}}/receipts/{{receiptId}}
+Accept: application/json
+Authorization: Bearer {{token}}
+
+###
+GET {{baseUrl}}/receipts/{{receiptId}}/download
+Authorization: Bearer {{token}}
+
+###
+POST {{baseUrl}}/receipts/{{receiptId}}/retry
+Accept: application/json
+Authorization: Bearer {{token}}
+Idempotency-Key: {{$guid}}
+
+###
+POST {{baseUrl}}/receipts/{{receiptId}}/review-transaction
+Accept: application/json
+Content-Type: application/json
+Authorization: Bearer {{token}}
+Idempotency-Key: {{$guid}}
+
+{"financial_account_id":"{{accountId}}","category_id":"{{categoryId}}","type":"expense","occurred_at":"2026-08-15T10:00:00+03:00","occurred_timezone":"Africa/Addis_Ababa","original_amount_minor_units":1250,"original_currency_code":"ETB"}
+
+### Feature 012 endpoint — available after PR #14 merges into dev
+GET {{baseUrl}}/exchange-rates
+Accept: application/json
+Authorization: Bearer {{token}}
