@@ -20,6 +20,7 @@ class StoreCategoryRequest extends FormRequest
             'kind' => ['required', 'in:expense,income'],
             'parent_id' => ['nullable', 'uuid'],
             'budget_enabled' => ['sometimes', 'boolean'],
+            'forecast_behavior' => ['sometimes', 'in:fixed,periodic,variable'],
             'base_limit_minor_units' => ['nullable', 'integer', 'min:0'],
             'budget_currency_code' => ['nullable', 'regex:/^[A-Z]{3}$/'],
             'rollover_enabled' => ['sometimes', 'boolean'],

@@ -18,6 +18,7 @@ class CategoryFactory extends Factory
             'is_active' => true,
             'is_system' => false,
             'budget_enabled' => false,
+            'forecast_behavior' => 'variable',
             'rollover_enabled' => false,
             'overspend_carry_enabled' => false,
             'borrowing_enabled' => false,

@@ -2,7 +2,7 @@
 
 Status: IN PROGRESS
 
-Last reconciled with implementation plan: 2026-08-15; reconciled with Feature 012 merged into `dev` via PR #14 and Feature 019 merged into `dev` via PR #15.
+Last reconciled with implementation plan: 2026-08-16; reconciled with Feature 013 merged into `dev` via PR #16 (`af015b6bc8a01f952fb22b5eab2ff33215974b28`).
 
 Integration branch: `dev`
 
@@ -96,7 +96,7 @@ The feature cannot safely continue until an external issue, dependency, requirem
 
 Total planned features: 19
 
-Merged: 13
+Merged: 14
 
 In progress: 1
 
@@ -104,7 +104,7 @@ PR open: 0
 
 Blocked: 0
 
-Pending: 5
+Pending: 4
 
 Overall status: IN PROGRESS
 
@@ -145,8 +145,8 @@ They may be split into additional independently reviewable features if required 
 | 010 | Merchant and item normalization | Phase 9 | 009 | `feat/010-normalization` | MERGED | 11 | 73f7fa742d1ed4497c6ab395b4e860cf7ccd4298 | CI passed | Merged into dev after PostgreSQL/Redis/MinIO-backed CI passed; OCR locale/parser matrix approved 2026-08-14 |
 | 011 | Duplicate detection                                             | Phase 9                               | 009, 010           | `feat/011-duplicate-detection`    | MERGED | 13 | b06fa689b5cea5696a5a8dbf36f8efef7b581692 | CI passed | Merged into dev after PostgreSQL/Redis/MinIO-backed CI passed |
 | 012 | FX provider operations and rate lifecycle                       | Phase 10                              | 006, 007, 011      | `feat/012-fx-operations`          | MERGED | 14 | 8b3eb9f87607d14b04c7d23081b70bee89a10397 | CI passed | Open Exchange Rates integration merged into dev after conflict-resolution CI passed |
-| 013 | Offline synchronization API contract                            | Phase 11                              | 003, 007, 009, 011, 012 | `feat/013-sync-contract` | PR_OPEN | 16 | —            | GitHub CI pending | Includes cursor expiry/full resync                                             |
-| 014 | Dashboard and forecasting                                       | Phase 12                              | 008, 012, 013      | `feat/014-dashboard-forecasting`  | PENDING | —  | —            | —             | Product formulas must be approved before implementation                        |
+| 013 | Offline synchronization API contract                            | Phase 11                              | 003, 007, 009, 011, 012 | `feat/013-sync-contract` | MERGED | 16 | af015b6bc8a01f952fb22b5eab2ff33215974b28 | CI passed | Authoritative cursor/full-resync contract merged into dev                      |
+| 014 | Dashboard and forecasting                                       | Phase 12                              | 008, 012, 013      | `feat/014-dashboard-forecasting`  | PR_OPEN | 17 | —            | CI pending | PR #17 targets dev; PostgreSQL-backed CI pending                                |
 | 015 | Notifications backend                                           | Phase 12                              | 014                | `feat/015-notifications`          | PENDING | —  | —            | —             | Approved notification channels only                                             |
 | 016 | Reports and exports                                             | Phase 13                              | 007, 008, 012, 014 | `feat/016-reports-exports`        | PENDING | —  | —            | —             | PDF, XLSX, CSV, Full JSON Data Export, full-account ZIP                        |
 | 017 | Security, performance and operations hardening                  | Phase 14                              | 001-016            | `feat/017-release-hardening`      | PENDING | —  | —            | —             | RPO/RTO, retention, constraints, correlation, restore drills                  |
@@ -158,19 +158,19 @@ They may be split into additional independently reviewable features if required 
 
 # Current Feature
 
-Feature ID: 013
+Feature ID: 014
 
-Feature: Offline synchronization API contract
+Feature: Dashboard and forecasting
 
-Branch: `feat/013-sync-contract`
+Branch: `feat/014-dashboard-forecasting`
 
 Status: PR_OPEN
 
-Started: 2026-08-15
+Started: 2026-08-16
 
-PR: #16 (open against `dev`)
+PR: #17 — https://github.com/Eyobalex/expense-tracker-backend/pull/17
 
-Blocker: None.
+Blocker: CI pending. Local PostgreSQL-focused test execution is unavailable in the Codex filesystem sandbox; static analysis and REST route-contract checks passed.
 
 ---
 
@@ -193,7 +193,16 @@ Feature 007 — Transaction aggregate and double-entry ledger — merged into de
 
 # Blockers
 
-None.
+## Feature 014 — PRODUCT DECISION REQUIRED BEFORE PHASE 12
+
+The implementation plan prohibits inventing the following business semantics:
+
+* Safe-to-spend numerator and denominator, whether today is included, zero-remaining-day behavior, negative budget behavior, and treatment of borrowing, rollover, underflow, and known future obligations.
+* Projected month-end spend formula and its forecast method/version.
+* Income concentration/diversification formula and interpretation.
+* Item inflation/deflation baseline, compatible-unit comparison dates, and percentage formula.
+
+Feature 014 may resume on `feat/014-dashboard-forecasting` after these formulas are approved and versioned.
 
 ---
 

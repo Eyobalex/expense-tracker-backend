@@ -4,9 +4,11 @@ use App\Http\Controllers\Api\V1\AuthController;
 use App\Http\Controllers\Api\V1\BudgetController;
 use App\Http\Controllers\Api\V1\CategoryController;
 use App\Http\Controllers\Api\V1\CurrencyController;
+use App\Http\Controllers\Api\V1\DashboardController;
 use App\Http\Controllers\Api\V1\DeviceController;
 use App\Http\Controllers\Api\V1\ExchangeRateController;
 use App\Http\Controllers\Api\V1\FinancialAccountController;
+use App\Http\Controllers\Api\V1\InsightController;
 use App\Http\Controllers\Api\V1\ItemController;
 use App\Http\Controllers\Api\V1\MerchantController;
 use App\Http\Controllers\Api\V1\NormalizationCandidateController;
@@ -64,6 +66,12 @@ Route::prefix('v1')
             Route::get('budgets/{category}/periods', [BudgetController::class, 'history']);
             Route::post('budgets/{category}/reallocate', [BudgetController::class, 'reallocate'])->middleware('idempotency');
             Route::post('budgets/{category}/borrow-next-month', [BudgetController::class, 'borrow'])->middleware('idempotency');
+
+            Route::get('dashboard', [DashboardController::class, 'show']);
+            Route::get('insights/safe-to-spend', [InsightController::class, 'safeToSpend']);
+            Route::get('insights/forecast', [InsightController::class, 'forecast']);
+            Route::get('insights/income-concentration', [InsightController::class, 'incomeConcentration']);
+            Route::get('insights/item-prices', [InsightController::class, 'itemPrices']);
 
             Route::get('merchants', [MerchantController::class, 'index']);
             Route::post('merchants', [MerchantController::class, 'store'])->middleware('idempotency');
