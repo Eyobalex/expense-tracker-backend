@@ -98,11 +98,11 @@ Total planned features: 19
 
 Merged: 14
 
-In progress: 0
+In progress: 1
 
 PR open: 0
 
-Blocked: 1
+Blocked: 0
 
 Pending: 4
 
@@ -146,7 +146,7 @@ They may be split into additional independently reviewable features if required 
 | 011 | Duplicate detection                                             | Phase 9                               | 009, 010           | `feat/011-duplicate-detection`    | MERGED | 13 | b06fa689b5cea5696a5a8dbf36f8efef7b581692 | CI passed | Merged into dev after PostgreSQL/Redis/MinIO-backed CI passed |
 | 012 | FX provider operations and rate lifecycle                       | Phase 10                              | 006, 007, 011      | `feat/012-fx-operations`          | MERGED | 14 | 8b3eb9f87607d14b04c7d23081b70bee89a10397 | CI passed | Open Exchange Rates integration merged into dev after conflict-resolution CI passed |
 | 013 | Offline synchronization API contract                            | Phase 11                              | 003, 007, 009, 011, 012 | `feat/013-sync-contract` | MERGED | 16 | af015b6bc8a01f952fb22b5eab2ff33215974b28 | CI passed | Authoritative cursor/full-resync contract merged into dev                      |
-| 014 | Dashboard and forecasting                                       | Phase 12                              | 008, 012, 013      | `feat/014-dashboard-forecasting`  | BLOCKED | —  | —            | Product decision required | Approved deterministic forecast formulas are required before implementation    |
+| 014 | Dashboard and forecasting                                       | Phase 12                              | 008, 012, 013      | `feat/014-dashboard-forecasting`  | IN_PROGRESS | —  | —            | Formula implementation in progress | Approved category-aware V1 formulas received 2026-08-16                        |
 | 015 | Notifications backend                                           | Phase 12                              | 014                | `feat/015-notifications`          | PENDING | —  | —            | —             | Approved notification channels only                                             |
 | 016 | Reports and exports                                             | Phase 13                              | 007, 008, 012, 014 | `feat/016-reports-exports`        | PENDING | —  | —            | —             | PDF, XLSX, CSV, Full JSON Data Export, full-account ZIP                        |
 | 017 | Security, performance and operations hardening                  | Phase 14                              | 001-016            | `feat/017-release-hardening`      | PENDING | —  | —            | —             | RPO/RTO, retention, constraints, correlation, restore drills                  |
@@ -164,13 +164,13 @@ Feature: Dashboard and forecasting
 
 Branch: `feat/014-dashboard-forecasting`
 
-Status: BLOCKED
+Status: IN_PROGRESS
 
 Started: 2026-08-16
 
 PR: —
 
-Blocker: PRODUCT DECISION REQUIRED BEFORE PHASE 12 — approve deterministic, versioned safe-to-spend, projected month-end spend, income concentration/diversification, and item inflation/deflation formulas. The approved PRD/technical specification supplies required inputs and versioning, but not the business formulas or edge-case semantics.
+Blocker: None.
 
 ---
 
