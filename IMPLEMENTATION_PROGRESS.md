@@ -145,7 +145,7 @@ They may be split into additional independently reviewable features if required 
 | 010 | Merchant and item normalization | Phase 9 | 009 | `feat/010-normalization` | MERGED | 11 | 73f7fa742d1ed4497c6ab395b4e860cf7ccd4298 | CI passed | Merged into dev after PostgreSQL/Redis/MinIO-backed CI passed; OCR locale/parser matrix approved 2026-08-14 |
 | 011 | Duplicate detection                                             | Phase 9                               | 009, 010           | `feat/011-duplicate-detection`    | MERGED | 13 | b06fa689b5cea5696a5a8dbf36f8efef7b581692 | CI passed | Merged into dev after PostgreSQL/Redis/MinIO-backed CI passed |
 | 012 | FX provider operations and rate lifecycle                       | Phase 10                              | 006, 007, 011      | `feat/012-fx-operations`          | MERGED | 14 | 8b3eb9f87607d14b04c7d23081b70bee89a10397 | CI passed | Open Exchange Rates integration merged into dev after conflict-resolution CI passed |
-| 013 | Offline synchronization API contract                            | Phase 11                              | 003, 007, 009, 011, 012 | `feat/013-sync-contract` | IN_PROGRESS | —  | —            | —             | Includes cursor expiry/full resync                                             |
+| 013 | Offline synchronization API contract                            | Phase 11                              | 003, 007, 009, 011, 012 | `feat/013-sync-contract` | PR_OPEN | 16 | —            | GitHub CI pending | Includes cursor expiry/full resync                                             |
 | 014 | Dashboard and forecasting                                       | Phase 12                              | 008, 012, 013      | `feat/014-dashboard-forecasting`  | PENDING | —  | —            | —             | Product formulas must be approved before implementation                        |
 | 015 | Notifications backend                                           | Phase 12                              | 014                | `feat/015-notifications`          | PENDING | —  | —            | —             | Approved notification channels only                                             |
 | 016 | Reports and exports                                             | Phase 13                              | 007, 008, 012, 014 | `feat/016-reports-exports`        | PENDING | —  | —            | —             | PDF, XLSX, CSV, Full JSON Data Export, full-account ZIP                        |
@@ -164,11 +164,11 @@ Feature: Offline synchronization API contract
 
 Branch: `feat/013-sync-contract`
 
-Status: IN_PROGRESS
+Status: PR_OPEN
 
 Started: 2026-08-15
 
-PR: —
+PR: #16 (open against `dev`)
 
 Blocker: None.
 
