@@ -11,3 +11,4 @@ Artisan::command('inspire', function () {
 Schedule::command('budget:initialize')->hourly()->onOneServer()->withoutOverlapping();
 Schedule::command('receipt:reconcile-storage')->daily()->onOneServer()->withoutOverlapping();
 Schedule::command('receipt:cleanup-artifacts')->daily()->onOneServer()->withoutOverlapping();
+Schedule::command('fx:refresh-rates')->dailyAt((string) config('fx.refresh_time'))->timezone('UTC')->onOneServer()->withoutOverlapping(10);

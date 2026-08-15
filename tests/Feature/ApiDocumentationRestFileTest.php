@@ -13,7 +13,6 @@ test('the REST Client collection documents every implemented API v1 route', func
     $documented = collect($matches)
         ->map(fn (array $match): string => $match[1].' api/v1'.$match[2])
         ->map(fn (string $signature): string => (string) preg_replace('/\{\{[^}]+}}|\{[^}]+}/', '{}', $signature))
-        ->reject(fn (string $signature): bool => $signature === 'GET api/v1/exchange-rates')
         ->values();
     $implemented = collect(Route::getRoutes()->getRoutes())
         ->filter(fn (LaravelRoute $route): bool => str_starts_with($route->uri(), 'api/v1/'))

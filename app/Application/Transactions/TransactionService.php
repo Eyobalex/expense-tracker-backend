@@ -3,6 +3,7 @@
 namespace App\Application\Transactions;
 
 use App\Application\Budgeting\RecalculateBudgetChain;
+use App\Application\Currency\TransactionRateLockingService;
 use App\Domain\Accounting\JournalEntryDefinition;
 use App\Domain\Shared\Exceptions\DomainErrorCode;
 use App\Domain\Shared\Exceptions\DomainException;
@@ -20,6 +21,7 @@ final readonly class TransactionService
         private CanonicalJournalBuilder $journals,
         private RecalculateBudgetChain $budgets,
         private DuplicateDetectionService $duplicates,
+        private TransactionRateLockingService $rates,
     ) {}
 
     /**
@@ -101,6 +103,14 @@ final readonly class TransactionService
             }
             $locked->load(['financialAccount', 'counterpartyAccount', 'category', 'relatedTransaction.category', 'splits.category']);
             $this->duplicates->assertNoUnresolvedCandidates($user, $locked);
+            $this->rates->lockForPosting($user, $locked);
+            if ($locked->rate_source === 'manual_override') {
+                $this->audit($user, 'transaction.fx_rate_overridden', $locked, [
+                    'reference_rate' => $locked->reference_rate,
+                    'used_rate' => $locked->used_rate,
+                    'rate_override_reason' => $locked->rate_override_reason,
+                ]);
+            }
             $this->assertPostable($user, $locked);
             $definition = $this->journals->build($user, $locked);
             $entry = $this->persistJournal($user, $locked, $definition);

@@ -143,7 +143,7 @@ test('cross-currency transfers preserve native amounts and balance with an expli
     $draft = $this->withToken($token)->withHeader('Idempotency-Key', (string) Str::uuid())->postJson('/api/v1/transactions', transactionPayload($source, $category, [
         'type' => 'transfer', 'counterparty_account_id' => $destination->id, 'original_amount_minor_units' => 10000,
         'counterparty_amount_minor_units' => 550001, 'counterparty_currency_code' => 'ETB', 'used_rate' => '55',
-        'reference_rate' => '55', 'rate_date' => '2026-08-12', 'rate_source' => 'fixture', 'rounding_mode' => 'HALF_EVEN',
+        'reference_rate' => '55', 'rate_date' => '2026-08-12', 'rate_override_reason' => 'Ledger fixture manual rate',
     ]))->assertCreated()->json('data');
 
     $this->withToken($token)->withHeader('If-Match', '1')->withHeader('Idempotency-Key', (string) Str::uuid())->postJson("/api/v1/transactions/{$draft['id']}/post")->assertOk();

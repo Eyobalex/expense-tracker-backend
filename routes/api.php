@@ -5,6 +5,7 @@ use App\Http\Controllers\Api\V1\BudgetController;
 use App\Http\Controllers\Api\V1\CategoryController;
 use App\Http\Controllers\Api\V1\CurrencyController;
 use App\Http\Controllers\Api\V1\DeviceController;
+use App\Http\Controllers\Api\V1\ExchangeRateController;
 use App\Http\Controllers\Api\V1\FinancialAccountController;
 use App\Http\Controllers\Api\V1\ItemController;
 use App\Http\Controllers\Api\V1\MerchantController;
@@ -36,6 +37,7 @@ Route::prefix('v1')
 
             Route::get('onboarding', [OnboardingController::class, 'show']);
             Route::get('currencies', [CurrencyController::class, 'index']);
+            Route::get('exchange-rates', [ExchangeRateController::class, 'index']);
             Route::put('onboarding', [OnboardingController::class, 'update'])->middleware('idempotency');
 
             Route::get('accounts', [FinancialAccountController::class, 'index']);

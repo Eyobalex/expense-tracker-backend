@@ -25,8 +25,8 @@ class StoreFinancialTransactionRequest extends FormRequest
             'original_amount_minor_units' => ['required', 'integer', 'min:1'], 'original_currency_code' => ['required', 'regex:/^[A-Z]{3}$/'],
             'counterparty_amount_minor_units' => ['nullable', 'integer', 'min:1'], 'counterparty_currency_code' => ['nullable', 'regex:/^[A-Z]{3}$/'],
             'reference_rate' => ['nullable', 'regex:/^[0-9]+(?:\.[0-9]{1,18})?$/'], 'used_rate' => ['nullable', 'regex:/^[0-9]+(?:\.[0-9]{1,18})?$/'],
-            'rate_date' => ['nullable', 'date'], 'rate_source' => ['nullable', 'string', 'max:64'], 'rate_override_reason' => ['nullable', 'string', 'max:500'],
-            'rounding_mode' => ['nullable', 'in:HALF_UP,HALF_EVEN,DOWN,UP,FLOOR,CEILING'], 'description' => ['nullable', 'string', 'max:500'], 'reference_number' => ['nullable', 'string', 'max:128'],
+            'rate_date' => ['nullable', 'date'], 'rate_source' => ['prohibited'], 'rate_override_reason' => ['nullable', 'string', 'max:500'],
+            'rounding_mode' => ['prohibited'], 'description' => ['nullable', 'string', 'max:500'], 'reference_number' => ['nullable', 'string', 'max:128'],
             'splits' => ['nullable', 'array'], 'splits.*.category_id' => ['required', 'uuid'], 'splits.*.canonical_item_id' => ['nullable', 'uuid'], 'splits.*.raw_item_text' => ['nullable', 'string', 'max:500'], 'splits.*.amount_minor_units' => ['required', 'integer', 'min:1'],
             'splits.*.currency_code' => ['required', 'regex:/^[A-Z]{3}$/'], 'splits.*.classification' => ['nullable', 'in:category,tax,fee,discount,rounding'], 'splits.*.description' => ['nullable', 'string', 'max:500'],
         ];

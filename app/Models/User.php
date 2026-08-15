@@ -76,6 +76,12 @@ class User extends Authenticatable implements PasskeyUser
         return $this->hasMany(Device::class);
     }
 
+    /** @return HasMany<AuditEvent, $this> */
+    public function auditEvents(): HasMany
+    {
+        return $this->hasMany(AuditEvent::class);
+    }
+
     /** @return array<string, string> */
     protected function casts(): array
     {
