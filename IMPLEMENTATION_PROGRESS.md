@@ -98,9 +98,9 @@ Total planned features: 19
 
 Merged: 11
 
-In progress: 1
+In progress: 0
 
-PR open: 1
+PR open: 2
 
 Blocked: 1
 
@@ -151,7 +151,7 @@ They may be split into additional independently reviewable features if required 
 | 016 | Reports and exports                                             | Phase 13                              | 007, 008, 012, 014 | `feat/016-reports-exports`        | PENDING | —  | —            | —             | PDF, XLSX, CSV, Full JSON Data Export, full-account ZIP                        |
 | 017 | Security, performance and operations hardening                  | Phase 14                              | 001-016            | `feat/017-release-hardening`      | PENDING | —  | —            | —             | RPO/RTO, retention, constraints, correlation, restore drills                  |
 | 018 | MVP release validation                                          | Phase 15                              | 017                | `feat/018-mvp-release-validation` | PENDING | —  | —            | —             | No product features; final gates/runbooks                                      |
-| 019 | OpenAPI/Swagger documentation and REST endpoint scenarios      | API contract support                  | 003                | `feat/019-api-documentation`       | IN_PROGRESS | — | — | Local REST tests passed; OpenAPI generation awaits PostgreSQL-backed CI | Generated OpenAPI UI plus editor-run REST scenarios; independent of Feature 012 |
+| 019 | OpenAPI/Swagger documentation and REST endpoint scenarios      | API contract support                  | 003                | `feat/019-api-documentation`       | PR_OPEN | 15 | — | Local REST tests passed; OpenAPI generation awaits PostgreSQL-backed CI | Generated OpenAPI UI plus editor-run REST scenarios; independent of Feature 012 |
 | 999 | Progress finalization                                           | Administrative                        | 001-018            | `feat/999-progress-finalization`  | PENDING | —  | —            | —             | Use only after final feature merge if needed                                   |
 
 ---
@@ -164,13 +164,13 @@ Feature: OpenAPI/Swagger documentation and REST endpoint scenarios
 
 Branch: `feat/019-api-documentation`
 
-Status: IN_PROGRESS
+Status: PR_OPEN
 
 Started: 2026-08-15
 
-PR: —
+PR: #15 — https://github.com/Eyobalex/expense-tracker-backend/pull/15
 
-Blocker: None. Scramble is installed; local OpenAPI generation needs the PostgreSQL-backed test environment used by CI.
+Blocker: Awaiting GitHub CI's PostgreSQL-backed OpenAPI-document test.
 
 ---
 
@@ -194,6 +194,8 @@ Feature 007 — Transaction aggregate and double-entry ledger — merged into de
 # Blockers
 
 Feature 012: PR #14 is open against `dev`. The latest CI run remains failed; merge is prohibited until the current failed log is reviewed and the PostgreSQL-backed suite passes.
+
+Feature 019: PR #15 is open against `dev`; merge is prohibited until GitHub CI passes the PostgreSQL-backed OpenAPI-document test.
 
 
 ---
