@@ -2,7 +2,7 @@
 
 Status: IN PROGRESS
 
-Last reconciled with implementation plan: 2026-08-16; reconciled with Feature 013 merged into `dev` via PR #16 (`af015b6bc8a01f952fb22b5eab2ff33215974b28`).
+Last reconciled with implementation plan: 2026-08-16; Feature 014 is verified merged into `dev` via PR #17 (`315bb79ca3065a1644aa3b10d374108225a8eb6d`) and Feature 015 is open as PR #19 against `dev`.
 
 Integration branch: `dev`
 
@@ -98,9 +98,9 @@ Total planned features: 19
 
 Merged: 15
 
-In progress: 1
+In progress: 0
 
-PR open: 0
+PR open: 1
 
 Blocked: 0
 
@@ -147,7 +147,7 @@ They may be split into additional independently reviewable features if required 
 | 012 | FX provider operations and rate lifecycle                       | Phase 10                              | 006, 007, 011      | `feat/012-fx-operations`          | MERGED | 14 | 8b3eb9f87607d14b04c7d23081b70bee89a10397 | CI passed | Open Exchange Rates integration merged into dev after conflict-resolution CI passed |
 | 013 | Offline synchronization API contract                            | Phase 11                              | 003, 007, 009, 011, 012 | `feat/013-sync-contract` | MERGED | 16 | af015b6bc8a01f952fb22b5eab2ff33215974b28 | CI passed | Authoritative cursor/full-resync contract merged into dev                      |
 | 014 | Dashboard and forecasting                                       | Phase 12                              | 008, 012, 013      | `feat/014-dashboard-forecasting`  | MERGED | 17 | 315bb79ca3065a1644aa3b10d374108225a8eb6d | CI passed | Merged into dev after PostgreSQL/Redis/MinIO-backed CI passed                  |
-| 015 | Notifications backend                                           | Phase 12                              | 014                | `feat/015-notifications`          | IN_PROGRESS | —  | —            | Implementation in progress | All approved channels: in-app, Android local payload, FCM, email               |
+| 015 | Notifications backend                                           | Phase 12                              | 014                | `feat/015-notifications`          | PR_OPEN | 19  | —            | Focused tests/Pint/PHPStan/audit passed; awaiting CI | In-app, Android local payload, FCM, email; item-price notification threshold remains a product decision |
 | 016 | Reports and exports                                             | Phase 13                              | 007, 008, 012, 014 | `feat/016-reports-exports`        | PENDING | —  | —            | —             | PDF, XLSX, CSV, Full JSON Data Export, full-account ZIP                        |
 | 017 | Security, performance and operations hardening                  | Phase 14                              | 001-016            | `feat/017-release-hardening`      | PENDING | —  | —            | —             | RPO/RTO, retention, constraints, correlation, restore drills                  |
 | 018 | MVP release validation                                          | Phase 15                              | 017                | `feat/018-mvp-release-validation` | PENDING | —  | —            | —             | No product features; final gates/runbooks                                      |
@@ -164,13 +164,13 @@ Feature: Notifications backend
 
 Branch: `feat/015-notifications`
 
-Status: IN_PROGRESS
+Status: PR_OPEN
 
 Started: 2026-08-16
 
-PR: —
+PR: #19 — https://github.com/Eyobalex/expense-tracker-backend/pull/19
 
-Blocker: None.
+Blocker: Awaiting required GitHub CI. Local full suite has one environment-only MinIO availability failure (`127.0.0.1:9000` was not listening); focused Feature 015 and documentation suites pass.
 
 ---
 
