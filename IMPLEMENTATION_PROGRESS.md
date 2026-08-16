@@ -2,7 +2,7 @@
 
 Status: IN PROGRESS
 
-Last reconciled with implementation plan: 2026-08-16; Feature 015 is verified merged into `dev` via PR #19 (`7e7ed53d74ca56e1621e3c712c4fcc1c9bf1f605`), and Feature 016 has started from the synchronized integration branch.
+Last reconciled with implementation plan: 2026-08-16; Feature 015 is verified merged into `dev` via PR #19 (`7e7ed53d74ca56e1621e3c712c4fcc1c9bf1f605`), and Feature 016 is open for review against `dev` as PR #20.
 
 Integration branch: `dev`
 
@@ -98,9 +98,9 @@ Total planned features: 19
 
 Merged: 16
 
-In progress: 1
+In progress: 0
 
-PR open: 0
+PR open: 1
 
 Blocked: 0
 
@@ -148,7 +148,7 @@ They may be split into additional independently reviewable features if required 
 | 013 | Offline synchronization API contract                            | Phase 11                              | 003, 007, 009, 011, 012 | `feat/013-sync-contract` | MERGED | 16 | af015b6bc8a01f952fb22b5eab2ff33215974b28 | CI passed | Authoritative cursor/full-resync contract merged into dev                      |
 | 014 | Dashboard and forecasting                                       | Phase 12                              | 008, 012, 013      | `feat/014-dashboard-forecasting`  | MERGED | 17 | 315bb79ca3065a1644aa3b10d374108225a8eb6d | CI passed | Merged into dev after PostgreSQL/Redis/MinIO-backed CI passed                  |
 | 015 | Notifications backend                                           | Phase 12                              | 014                | `feat/015-notifications`          | MERGED | 19  | 7e7ed53d74ca56e1621e3c712c4fcc1c9bf1f605 | CI passed | In-app, Android local payload, FCM, email; item-price notification threshold remains a product decision |
-| 016 | Reports and exports                                             | Phase 13                              | 007, 008, 012, 014 | `feat/016-reports-exports`        | IN_PROGRESS | —  | —            | Pending | PDF, XLSX, CSV, Full JSON Data Export, full-account ZIP                        |
+| 016 | Reports and exports                                             | Phase 13                              | 007, 008, 012, 014 | `feat/016-reports-exports`        | PR_OPEN | 20 | —            | Local gates passed; CI in progress | PDF, XLSX, CSV, Full JSON Data Export, full-account ZIP                        |
 | 017 | Security, performance and operations hardening                  | Phase 14                              | 001-016            | `feat/017-release-hardening`      | PENDING | —  | —            | —             | RPO/RTO, retention, constraints, correlation, restore drills                  |
 | 018 | MVP release validation                                          | Phase 15                              | 017                | `feat/018-mvp-release-validation` | PENDING | —  | —            | —             | No product features; final gates/runbooks                                      |
 | 019 | OpenAPI/Swagger documentation and REST endpoint scenarios      | API contract support                  | 003                | `feat/019-api-documentation`       | MERGED | 15 | db2c8f9775710dda79d9881f0037d17f885b3bab | CI passed | OpenAPI documentation, docs gate, and REST scenarios merged into dev |
@@ -164,13 +164,13 @@ Feature: Reports and exports
 
 Branch: `feat/016-reports-exports`
 
-Status: IN_PROGRESS
+Status: PR_OPEN
 
 Started: 2026-08-16
 
-PR: —
+PR: #20 — https://github.com/Eyobalex/expense-tracker-backend/pull/20
 
-Blocker: None. Feature 015 CI passed and PR #19 merged into `dev`; Feature 016 begins from synchronized `dev`.
+Blocker: None. Local Pint, PHPStan, migration dry-run, Composer validation/audit, Scramble contract analysis, and complete Pest suite passed; GitHub CI is in progress.
 
 ---
 
