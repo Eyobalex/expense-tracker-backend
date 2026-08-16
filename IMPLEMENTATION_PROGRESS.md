@@ -2,7 +2,7 @@
 
 Status: IN PROGRESS
 
-Last reconciled with implementation plan: 2026-08-16; Feature 015 is verified merged into `dev` via PR #19 (`7e7ed53d74ca56e1621e3c712c4fcc1c9bf1f605`), and Feature 016 is open for review against `dev` as PR #20.
+Last reconciled with implementation plan: 2026-08-16; Feature 016 is verified merged into `dev` via PR #20 (`b8bfeee024dd6e242f1a7996c0072c32bf3a1124`), and Feature 017 has started from the synchronized integration branch.
 
 Integration branch: `dev`
 
@@ -96,15 +96,15 @@ The feature cannot safely continue until an external issue, dependency, requirem
 
 Total planned features: 19
 
-Merged: 16
+Merged: 17
 
-In progress: 0
+In progress: 1
 
-PR open: 1
+PR open: 0
 
 Blocked: 0
 
-Pending: 2
+Pending: 1
 
 Overall status: IN PROGRESS
 
@@ -148,8 +148,8 @@ They may be split into additional independently reviewable features if required 
 | 013 | Offline synchronization API contract                            | Phase 11                              | 003, 007, 009, 011, 012 | `feat/013-sync-contract` | MERGED | 16 | af015b6bc8a01f952fb22b5eab2ff33215974b28 | CI passed | Authoritative cursor/full-resync contract merged into dev                      |
 | 014 | Dashboard and forecasting                                       | Phase 12                              | 008, 012, 013      | `feat/014-dashboard-forecasting`  | MERGED | 17 | 315bb79ca3065a1644aa3b10d374108225a8eb6d | CI passed | Merged into dev after PostgreSQL/Redis/MinIO-backed CI passed                  |
 | 015 | Notifications backend                                           | Phase 12                              | 014                | `feat/015-notifications`          | MERGED | 19  | 7e7ed53d74ca56e1621e3c712c4fcc1c9bf1f605 | CI passed | In-app, Android local payload, FCM, email; item-price notification threshold remains a product decision |
-| 016 | Reports and exports                                             | Phase 13                              | 007, 008, 012, 014 | `feat/016-reports-exports`        | PR_OPEN | 20 | —            | Local gates passed; CI in progress | PDF, XLSX, CSV, Full JSON Data Export, full-account ZIP                        |
-| 017 | Security, performance and operations hardening                  | Phase 14                              | 001-016            | `feat/017-release-hardening`      | PENDING | —  | —            | —             | RPO/RTO, retention, constraints, correlation, restore drills                  |
+| 016 | Reports and exports                                             | Phase 13                              | 007, 008, 012, 014 | `feat/016-reports-exports`        | MERGED | 20 | b8bfeee024dd6e242f1a7996c0072c32bf3a1124 | CI passed | PDF, XLSX, CSV, Full JSON Data Export, full-account ZIP                        |
+| 017 | Security, performance and operations hardening                  | Phase 14                              | 001-016            | `feat/017-release-hardening`      | IN_PROGRESS | — | — | Pending | RPO/RTO, retention, constraints, correlation, restore drills                  |
 | 018 | MVP release validation                                          | Phase 15                              | 017                | `feat/018-mvp-release-validation` | PENDING | —  | —            | —             | No product features; final gates/runbooks                                      |
 | 019 | OpenAPI/Swagger documentation and REST endpoint scenarios      | API contract support                  | 003                | `feat/019-api-documentation`       | MERGED | 15 | db2c8f9775710dda79d9881f0037d17f885b3bab | CI passed | OpenAPI documentation, docs gate, and REST scenarios merged into dev |
 | 999 | Progress finalization                                           | Administrative                        | 001-018            | `feat/999-progress-finalization`  | PENDING | —  | —            | —             | Use only after final feature merge if needed                                   |
@@ -158,19 +158,19 @@ They may be split into additional independently reviewable features if required 
 
 # Current Feature
 
-Feature ID: 016
+Feature ID: 017
 
-Feature: Reports and exports
+Feature: Security, performance and operations hardening
 
-Branch: `feat/016-reports-exports`
+Branch: `feat/017-release-hardening`
 
-Status: PR_OPEN
+Status: IN_PROGRESS
 
 Started: 2026-08-16
 
-PR: #20 — https://github.com/Eyobalex/expense-tracker-backend/pull/20
+PR: —
 
-Blocker: None. Local Pint, PHPStan, migration dry-run, Composer validation/audit, Scramble contract analysis, and complete Pest suite passed; GitHub CI is in progress.
+Blocker: None. Feature 016 CI passed and PR #20 merged into `dev`; Feature 017 begins from synchronized `dev`. Production retention values, RPO/RTO targets, backup destinations, and VPS deployment access remain PRODUCT/OPERATIONS DECISIONS REQUIRED BEFORE PHASE 14 EXIT.
 
 ---
 
@@ -189,20 +189,31 @@ Feature 006 — Currency Core — merged into dev via PR #6 (17df610cfa89da3cd8c
 
 Feature 007 — Transaction aggregate and double-entry ledger — merged into dev via PR #8 (746c17072232df723b8778c89ab8926ca0c6edfa).
 
+Feature 008 — Budget engine — merged into dev via PR #9 (ae1ace1f4c5f9b16d1b9bb3b31ee93ab4429faae).
+
+Feature 009 — Receipt storage and OCR infrastructure — merged into dev via PR #10 (d409a68a7d1f84b9947e9563a689b816938399f2).
+
+Feature 010 — Merchant and item normalization — merged into dev via PR #11 (73f7fa742d1ed4497c6ab395b4e860cf7ccd4298).
+
+Feature 011 — Duplicate detection — merged into dev via PR #13 (b06fa689b5cea5696a5a8dbf36f8efef7b581692).
+
+Feature 012 — FX provider operations and rate lifecycle — merged into dev via PR #14 (8b3eb9f87607d14b04c7d23081b70bee89a10397).
+
+Feature 013 — Offline synchronization API contract — merged into dev via PR #16 (af015b6bc8a01f952fb22b5eab2ff33215974b28).
+
+Feature 014 — Dashboard and forecasting — merged into dev via PR #17 (315bb79ca3065a1644aa3b10d374108225a8eb6d).
+
+Feature 015 — Notifications backend — merged into dev via PR #19 (7e7ed53d74ca56e1621e3c712c4fcc1c9bf1f605).
+
+Feature 016 — Reports and exports — merged into dev via PR #20 (b8bfeee024dd6e242f1a7996c0072c32bf3a1124).
+
 ---
 
 # Blockers
 
-## Feature 014 — PRODUCT DECISION REQUIRED BEFORE PHASE 12
+## Feature 014 — RESOLVED
 
-The implementation plan prohibits inventing the following business semantics:
-
-* Safe-to-spend numerator and denominator, whether today is included, zero-remaining-day behavior, negative budget behavior, and treatment of borrowing, rollover, underflow, and known future obligations.
-* Projected month-end spend formula and its forecast method/version.
-* Income concentration/diversification formula and interpretation.
-* Item inflation/deflation baseline, compatible-unit comparison dates, and percentage formula.
-
-Feature 014 may resume on `feat/014-dashboard-forecasting` after these formulas are approved and versioned.
+The user approved deterministic Safe-to-Spend, category-aware FIXED/PERIODIC/VARIABLE forecasting, income-concentration, and Item Price Movement V1 semantics. Feature 014 implemented the approved formulas and merged into `dev` via PR #17.
 
 ---
 
@@ -321,19 +332,19 @@ Notes: Exact money/rate arithmetic, deterministic time, domain errors, audit red
 
 ## Feature 005
 
-Status: IN_PROGRESS
+Status: MERGED
 
 Branch: `feat/005-accounts-categories`
 
 Implementation plan coverage: Phase 4, steps 1-11.
 
-PR: #5 (targets `dev`)
+PR: #5 (merged into `dev`)
 
-Merge commit: —
+Merge commit: 1c3bba74d4486921c7cc41cc88308613aa47005b
 
-Tests executed: Pending.
+Tests executed: GitHub Actions CI passed with PostgreSQL, Redis, MinIO, Pint, PHPStan, and PHPUnit.
 
-Checklist: In progress.
+Checklist: Complete.
 
 Notes: User financial settings, accounts, categories, onboarding, seed data, ownership, and currency locks.
 
