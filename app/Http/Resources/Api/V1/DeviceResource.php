@@ -22,6 +22,7 @@ class DeviceResource extends JsonResource
             'client_device_id' => $device->client_device_id,
             'platform' => $device->platform,
             'app_version' => $device->app_version,
+            'push_token_registered' => $device->push_token !== null,
             'last_seen_at' => $device->last_seen_at->toISOString(),
             'revoked_at' => $device->revoked_at?->toISOString(),
         ];

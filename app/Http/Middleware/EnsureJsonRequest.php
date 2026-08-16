@@ -13,6 +13,10 @@ class EnsureJsonRequest
      */
     public function handle(Request $request, Closure $next): Response
     {
+        if ($request->isMethod('GET') && $request->is('api/v1/reports/*/download')) {
+            return $next($request);
+        }
+
         if (! $request->expectsJson() && ! $request->isJson()) {
             return response()->json([
                 'error' => [

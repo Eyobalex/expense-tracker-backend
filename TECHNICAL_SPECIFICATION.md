@@ -51,6 +51,10 @@ devices: id, user_id, device client ID, platform, app version, last seen, revoke
 
 user_settings: local lock preference, alert thresholds, budget timezone, forecast method, export defaults, and feature flags. Security-sensitive changes are audited.
 
+user_notifications: UUID, user_id, stable notification type, title/body, schema-versioned local-device payload, in-app visibility, read timestamp/version, deduplication key, request correlation ID, optional immutable insight snapshot reference, timestamps. The per-user deduplication key is unique.
+
+notification_deliveries: UUID, user_notification_id, optional target device, channel (in_app/local/push/email), queued/delivered/failed/skipped status, deterministic idempotency key, retry attempt/job IDs, delivery/failure timestamps, and sanitized failure code. Notification delivery history is an audit record, never a source of financial truth.
+
 ### 3.2 Financial structure and chart mapping
 
 financial_accounts: id, user_id, name, user-facing type (cash, bank, mobile_wallet, savings, credit_card, loan, investment, other), internal accounting type (asset/liability), currency code, archived timestamp, opening-balance state, version.
@@ -224,6 +228,7 @@ Base path: /api/v1. Authenticated JSON except multipart receipt upload. All crea
     POST   /sync/push
     GET    /sync/pull?cursor=...
     GET    /sync/operations/{id}
+    GET    /reports
     POST   /reports
     GET    /reports/{id}
     GET    /reports/{id}/download
@@ -281,7 +286,7 @@ For purchase receipts, calculate line subtotal plus explicit adjustments and com
 
 ## 11. Reporting and insight formulas
 
-All totals are server-side and use the same filter specification as history. Required reports: transaction, account statement, budget, expense, income/concentration, merchant, item price, and multi-currency. CSV is suitable for small synchronous exports; XLSX/PDF/JSON and large datasets use report_jobs.
+All totals are server-side and use the same filter specification as history. Required reports: transaction, account statement, budget, expense, income/concentration, merchant, item price, and multi-currency. CSV is suitable only for small bounded synchronous exports; XLSX/PDF/JSON and large datasets use private, expiring `report_jobs`. A Full JSON Data Export is a portability export, not a backup: it preserves approved user data, IDs, relationships, transaction/journal history, budgets, catalog entities, FX metadata, receipt metadata, and approved audit/import metadata but has no restore path. A Full Account Export is a separate private ZIP containing `manifest.json`, `data.json`, and the user's original receipt media at `receipts/<receipt-uuid>.<ext>`.
 
 Minimum insight inputs are posted transactions only, current effective budget, actual spent, remaining days in the user's budget timezone, selected forecast method, and locked historical FX. Store formula/algorithm version with derived analytics. Drafts are never spent. Concentration shows each source share and a deterministic versioned indicator. Item comparisons require equivalent canonical item/unit and show merchant/date/previous/current/unit price/absolute/percentage changes.
 
@@ -292,6 +297,12 @@ The rejected global projection `total_actual_spend / elapsed_days × total_days`
 Income concentration uses a 12-calendar-month-or-available-history HHI calculation in the reporting timezone. Canonical source, normalized source text, then `Unattributed` are the resolution order. HHI classifications are diversified (`<= 0.15`), moderately concentrated (`> 0.15` and `<= 0.25`), and concentrated (`> 0.25`); classification is suppressed when unattributed income exceeds 20%. Item Price Movement is not a general inflation metric: it compares an item only with its immediately previous compatible posted receipt line, same original currency, on occurrence date. Line-level amounts are used without allocating order-level tax, delivery, tips, service fees, or unallocated discounts. Same-merchant comparisons are alert-eligible; no item-price notification threshold is emitted until separately configured and approved.
 
 Insight dashboard results are live indexed read queries in V1; no Redis cache is introduced, so posting, reversal, correction, refund, budget, category, normalization, and FX changes cannot serve stale cached insight output. Persist `insight_snapshots` only when a notification, scheduled/period-close snapshot, or report requires historical reproducibility. Each snapshot preserves its formula identity/version, inputs, result, coverage, timezone, base currency, and calculation timestamp and is never reinterpreted after a later formula revision.
+
+### 11.1 Notification delivery contract
+
+Laravel owns notification eligibility and payload construction. Budget threshold notifications use user-configurable 50/75/90/100 percent defaults; actual overspend is eligible immediately, while projected overspend is eligible only from budget-calendar day five through the approved category-aware forecast. Confirmed borrowing records an immediate consequence notification. OCR failures notify without logging or serializing raw OCR/image data. A notification stores its formula-derived insight snapshot only when it is emitted, so later formula or historical-data changes never rewrite the original alert explanation.
+
+In-app notifications are persistent and mutable only for the user's read state. The local channel supplies a server-authored payload for an authenticated active Android device; the backend does not implement client UI behavior. FCM uses the Firebase HTTP v1 adapter with a VPS-mounted service-account credential file (`FCM_SERVICE_ACCOUNT_CREDENTIALS`) and a Redis-cached short-lived OAuth token; an explicitly injected short-lived access token exists only for controlled operational/testing use. Email uses Laravel mail. All external delivery is queued, retryable, idempotent per delivery record, and auditable. Missing FCM configuration or a device token is a skipped delivery, not a financial failure. User preferences can disable channels/types and set threshold values. Item Price Movement remains alert-eligible only for same-merchant comparisons; no item-price notification is emitted until the separate approved threshold is configured.
 
 ## 12. Security, privacy, and authorization
 
