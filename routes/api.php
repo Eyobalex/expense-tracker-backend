@@ -16,6 +16,7 @@ use App\Http\Controllers\Api\V1\NotificationController;
 use App\Http\Controllers\Api\V1\OnboardingController;
 use App\Http\Controllers\Api\V1\ProfileController;
 use App\Http\Controllers\Api\V1\ReceiptController;
+use App\Http\Controllers\Api\V1\ReportController;
 use App\Http\Controllers\Api\V1\SyncController;
 use App\Http\Controllers\Api\V1\TransactionController;
 use App\Http\Controllers\Api\V1\TransactionDuplicateController;
@@ -43,6 +44,10 @@ Route::prefix('v1')
             Route::get('notification-preferences', [NotificationController::class, 'preferences']);
             Route::put('notification-preferences', [NotificationController::class, 'updatePreferences'])->middleware('idempotency');
             Route::post('notifications/{notification}/read', [NotificationController::class, 'markRead'])->middleware('idempotency');
+            Route::get('reports', [ReportController::class, 'index']);
+            Route::post('reports', [ReportController::class, 'store'])->middleware(['throttle:exports', 'idempotency']);
+            Route::get('reports/{report}', [ReportController::class, 'show']);
+            Route::get('reports/{report}/download', [ReportController::class, 'download']);
 
             Route::get('onboarding', [OnboardingController::class, 'show']);
             Route::get('currencies', [CurrencyController::class, 'index']);

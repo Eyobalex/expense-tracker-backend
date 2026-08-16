@@ -63,6 +63,7 @@ class AppServiceProvider extends ServiceProvider
         RateLimiter::for('auth-api', fn (Request $request): Limit => Limit::perMinute(5)->by(mb_strtolower((string) $request->input('email', '')).'|'.$request->ip()));
         RateLimiter::for('api', fn (Request $request): Limit => Limit::perMinute(120)->by((string) ($request->user()?->getKey() ?? $request->ip())));
         RateLimiter::for('receipt-upload', fn (Request $request): Limit => Limit::perMinute(10)->by((string) ($request->user()?->getKey() ?? $request->ip())));
+        RateLimiter::for('exports', fn (Request $request): Limit => Limit::perMinute((int) config('reports.rate_limit_per_minute'))->by((string) ($request->user()?->getKey() ?? $request->ip())));
     }
 
     private function configureApiDocumentation(): void

@@ -228,6 +228,7 @@ Base path: /api/v1. Authenticated JSON except multipart receipt upload. All crea
     POST   /sync/push
     GET    /sync/pull?cursor=...
     GET    /sync/operations/{id}
+    GET    /reports
     POST   /reports
     GET    /reports/{id}
     GET    /reports/{id}/download
@@ -285,7 +286,7 @@ For purchase receipts, calculate line subtotal plus explicit adjustments and com
 
 ## 11. Reporting and insight formulas
 
-All totals are server-side and use the same filter specification as history. Required reports: transaction, account statement, budget, expense, income/concentration, merchant, item price, and multi-currency. CSV is suitable for small synchronous exports; XLSX/PDF/JSON and large datasets use report_jobs.
+All totals are server-side and use the same filter specification as history. Required reports: transaction, account statement, budget, expense, income/concentration, merchant, item price, and multi-currency. CSV is suitable only for small bounded synchronous exports; XLSX/PDF/JSON and large datasets use private, expiring `report_jobs`. A Full JSON Data Export is a portability export, not a backup: it preserves approved user data, IDs, relationships, transaction/journal history, budgets, catalog entities, FX metadata, receipt metadata, and approved audit/import metadata but has no restore path. A Full Account Export is a separate private ZIP containing `manifest.json`, `data.json`, and the user's original receipt media at `receipts/<receipt-uuid>.<ext>`.
 
 Minimum insight inputs are posted transactions only, current effective budget, actual spent, remaining days in the user's budget timezone, selected forecast method, and locked historical FX. Store formula/algorithm version with derived analytics. Drafts are never spent. Concentration shows each source share and a deterministic versioned indicator. Item comparisons require equivalent canonical item/unit and show merchant/date/previous/current/unit price/absolute/percentage changes.
 
