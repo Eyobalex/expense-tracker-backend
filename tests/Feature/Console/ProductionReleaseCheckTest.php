@@ -50,3 +50,18 @@ test('production runtime checks fail closed for missing approvals or recovery ob
         ->expectsOutput('Production release requires a positive value for retention_days.generated_reports.')
         ->assertFailed();
 });
+
+test('the environment example provides suggested numeric defaults without pre-approving a production release', function (): void {
+    $environmentExample = file_get_contents(base_path('.env.example'));
+
+    expect($environmentExample)
+        ->toContain('RELEASE_RETENTION_POLICY_APPROVED=false')
+        ->toContain('RELEASE_RECOVERY_OBJECTIVES_APPROVED=false')
+        ->toContain('RELEASE_BACKUP_RESTORE_DRILL_COMPLETED=false')
+        ->toContain('AUDIT_EVENT_RETENTION_DAYS=2555')
+        ->toContain('RPO_POSTGRESQL_MINUTES=15')
+        ->toContain('RTO_CORE_API_DATABASE_MINUTES=60')
+        ->toContain('POSTGRESQL_BACKUP_DESTINATION=')
+        ->toContain('MINIO_BACKUP_DESTINATION=')
+        ->toContain('BACKUP_ENCRYPTION_KEY_REFERENCE=');
+});
