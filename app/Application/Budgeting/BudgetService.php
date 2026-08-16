@@ -2,7 +2,9 @@
 
 namespace App\Application\Budgeting;
 
+use App\Application\Notifications\NotificationService;
 use App\Domain\Budgeting\Enums\BudgetAdjustmentType;
+use App\Domain\Notifications\Enums\NotificationType;
 use App\Domain\Shared\Exceptions\DomainErrorCode;
 use App\Domain\Shared\Exceptions\DomainException;
 use App\Domain\Shared\Time\Clock;
@@ -19,6 +21,7 @@ final readonly class BudgetService
     public function __construct(
         private EnsureBudgetPeriodExists $periods,
         private Clock $clock,
+        private NotificationService $notifications,
     ) {}
 
     /** @return array<int, BudgetPeriod> */
@@ -37,7 +40,7 @@ final readonly class BudgetService
 
     public function borrowNextMonth(User $user, Category $category, MonthlyPeriod $sourcePeriod): BudgetPeriod
     {
-        return DB::transaction(function () use ($user, $category, $sourcePeriod): BudgetPeriod {
+        $source = DB::transaction(function () use ($user, $category, $sourcePeriod): BudgetPeriod {
             $source = $this->periods->forCategory($user, $category, $sourcePeriod);
             $targetPeriod = MonthlyPeriod::containing($sourcePeriod->endsAt(), $sourcePeriod->timezone->getName());
             $target = $this->periods->forCategory($user, $category, $targetPeriod);
@@ -83,6 +86,24 @@ final readonly class BudgetService
 
             return $source;
         }, attempts: 3);
+        $this->notifications->create(
+            $user,
+            NotificationType::BorrowingConsequence,
+            'borrowing-consequence:'.$source->getKey(),
+            'Next budget period reserved',
+            'A confirmed budget borrow has reserved the immediate following period.',
+            [
+                'category_id' => $source->category_id,
+                'budget_period_id' => $source->getKey(),
+                'period_year' => $source->period_year,
+                'period_month' => $source->period_month,
+                'base_limit_minor_units' => $source->base_limit_minor_units,
+                'currency_code' => $source->currency_code,
+                'rule' => ['name' => 'borrowing_consequence', 'version' => 1],
+            ],
+        );
+
+        return $source;
     }
 
     public function reallocate(User $user, Category $sourceCategory, Category $targetCategory, MonthlyPeriod $period, int $amount): BudgetPeriod

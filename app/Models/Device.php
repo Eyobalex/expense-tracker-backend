@@ -15,6 +15,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property string $client_device_id
  * @property string $platform
  * @property string|null $app_version
+ * @property string|null $push_token
+ * @property string|null $push_token_provider
  * @property int|null $personal_access_token_id
  * @property CarbonImmutable $last_seen_at
  * @property CarbonImmutable|null $revoked_at
@@ -28,11 +30,13 @@ class Device extends Model
 
     protected $keyType = 'string';
 
-    protected $fillable = ['client_device_id', 'platform', 'app_version', 'last_seen_at', 'revoked_at', 'personal_access_token_id'];
+    protected $fillable = ['client_device_id', 'platform', 'app_version', 'push_token', 'push_token_provider', 'push_token_updated_at', 'last_seen_at', 'revoked_at', 'personal_access_token_id'];
+
+    protected $hidden = ['push_token'];
 
     protected function casts(): array
     {
-        return ['last_seen_at' => 'immutable_datetime', 'revoked_at' => 'immutable_datetime'];
+        return ['push_token' => 'encrypted', 'push_token_updated_at' => 'immutable_datetime', 'last_seen_at' => 'immutable_datetime', 'revoked_at' => 'immutable_datetime'];
     }
 
     /**

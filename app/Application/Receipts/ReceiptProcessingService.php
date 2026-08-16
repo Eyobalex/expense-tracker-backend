@@ -2,6 +2,8 @@
 
 namespace App\Application\Receipts;
 
+use App\Application\Notifications\NotificationService;
+use App\Domain\Notifications\Enums\NotificationType;
 use App\Domain\Receipts\Contracts\ReceiptOcrProvider;
 use App\Jobs\NormalizeReceiptEntities;
 use App\Jobs\ProcessReceiptOcr;
@@ -19,6 +21,7 @@ final readonly class ReceiptProcessingService
         private ReceiptImagePreprocessor $preprocessor,
         private ReceiptOcrProvider $ocr,
         private ReceiptOcrNormalizer $normalizer,
+        private NotificationService $notifications,
     ) {}
 
     public function queue(Receipt $receipt): void
@@ -84,6 +87,15 @@ final readonly class ReceiptProcessingService
         $receipt = Receipt::query()->find($receiptId);
         if ($receipt instanceof Receipt) {
             AuditEvent::query()->create(['user_id' => $receipt->user_id, 'event_name' => 'receipt.ocr_failed', 'aggregate_type' => 'receipt', 'aggregate_id' => $receiptId, 'summary' => ['request_id' => $requestId, 'receipt_id' => $receiptId, 'job_id' => $jobId, 'exception' => $exception::class]]);
+            $this->notifications->create(
+                $receipt->user,
+                NotificationType::OcrFailed,
+                'ocr-failed:'.$receipt->getKey(),
+                'Receipt processing needs review',
+                'Receipt processing did not complete. Your original receipt remains available for review or retry.',
+                ['receipt_id' => $receipt->getKey(), 'rule' => ['name' => 'ocr_failure', 'version' => 1]],
+                requestId: $requestId,
+            );
         }
     }
 }

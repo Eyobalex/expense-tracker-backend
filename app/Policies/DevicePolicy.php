@@ -21,4 +21,9 @@ class DevicePolicy
     {
         return $this->view($user, $device);
     }
+
+    public function update(User $user, Device $device): bool
+    {
+        return $this->view($user, $device);
+    }
 }

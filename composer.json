@@ -12,6 +12,7 @@
         "php": "^8.5",
         "brick/math": "^0.18",
         "dedoc/scramble": "^0.13",
+        "google/auth": "^1.53",
         "laravel/chisel": "^0.1.0",
         "laravel/fortify": "^1.37.2",
         "laravel/framework": "^13.17",
