@@ -12,7 +12,7 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Throwable;
 
-#[Signature('runtime:check {--deep : Verify PostgreSQL, Redis, and MinIO connectivity}')]
+#[Signature('runtime:check {--deep : Verify PostgreSQL, Redis, and MinIO connectivity} {--production : Verify production release configuration gates}')]
 #[Description('Validate the required PostgreSQL, Redis, and MinIO runtime configuration')]
 class RuntimeCheck extends Command
 {
@@ -23,7 +23,11 @@ class RuntimeCheck extends Command
 
     public function handle(): int
     {
-        $errors = $this->runtimeConfigurationValidator->validate($this->configuration());
+        $configuration = $this->configuration();
+        $errors = $this->runtimeConfigurationValidator->validate($configuration);
+        if ($this->option('production')) {
+            $errors = [...$errors, ...$this->runtimeConfigurationValidator->validateProductionRelease($configuration)];
+        }
 
         if ($errors !== []) {
             foreach ($errors as $error) {
@@ -62,17 +66,20 @@ class RuntimeCheck extends Command
     }
 
     /**
-     * @return array{app_key: mixed, database_default: mixed, cache_default: mixed, queue_default: mixed, filesystem_default: mixed, minio: array<string, mixed>}
+     * @return array{app_key: mixed, app_debug: mixed, api_docs_enabled: mixed, database_default: mixed, cache_default: mixed, queue_default: mixed, filesystem_default: mixed, minio: array<string, mixed>, release: array<string, mixed>}
      */
     private function configuration(): array
     {
         return [
             'app_key' => config('app.key'),
+            'app_debug' => config('app.debug'),
+            'api_docs_enabled' => config('api_docs.enabled'),
             'database_default' => config('database.default'),
             'cache_default' => config('cache.default'),
             'queue_default' => config('queue.default'),
             'filesystem_default' => config('filesystems.default'),
             'minio' => config('filesystems.disks.minio', []),
+            'release' => config('release', []),
         ];
     }
 }
