@@ -13,3 +13,4 @@ Schedule::command('receipt:reconcile-storage')->daily()->onOneServer()->withoutO
 Schedule::command('receipt:cleanup-artifacts')->daily()->onOneServer()->withoutOverlapping();
 Schedule::command('fx:refresh-rates')->dailyAt((string) config('fx.refresh_time'))->timezone('UTC')->onOneServer()->withoutOverlapping(10);
 Schedule::command('notifications:evaluate')->hourly()->onOneServer()->withoutOverlapping(10);
+Schedule::command('reports:cleanup')->daily()->onOneServer()->withoutOverlapping();

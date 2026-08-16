@@ -106,6 +106,12 @@ class User extends Authenticatable implements PasskeyUser
         return $this->hasMany(UserNotification::class);
     }
 
+    /** @return HasMany<ReportJob, $this> */
+    public function reportJobs(): HasMany
+    {
+        return $this->hasMany(ReportJob::class);
+    }
+
     /** @return array<string, string> */
     protected function casts(): array
     {
