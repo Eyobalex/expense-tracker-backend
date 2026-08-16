@@ -8,6 +8,11 @@ function validProductionReleaseConfiguration(): array
         'retention_policy_approved' => true,
         'recovery_objectives_approved' => true,
         'backup_restore_drill_completed' => true,
+        'backups' => [
+            'postgresql_destination' => 's3://private-backups/postgresql',
+            'minio_destination' => 's3://private-backups/minio',
+            'encryption_key_reference' => 'secret://production/backup-key',
+        ],
         'retention_days' => array_fill_keys(['generated_reports', 'full_account_exports', 'failed_ocr_artifacts', 'processing_derivatives', 'abandoned_receipts', 'audit_events', 'deleted_account_grace', 'postgresql_backups', 'minio_backups', 'sync_tombstones', 'failed_jobs'], 30),
         'rpo_minutes' => array_fill_keys(['postgresql', 'minio_receipts', 'report_export_artifacts'], 60),
         'rto_minutes' => array_fill_keys(['core_api_database', 'receipt_storage', 'queue_ocr'], 120),
@@ -41,6 +46,7 @@ test('production runtime checks fail closed for missing approvals or recovery ob
     $this->artisan('runtime:check --production')
         ->expectsOutput('Production release requires APP_DEBUG=false.')
         ->expectsOutput('Approved concrete retention policy values are required before production release.')
+        ->expectsOutput('Production release requires release.backups.postgresql_destination.')
         ->expectsOutput('Production release requires a positive value for retention_days.generated_reports.')
         ->assertFailed();
 });

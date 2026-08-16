@@ -84,6 +84,17 @@ class RuntimeConfigurationValidator
             }
         }
 
+        $backups = $release['backups'] ?? [];
+        if (! is_array($backups)) {
+            $errors['release.backups'] = 'Production release requires encrypted PostgreSQL and MinIO backup destinations.';
+        } else {
+            foreach (['postgresql_destination', 'minio_destination', 'encryption_key_reference'] as $key) {
+                if (! is_string($backups[$key] ?? null) || trim($backups[$key]) === '') {
+                    $errors['release.backups.'.$key] = sprintf('Production release requires release.backups.%s.', $key);
+                }
+            }
+        }
+
         foreach ([
             'retention_days' => ['generated_reports', 'full_account_exports', 'failed_ocr_artifacts', 'processing_derivatives', 'abandoned_receipts', 'audit_events', 'deleted_account_grace', 'postgresql_backups', 'minio_backups', 'sync_tombstones', 'failed_jobs'],
             'rpo_minutes' => ['postgresql', 'minio_receipts', 'report_export_artifacts'],

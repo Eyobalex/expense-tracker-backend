@@ -4,6 +4,11 @@ return [
     'retention_policy_approved' => (bool) env('RELEASE_RETENTION_POLICY_APPROVED', false),
     'recovery_objectives_approved' => (bool) env('RELEASE_RECOVERY_OBJECTIVES_APPROVED', false),
     'backup_restore_drill_completed' => (bool) env('RELEASE_BACKUP_RESTORE_DRILL_COMPLETED', false),
+    'backups' => [
+        'postgresql_destination' => env('POSTGRESQL_BACKUP_DESTINATION'),
+        'minio_destination' => env('MINIO_BACKUP_DESTINATION'),
+        'encryption_key_reference' => env('BACKUP_ENCRYPTION_KEY_REFERENCE'),
+    ],
     'retention_days' => [
         'generated_reports' => env('REPORT_RETENTION_DAYS'),
         'full_account_exports' => env('FULL_ACCOUNT_EXPORT_RETENTION_DAYS'),
