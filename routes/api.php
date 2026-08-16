@@ -12,6 +12,7 @@ use App\Http\Controllers\Api\V1\InsightController;
 use App\Http\Controllers\Api\V1\ItemController;
 use App\Http\Controllers\Api\V1\MerchantController;
 use App\Http\Controllers\Api\V1\NormalizationCandidateController;
+use App\Http\Controllers\Api\V1\NotificationController;
 use App\Http\Controllers\Api\V1\OnboardingController;
 use App\Http\Controllers\Api\V1\ProfileController;
 use App\Http\Controllers\Api\V1\ReceiptController;
@@ -37,6 +38,11 @@ Route::prefix('v1')
             Route::patch('me', [ProfileController::class, 'update'])->middleware('idempotency');
             Route::get('devices', [DeviceController::class, 'index']);
             Route::delete('devices/{device}', [DeviceController::class, 'destroy'])->middleware('idempotency');
+            Route::put('devices/{device}/push-token', [DeviceController::class, 'updatePushToken'])->middleware('idempotency');
+            Route::get('notifications', [NotificationController::class, 'index']);
+            Route::get('notification-preferences', [NotificationController::class, 'preferences']);
+            Route::put('notification-preferences', [NotificationController::class, 'updatePreferences'])->middleware('idempotency');
+            Route::post('notifications/{notification}/read', [NotificationController::class, 'markRead'])->middleware('idempotency');
 
             Route::get('onboarding', [OnboardingController::class, 'show']);
             Route::get('currencies', [CurrencyController::class, 'index']);

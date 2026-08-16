@@ -39,4 +39,12 @@ return [
         'app_id' => env('OPEN_EXCHANGE_RATES_APP_ID'),
     ],
 
+    'firebase' => [
+        'project_id' => env('FCM_PROJECT_ID'),
+        'service_account_credentials_path' => env('FCM_SERVICE_ACCOUNT_CREDENTIALS'),
+        'access_token' => env('FCM_ACCESS_TOKEN'),
+        'timeout_seconds' => (int) env('FCM_TIMEOUT_SECONDS', 10),
+        'connect_timeout_seconds' => (int) env('FCM_CONNECT_TIMEOUT_SECONDS', 3),
+    ],
+
 ];

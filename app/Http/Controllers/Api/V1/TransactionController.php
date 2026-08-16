@@ -71,7 +71,7 @@ class TransactionController extends Controller
         if ($request->user()->cannot('post', $transaction)) {
             return $this->notFound($request);
         }
-        $posted = $transactions->post($request->user(), $transaction, $this->expectedVersion($request));
+        $posted = $transactions->post($request->user(), $transaction, $this->expectedVersion($request), $request->attributes->get('request_id'));
 
         return $this->success($request, (new FinancialTransactionResource($posted))->resolve($request));
     }

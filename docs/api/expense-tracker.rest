@@ -23,6 +23,7 @@
 @deviceRecordId = replace-with-device-record-uuid
 @candidateId = replace-with-normalization-candidate-uuid
 @duplicateCandidateId = replace-with-duplicate-candidate-uuid
+@notificationId = replace-with-notification-uuid
 @receiptPath = ./fixtures/receipt.jpg
 
 ### Register
@@ -83,6 +84,42 @@ DELETE {{baseUrl}}/devices/{{deviceRecordId}}
 Accept: application/json
 Authorization: Bearer {{token}}
 Idempotency-Key: {{$guid}}
+
+### Register or clear the FCM token for the currently authenticated active device
+PUT {{baseUrl}}/devices/{{deviceRecordId}}/push-token
+Accept: application/json
+Content-Type: application/json
+Authorization: Bearer {{token}}
+Idempotency-Key: {{$guid}}
+
+{"push_token":"replace-with-fcm-registration-token","provider":"fcm"}
+
+### Notification preferences and inbox
+GET {{baseUrl}}/notification-preferences
+Accept: application/json
+Authorization: Bearer {{token}}
+
+###
+PUT {{baseUrl}}/notification-preferences
+Accept: application/json
+Content-Type: application/json
+Authorization: Bearer {{token}}
+Idempotency-Key: {{$guid}}
+If-Match: 1
+
+{"channels":{"email":true,"in_app":true,"local":true,"push":true},"budget_thresholds":[50,75,90,100]}
+
+###
+GET {{baseUrl}}/notifications?unread_only=1&limit=50
+Accept: application/json
+Authorization: Bearer {{token}}
+
+###
+POST {{baseUrl}}/notifications/{{notificationId}}/read
+Accept: application/json
+Authorization: Bearer {{token}}
+Idempotency-Key: {{$guid}}
+If-Match: 1
 
 ###
 POST {{baseUrl}}/auth/refresh-or-revoke

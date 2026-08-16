@@ -100,6 +100,12 @@ class User extends Authenticatable implements PasskeyUser
         return $this->hasMany(InsightSnapshot::class);
     }
 
+    /** @return HasMany<UserNotification, $this> */
+    public function userNotifications(): HasMany
+    {
+        return $this->hasMany(UserNotification::class);
+    }
+
     /** @return array<string, string> */
     protected function casts(): array
     {
