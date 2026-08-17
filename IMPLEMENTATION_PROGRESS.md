@@ -2,7 +2,7 @@
 
 Status: IN PROGRESS
 
-Last reconciled with implementation plan: 2026-08-17; Feature 016 is verified merged into `dev` via PR #20 (`b8bfeee024dd6e242f1a7996c0072c32bf3a1124`). Feature 017 has local committed work but remains blocked on VPS-only release validation. Documentation-only Feature 020 is in progress from synchronized `dev`.
+Last reconciled with implementation plan: 2026-08-17; Feature 016 is verified merged into `dev` via PR #20 (`b8bfeee024dd6e242f1a7996c0072c32bf3a1124`). Feature 017 has local committed work but remains blocked on VPS-only release validation. Documentation-only Feature 020 is open as PR #22 against `dev`.
 
 Integration branch: `dev`
 
@@ -98,9 +98,9 @@ Total planned features: 20
 
 Merged: 17
 
-In progress: 1
+In progress: 0
 
-PR open: 0
+PR open: 1
 
 Blocked: 1
 
@@ -154,7 +154,7 @@ They may be split into additional independently reviewable features if required 
 | 017 | Security, performance and operations hardening                  | Phase 14                              | 001-016            | `feat/017-release-hardening`      | BLOCKED | —  | — | Local gates passed; VPS gates pending | RPO/RTO, retention, constraints, correlation, restore drills                  |
 | 018 | MVP release validation                                          | Phase 15                              | 017                | `feat/018-mvp-release-validation` | PENDING | —  | —            | —             | No product features; final gates/runbooks                                      |
 | 019 | OpenAPI/Swagger documentation and REST endpoint scenarios      | API contract support                  | 003                | `feat/019-api-documentation`       | MERGED | 15 | db2c8f9775710dda79d9881f0037d17f885b3bab | CI passed | OpenAPI documentation, docs gate, and REST scenarios merged into dev |
-| 020 | Flutter backend integration guide                              | Documentation audit                   | 003-016, 019        | `feat/020-flutter-integration-guide` | IN_PROGRESS | — | — | Pending | Actual-state guide for the separate Flutter client repository |
+| 020 | Flutter backend integration guide                              | Documentation audit                   | 003-016, 019        | `feat/020-flutter-integration-guide` | PR_OPEN | 22 | — | Focused docs tests passed; CI pending | Actual-state guide for the separate Flutter client repository |
 | 999 | Progress finalization                                           | Administrative                        | 001-018            | `feat/999-progress-finalization`  | PENDING | —  | —            | —             | Use only after final feature merge if needed                                   |
 
 ---
@@ -167,11 +167,11 @@ Feature: Flutter backend integration guide
 
 Branch: `feat/020-flutter-integration-guide`
 
-Status: IN_PROGRESS
+Status: PR_OPEN
 
 Started: 2026-08-17
 
-PR: —
+PR: #22 — https://github.com/Eyobalex/expense-tracker-backend/pull/22
 
 Blocker: None for Feature 020. Feature 017 remains blocked on a provisioned VPS/production-like environment, approved retention/RPO/RTO values, backup/restore, performance/query-plan, and outage drills.
 
