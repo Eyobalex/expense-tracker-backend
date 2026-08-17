@@ -2,7 +2,7 @@
 
 Status: IN PROGRESS
 
-Last reconciled with implementation plan: 2026-08-16; Feature 016 is verified merged into `dev` via PR #20 (`b8bfeee024dd6e242f1a7996c0072c32bf3a1124`), and Feature 017 has started from the synchronized integration branch.
+Last reconciled with implementation plan: 2026-08-17; Feature 017 local code, integrity, correlation, rate-limit, and release-gate work is committed on `feat/017-release-hardening`. Its remaining Phase 14 exit criteria require a provisioned VPS/backup environment and approved operations decisions.
 
 Integration branch: `dev`
 
@@ -98,11 +98,11 @@ Total planned features: 19
 
 Merged: 17
 
-In progress: 1
+In progress: 0
 
 PR open: 0
 
-Blocked: 0
+Blocked: 1
 
 Pending: 1
 
@@ -149,7 +149,7 @@ They may be split into additional independently reviewable features if required 
 | 014 | Dashboard and forecasting                                       | Phase 12                              | 008, 012, 013      | `feat/014-dashboard-forecasting`  | MERGED | 17 | 315bb79ca3065a1644aa3b10d374108225a8eb6d | CI passed | Merged into dev after PostgreSQL/Redis/MinIO-backed CI passed                  |
 | 015 | Notifications backend                                           | Phase 12                              | 014                | `feat/015-notifications`          | MERGED | 19  | 7e7ed53d74ca56e1621e3c712c4fcc1c9bf1f605 | CI passed | In-app, Android local payload, FCM, email; item-price notification threshold remains a product decision |
 | 016 | Reports and exports                                             | Phase 13                              | 007, 008, 012, 014 | `feat/016-reports-exports`        | MERGED | 20 | b8bfeee024dd6e242f1a7996c0072c32bf3a1124 | CI passed | PDF, XLSX, CSV, Full JSON Data Export, full-account ZIP                        |
-| 017 | Security, performance and operations hardening                  | Phase 14                              | 001-016            | `feat/017-release-hardening`      | IN_PROGRESS | — | — | Pending | RPO/RTO, retention, constraints, correlation, restore drills                  |
+| 017 | Security, performance and operations hardening                  | Phase 14                              | 001-016            | `feat/017-release-hardening`      | BLOCKED | — | — | Local gates passed; VPS gates pending | RPO/RTO, retention, constraints, correlation, restore drills                  |
 | 018 | MVP release validation                                          | Phase 15                              | 017                | `feat/018-mvp-release-validation` | PENDING | —  | —            | —             | No product features; final gates/runbooks                                      |
 | 019 | OpenAPI/Swagger documentation and REST endpoint scenarios      | API contract support                  | 003                | `feat/019-api-documentation`       | MERGED | 15 | db2c8f9775710dda79d9881f0037d17f885b3bab | CI passed | OpenAPI documentation, docs gate, and REST scenarios merged into dev |
 | 999 | Progress finalization                                           | Administrative                        | 001-018            | `feat/999-progress-finalization`  | PENDING | —  | —            | —             | Use only after final feature merge if needed                                   |
@@ -164,13 +164,13 @@ Feature: Security, performance and operations hardening
 
 Branch: `feat/017-release-hardening`
 
-Status: IN_PROGRESS
+Status: BLOCKED
 
 Started: 2026-08-16
 
 PR: —
 
-Blocker: None. Feature 016 CI passed and PR #20 merged into `dev`; Feature 017 begins from synchronized `dev`. Production retention values, RPO/RTO targets, backup destinations, and VPS deployment access remain PRODUCT/OPERATIONS DECISIONS REQUIRED BEFORE PHASE 14 EXIT.
+Blocker: Local implementation is complete, but Phase 14 cannot exit or open a release-hardening PR until the VPS/production-like environment exists. Required external work: approve production retention and RPO/RTO values; provision private encrypted PostgreSQL and MinIO backup destinations plus an encryption-key reference; record the deployed PaddleOCR artifact SHA-256; configure production `APP_DEBUG=false`, protected/disabled API docs, and daily log rotation; run backup/restore, 100,000-transaction performance/query-plan, and dependency-outage drills. The branch's `runtime:check --production` correctly fails closed until these requirements are met.
 
 ---
 
