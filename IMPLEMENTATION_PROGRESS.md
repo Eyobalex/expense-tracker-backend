@@ -2,7 +2,7 @@
 
 Status: IN PROGRESS
 
-Last reconciled with implementation plan: 2026-08-17; Feature 016 is verified merged into `dev` via PR #20 (`b8bfeee024dd6e242f1a7996c0072c32bf3a1124`). Feature 017 has local committed work but remains blocked on VPS-only release validation. Documentation-only Feature 020 started from synchronized `dev`.
+Last reconciled with implementation plan: 2026-08-17; Feature 016 is verified merged into `dev` via PR #20 (`b8bfeee024dd6e242f1a7996c0072c32bf3a1124`). Feature 017 has local committed work but remains blocked on VPS-only release validation. Documentation-only Feature 020 is in progress from synchronized `dev`.
 
 Integration branch: `dev`
 
@@ -98,13 +98,15 @@ Total planned features: 20
 
 Merged: 17
 
-In progress: 0
+In progress: 1
 
 PR open: 0
 
 Blocked: 1
 
-Pending: 2
+Pending: 1
+
+Administrative Feature 999 is excluded from the 20 planned delivery features.
 
 Overall status: IN PROGRESS
 
@@ -194,16 +196,9 @@ Feature 007 — Transaction aggregate and double-entry ledger — merged into de
 
 # Blockers
 
-## Feature 014 — PRODUCT DECISION REQUIRED BEFORE PHASE 12
+## Feature 017 — VPS / production operations validation required
 
-The implementation plan prohibits inventing the following business semantics:
-
-* Safe-to-spend numerator and denominator, whether today is included, zero-remaining-day behavior, negative budget behavior, and treatment of borrowing, rollover, underflow, and known future obligations.
-* Projected month-end spend formula and its forecast method/version.
-* Income concentration/diversification formula and interpretation.
-* Item inflation/deflation baseline, compatible-unit comparison dates, and percentage formula.
-
-Feature 014 may resume on `feat/014-dashboard-forecasting` after these formulas are approved and versioned.
+Feature 017 has local committed implementation work on `feat/017-release-hardening`, but its remaining release gates require a provisioned VPS/production-like environment and approved operations values. It cannot be merged until approved retention/RPO/RTO values, backup destinations and restore drill, production-like performance/query-plan checks, and outage validation are completed.
 
 ---
 
