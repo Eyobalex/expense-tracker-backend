@@ -1,6 +1,6 @@
 # Next-Gen Financial Tracker — Backend Implementation Progress
 
-Status: IN PROGRESS
+Status: BLOCKED
 
 Last reconciled with implementation plan: 2026-08-17; Feature 017 local code, integrity, correlation, rate-limit, and release-gate work is committed on `feat/017-release-hardening`. Its remaining Phase 14 exit criteria require a provisioned VPS/backup environment and approved operations decisions.
 
