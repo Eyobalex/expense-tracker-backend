@@ -18,6 +18,7 @@ Set every release-policy variable in the deployed `.env` and use approved positi
 - RPO: `RPO_POSTGRESQL_MINUTES`, `RPO_MINIO_RECEIPTS_MINUTES`, `RPO_REPORT_EXPORT_ARTIFACTS_MINUTES`.
 - RTO: `RTO_CORE_API_DATABASE_MINUTES`, `RTO_RECEIPT_STORAGE_MINUTES`, `RTO_QUEUE_OCR_MINUTES`.
 - Backup topology: `POSTGRESQL_BACKUP_DESTINATION`, `MINIO_BACKUP_DESTINATION`, `BACKUP_ENCRYPTION_KEY_REFERENCE`.
+- OCR artifact identity: `PADDLE_OCR_MODEL_ARTIFACT_SHA256` must be the verified SHA-256 of the exact PP-OCRv6 artifact deployed to the private OCR service.
 - Approval evidence: set `RELEASE_RETENTION_POLICY_APPROVED`, `RELEASE_RECOVERY_OBJECTIVES_APPROVED`, and `RELEASE_BACKUP_RESTORE_DRILL_COMPLETED` to `true` only after the corresponding approval or drill has occurred.
 
 `APP_DEBUG` must be `false`. Keep `API_DOCS_ENABLED=false` unless documentation is separately protected by an approved access-control design.
@@ -31,6 +32,7 @@ Set every release-policy variable in the deployed `.env` and use approved positi
 5. Restart PHP-FPM and supervised queue workers. Run workers for `default`, `ocr`, `reports`, and notification queues as applicable.
 6. Confirm the scheduler is invoking `php artisan schedule:run` at least once per minute, or run `schedule:work` under supervision.
 7. Verify the authenticated API, `/up` health endpoint, PostgreSQL, Redis, private MinIO, OCR service, worker queue processing, and scheduled commands.
+8. Verify the OCR service reports the configured provider/model version and is running the artifact whose SHA-256 is recorded in `PADDLE_OCR_MODEL_ARTIFACT_SHA256`.
 
 ## Backup and restore drill
 

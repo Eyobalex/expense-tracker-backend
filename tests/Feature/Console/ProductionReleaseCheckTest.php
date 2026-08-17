@@ -33,6 +33,7 @@ test('production runtime checks require explicit approved retention, recovery, a
     ]);
     Config::set('logging.channels.stack.channels', ['daily']);
     Config::set('logging.channels.daily.max_files', 30);
+    Config::set('receipts.ocr.model_artifact_sha256', str_repeat('a', 64));
     Config::set('release', validProductionReleaseConfiguration());
 
     $this->artisan('runtime:check --production')
@@ -65,5 +66,6 @@ test('the environment example provides suggested numeric defaults without pre-ap
         ->toContain('RTO_CORE_API_DATABASE_MINUTES=60')
         ->toContain('POSTGRESQL_BACKUP_DESTINATION=')
         ->toContain('MINIO_BACKUP_DESTINATION=')
-        ->toContain('BACKUP_ENCRYPTION_KEY_REFERENCE=');
+        ->toContain('BACKUP_ENCRYPTION_KEY_REFERENCE=')
+        ->toContain('PADDLE_OCR_MODEL_ARTIFACT_SHA256=');
 });

@@ -20,5 +20,6 @@ return [
         'timeout' => (int) env('PADDLE_OCR_TIMEOUT', 45),
         'provider_version' => env('PADDLE_OCR_PROVIDER_VERSION', 'paddleocr'),
         'model_version' => env('PADDLE_OCR_MODEL_VERSION', 'pp-ocrv6'),
+        'model_artifact_sha256' => env('PADDLE_OCR_MODEL_ARTIFACT_SHA256'),
     ],
 ];

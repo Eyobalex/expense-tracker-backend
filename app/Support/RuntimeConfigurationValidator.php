@@ -76,6 +76,11 @@ class RuntimeConfigurationValidator
             $errors['logging'] = 'Production release requires daily log rotation with a positive retention count.';
         }
 
+        $ocrDigest = data_get($configuration, 'receipts.ocr.model_artifact_sha256');
+        if (! is_string($ocrDigest) || preg_match('/^[a-f0-9]{64}$/i', $ocrDigest) !== 1) {
+            $errors['receipts.ocr.model_artifact_sha256'] = 'Production release requires the verified SHA-256 for the pinned PaddleOCR model artifact.';
+        }
+
         $release = $configuration['release'] ?? [];
         if (! is_array($release)) {
             return ['release' => 'Production release configuration is missing.'];
