@@ -63,6 +63,8 @@ class IdempotencyMiddleware
                 'path' => $request->path(),
                 'request_hash' => $requestHash,
             ]));
+            $request->attributes->set('operation_id', $operation->getKey());
+            $request->attributes->set('idempotency_operation_id', $operation->getKey());
             $response = $next($request);
 
             if ($response instanceof JsonResponse) {

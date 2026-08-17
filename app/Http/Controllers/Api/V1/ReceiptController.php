@@ -30,7 +30,7 @@ class ReceiptController extends Controller
     {
         $receipt = $storage->store($request->user(), $request->file('receipt'), (string) $request->attributes->get('request_id'));
         if ($receipt->status === 'uploaded') {
-            $processing->queue($receipt);
+            $processing->queue($receipt, (string) $request->attributes->get('request_id'));
         }
 
         return $this->success($request, (new ReceiptResource($receipt))->resolve($request), JsonResponse::HTTP_CREATED);
@@ -60,7 +60,7 @@ class ReceiptController extends Controller
             return $this->notFound($request);
         }
         $receipt->forceFill(['status' => 'uploaded', 'failed_at' => null, 'failure_reason' => null])->save();
-        $processing->queue($receipt);
+        $processing->queue($receipt, (string) $request->attributes->get('request_id'));
 
         return $this->success($request, (new ReceiptResource($receipt))->resolve($request), JsonResponse::HTTP_ACCEPTED);
     }
@@ -70,7 +70,13 @@ class ReceiptController extends Controller
         if ($receipt->user_id !== $request->user()->getKey() || $request->user()->cannot('update', $receipt)) {
             return $this->notFound($request);
         }
-        $transaction = $review->createTransaction($request->user(), $receipt, $request->validated());
+        $transaction = $review->createTransaction(
+            $request->user(),
+            $receipt,
+            $request->validated(),
+            (string) $request->attributes->get('request_id'),
+            $request->attributes->get('operation_id'),
+        );
 
         return $this->success($request, (new FinancialTransactionResource($transaction))->resolve($request), JsonResponse::HTTP_CREATED);
     }

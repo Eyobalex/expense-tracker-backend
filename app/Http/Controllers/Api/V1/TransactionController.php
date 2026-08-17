@@ -71,7 +71,13 @@ class TransactionController extends Controller
         if ($request->user()->cannot('post', $transaction)) {
             return $this->notFound($request);
         }
-        $posted = $transactions->post($request->user(), $transaction, $this->expectedVersion($request), $request->attributes->get('request_id'));
+        $posted = $transactions->post(
+            $request->user(),
+            $transaction,
+            $this->expectedVersion($request),
+            $request->attributes->get('request_id'),
+            $request->attributes->get('operation_id'),
+        );
 
         return $this->success($request, (new FinancialTransactionResource($posted))->resolve($request));
     }
@@ -81,7 +87,14 @@ class TransactionController extends Controller
         if ($request->user()->cannot('reverse', $transaction)) {
             return $this->notFound($request);
         }
-        $reversal = $transactions->reverse($request->user(), $transaction, $this->expectedVersion($request), (string) $request->validated('reason'));
+        $reversal = $transactions->reverse(
+            $request->user(),
+            $transaction,
+            $this->expectedVersion($request),
+            (string) $request->validated('reason'),
+            $request->attributes->get('request_id'),
+            $request->attributes->get('operation_id'),
+        );
 
         return $this->success($request, (new FinancialTransactionResource($reversal))->resolve($request), JsonResponse::HTTP_CREATED);
     }
@@ -92,7 +105,15 @@ class TransactionController extends Controller
             return $this->notFound($request);
         }
         $attributes = $request->validated();
-        $corrected = $transactions->correct($request->user(), $transaction, $this->expectedVersion($request), (string) $attributes['reason'], $attributes);
+        $corrected = $transactions->correct(
+            $request->user(),
+            $transaction,
+            $this->expectedVersion($request),
+            (string) $attributes['reason'],
+            $attributes,
+            $request->attributes->get('request_id'),
+            $request->attributes->get('operation_id'),
+        );
 
         return $this->success($request, (new FinancialTransactionResource($corrected))->resolve($request), JsonResponse::HTTP_CREATED);
     }

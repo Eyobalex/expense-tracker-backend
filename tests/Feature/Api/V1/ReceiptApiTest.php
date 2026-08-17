@@ -5,7 +5,9 @@ use App\Domain\Receipts\Contracts\ReceiptOcrProvider;
 use App\Domain\Receipts\ValueObjects\OcrResult;
 use App\Jobs\NormalizeReceiptEntities;
 use App\Jobs\ProcessReceiptOcr;
+use App\Models\AuditEvent;
 use App\Models\FinancialAccount;
+use App\Models\IdempotencyOperation;
 use App\Models\Receipt;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -35,16 +37,25 @@ function receiptHeaders(User $user): array
 test('an owner uploads a validated immutable private receipt and OCR work is queued', function (): void {
     $user = User::factory()->create(['base_currency_code' => 'ETB']);
     $upload = UploadedFile::fake()->image('../untrusted-name.jpg', 100, 120)->size(12);
+    $requestId = (string) Str::uuid();
+    $idempotencyKey = (string) Str::uuid();
 
-    $this->postJson('/api/v1/receipts', ['receipt' => $upload], receiptHeaders($user))
+    $this->postJson('/api/v1/receipts', ['receipt' => $upload], [
+        'Accept' => 'application/json',
+        'Authorization' => 'Bearer '.receiptToken($user),
+        'Idempotency-Key' => $idempotencyKey,
+        'X-Request-Id' => $requestId,
+    ])
         ->assertCreated()->assertJsonPath('data.status', 'uploaded')->assertJsonPath('data.mime_type', 'image/jpeg');
 
     $receipt = Receipt::query()->sole();
     expect($receipt->original_object_key)->toStartWith('receipts/originals/')
         ->and($receipt->original_object_key)->not->toContain('untrusted-name')
-        ->and($receipt->original_filename)->toBe('untrusted-name.jpg');
+        ->and($receipt->original_filename)->toBe('untrusted-name.jpg')
+        ->and($receipt->request_id)->toBe($requestId);
     Storage::disk('minio')->assertExists($receipt->original_object_key);
-    Queue::assertPushed(ProcessReceiptOcr::class, fn (ProcessReceiptOcr $job): bool => $job->receiptId === $receipt->id);
+    Queue::assertPushed(ProcessReceiptOcr::class, fn (ProcessReceiptOcr $job): bool => $job->receiptId === $receipt->id && $job->requestId === $requestId);
+    expect(IdempotencyOperation::query()->where('idempotency_key', $idempotencyKey)->exists())->toBeTrue();
 });
 
 test('upload rejects non-image content and a different user cannot access receipt metadata or media', function (): void {
@@ -72,7 +83,8 @@ test('OCR persists approved-locale normalized results and queues user-controlled
         }
     });
 
-    app(ReceiptProcessingService::class)->process($receipt->id, (string) Str::uuid(), 'fixture-job');
+    $requestId = (string) Str::uuid();
+    app(ReceiptProcessingService::class)->process($receipt->id, $requestId, 'fixture-job');
 
     $receipt->refresh()->load('extractions');
     expect($receipt->status)->toBe('needs_review')
@@ -84,7 +96,9 @@ test('OCR persists approved-locale normalized results and queues user-controlled
         ->and($receipt->extractions->first()->normalized_data['parsed_fields']['currency_code'])->toBe('ETB')
         ->and($receipt->extractions->first()->normalized_data['parsed_fields']['total_decimal'])->toBe('1250.50')
         ->and($receipt->extractions->first()->normalized_data['ambiguities'])->toContain('ambiguous_numeric_date')
-        ->and($receipt->review_transaction_id)->toBeNull();
+        ->and($receipt->review_transaction_id)->toBeNull()
+        ->and($receipt->extractions->first()->request_id)->toBe($requestId);
+    expect(AuditEvent::query()->where('event_name', 'receipt.ocr_completed')->sole()->request_id)->toBe($requestId);
     $this->assertDatabaseCount('financial_transactions', 0);
     Queue::assertPushed(NormalizeReceiptEntities::class, fn (NormalizeReceiptEntities $job): bool => $job->receiptId === $receipt->id);
 });
@@ -97,14 +111,24 @@ test('review creates one ordinary pending-review transaction and OCR cannot post
         'financial_account_id' => $account->id, 'type' => 'expense', 'occurred_at' => '2026-08-13T10:00:00Z',
         'occurred_timezone' => 'UTC', 'original_amount_minor_units' => 1250, 'original_currency_code' => 'ETB', 'description' => 'Reviewed OCR receipt',
     ];
+    $requestId = (string) Str::uuid();
+    $idempotencyKey = (string) Str::uuid();
 
-    $this->postJson("/api/v1/receipts/{$receipt->id}/review-transaction", $payload, receiptHeaders($user))
+    $this->postJson("/api/v1/receipts/{$receipt->id}/review-transaction", $payload, [
+        'Accept' => 'application/json',
+        'Authorization' => 'Bearer '.receiptToken($user),
+        'Idempotency-Key' => $idempotencyKey,
+        'X-Request-Id' => $requestId,
+    ])
         ->assertCreated()->assertJsonPath('data.state', 'pending_review')->assertJsonPath('data.source', 'receipt_ocr');
     $this->postJson("/api/v1/receipts/{$receipt->id}/review-transaction", $payload, receiptHeaders($user))->assertUnprocessable();
 
     $receipt->refresh();
     expect($receipt->review_transaction_id)->not->toBeNull();
     $this->assertDatabaseCount('journal_entries', 0);
+    $audit = AuditEvent::query()->where('event_name', 'receipt.review_transaction_created')->sole();
+    $operation = IdempotencyOperation::query()->where('idempotency_key', $idempotencyKey)->sole();
+    expect($audit->request_id)->toBe($requestId)->and($audit->operation_id)->toBe($operation->id);
 });
 
 test('a failed OCR receipt can be retried by its owner and retry is queued', function (): void {

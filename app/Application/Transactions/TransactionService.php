@@ -96,9 +96,9 @@ final readonly class TransactionService
         }, attempts: 3);
     }
 
-    public function post(User $user, FinancialTransaction $transaction, int $expectedVersion): FinancialTransaction
+    public function post(User $user, FinancialTransaction $transaction, int $expectedVersion, ?string $requestId = null, ?string $operationId = null): FinancialTransaction
     {
-        return DB::transaction(function () use ($user, $transaction, $expectedVersion): FinancialTransaction {
+        return DB::transaction(function () use ($user, $transaction, $expectedVersion, $requestId, $operationId): FinancialTransaction {
             /** @var FinancialTransaction|null $locked */
             $locked = FinancialTransaction::query()->ownedBy($user)->whereKey($transaction->getKey())->lockForUpdate()->first();
             if (! $locked instanceof FinancialTransaction) {
@@ -118,11 +118,11 @@ final readonly class TransactionService
                     'reference_rate' => $locked->reference_rate,
                     'used_rate' => $locked->used_rate,
                     'rate_override_reason' => $locked->rate_override_reason,
-                ]);
+                ], $requestId, $operationId);
             }
             $this->assertPostable($user, $locked);
             $definition = $this->journals->build($user, $locked);
-            $entry = $this->persistJournal($user, $locked, $definition);
+            $entry = $this->persistJournal($user, $locked, $definition, $operationId);
             $now = now();
             $locked->forceFill([
                 'state' => 'posted', 'base_amount_minor_units' => $this->baseAmountFrom($definition, $locked),
@@ -131,7 +131,7 @@ final readonly class TransactionService
             ])->save();
             $this->createHistoryLocks($user, $locked, $now);
             $this->budgets->forTransaction($locked);
-            $this->audit($user, 'transaction.posted', $locked, ['journal_entry_id' => $entry->getKey()]);
+            $this->audit($user, 'transaction.posted', $locked, ['journal_entry_id' => $entry->getKey()], $requestId, $operationId);
 
             return $locked->fresh()->load(['financialAccount', 'counterpartyAccount', 'category', 'relatedTransaction', 'splits.category', 'journalEntry.lines']);
         }, attempts: 3);
@@ -140,19 +140,19 @@ final readonly class TransactionService
     /**
      * @param  array<string, mixed>  $attributes
      */
-    public function correct(User $user, FinancialTransaction $transaction, int $expectedVersion, string $reason, array $attributes): FinancialTransaction
+    public function correct(User $user, FinancialTransaction $transaction, int $expectedVersion, string $reason, array $attributes, ?string $requestId = null, ?string $operationId = null): FinancialTransaction
     {
-        return DB::transaction(function () use ($user, $transaction, $expectedVersion, $reason, $attributes): FinancialTransaction {
-            $this->reverse($user, $transaction, $expectedVersion, $reason);
+        return DB::transaction(function () use ($user, $transaction, $expectedVersion, $reason, $attributes, $requestId, $operationId): FinancialTransaction {
+            $this->reverse($user, $transaction, $expectedVersion, $reason, $requestId, $operationId);
             $replacement = $this->create($user, [...$attributes, 'correction_of_id' => $transaction->getKey()]);
 
-            return $this->post($user, $replacement, $replacement->version);
+            return $this->post($user, $replacement, $replacement->version, $requestId, $operationId);
         }, attempts: 3);
     }
 
-    public function reverse(User $user, FinancialTransaction $transaction, int $expectedVersion, string $reason): FinancialTransaction
+    public function reverse(User $user, FinancialTransaction $transaction, int $expectedVersion, string $reason, ?string $requestId = null, ?string $operationId = null): FinancialTransaction
     {
-        return DB::transaction(function () use ($user, $transaction, $expectedVersion, $reason): FinancialTransaction {
+        return DB::transaction(function () use ($user, $transaction, $expectedVersion, $reason, $requestId, $operationId): FinancialTransaction {
             /** @var FinancialTransaction|null $original */
             $original = FinancialTransaction::query()->ownedBy($user)->whereKey($transaction->getKey())->lockForUpdate()->first();
             if (! $original instanceof FinancialTransaction) {
@@ -168,11 +168,11 @@ final readonly class TransactionService
                 ...$original->only(['financial_account_id', 'counterparty_account_id', 'category_id', 'merchant_id', 'raw_merchant_text', 'related_transaction_id', 'correction_of_id', 'type', 'source', 'adjustment_subtype', 'adjustment_direction', 'occurred_at', 'occurred_timezone', 'original_amount_minor_units', 'original_currency_code', 'counterparty_amount_minor_units', 'counterparty_currency_code', 'reference_rate', 'used_rate', 'rate_date', 'rate_source', 'rate_override_reason', 'rounding_mode', 'description', 'reference_number']),
                 'state' => 'draft', 'reason' => $reason, 'reversal_of_id' => $original->getKey(), 'base_amount_minor_units' => $original->base_amount_minor_units, 'base_currency_code' => $original->base_currency_code,
             ]);
-            $entry = $this->persistOppositeJournal($user, $original, $reversal);
+            $entry = $this->persistOppositeJournal($user, $original, $reversal, $operationId);
             $reversal->forceFill(['state' => 'reversed', 'journal_entry_id' => $entry->getKey(), 'posted_at' => now()])->save();
             $original->forceFill(['state' => 'reversed', 'reversed_at' => now(), 'version' => $original->version + 1])->save();
             $this->budgets->forTransactionEffectRemoved($original);
-            $this->audit($user, 'transaction.reversed', $original, ['reversal_transaction_id' => $reversal->getKey(), 'reason' => $reason]);
+            $this->audit($user, 'transaction.reversed', $original, ['reversal_transaction_id' => $reversal->getKey(), 'reason' => $reason], $requestId, $operationId);
 
             return $reversal->fresh()->load(['journalEntry.lines']);
         }, attempts: 3);
@@ -253,9 +253,9 @@ final readonly class TransactionService
         }
     }
 
-    private function persistJournal(User $user, FinancialTransaction $transaction, JournalEntryDefinition $definition): JournalEntry
+    private function persistJournal(User $user, FinancialTransaction $transaction, JournalEntryDefinition $definition, ?string $operationId = null): JournalEntry
     {
-        $entry = JournalEntry::query()->create(['user_id' => $user->getKey(), 'financial_transaction_id' => $transaction->getKey(), 'type' => $definition->type->value, 'functional_currency_code' => $definition->functionalCurrency->toString(), 'posted_at' => now()]);
+        $entry = JournalEntry::query()->create(['user_id' => $user->getKey(), 'financial_transaction_id' => $transaction->getKey(), 'type' => $definition->type->value, 'functional_currency_code' => $definition->functionalCurrency->toString(), 'posted_at' => now(), 'idempotency_operation_id' => $operationId]);
         foreach ($definition->lines as $sequence => $line) {
             $entry->lines()->create(['user_id' => $user->getKey(), 'financial_account_id' => $line->financialAccountId, 'ledger_code' => $line->ledgerCode, 'debit_minor_units' => $line->debitMinorUnits, 'credit_minor_units' => $line->creditMinorUnits, 'currency_code' => $line->currency->toString(), 'base_debit_minor_units' => $line->baseDebitMinorUnits, 'base_credit_minor_units' => $line->baseCreditMinorUnits, 'base_currency_code' => $line->baseCurrency->toString(), 'used_rate' => $transaction->used_rate, 'rate_date' => $transaction->rate_date, 'rate_source' => $transaction->rate_source, 'description' => $line->description, 'sequence' => $sequence]);
         }
@@ -263,9 +263,9 @@ final readonly class TransactionService
         return $entry;
     }
 
-    private function persistOppositeJournal(User $user, FinancialTransaction $original, FinancialTransaction $reversal): JournalEntry
+    private function persistOppositeJournal(User $user, FinancialTransaction $original, FinancialTransaction $reversal, ?string $operationId = null): JournalEntry
     {
-        $entry = JournalEntry::query()->create(['user_id' => $user->getKey(), 'financial_transaction_id' => $reversal->getKey(), 'type' => 'reversal', 'functional_currency_code' => $original->base_currency_code, 'posted_at' => now(), 'reversed_entry_id' => $original->journal_entry_id]);
+        $entry = JournalEntry::query()->create(['user_id' => $user->getKey(), 'financial_transaction_id' => $reversal->getKey(), 'type' => 'reversal', 'functional_currency_code' => $original->base_currency_code, 'posted_at' => now(), 'reversed_entry_id' => $original->journal_entry_id, 'idempotency_operation_id' => $operationId]);
         foreach (JournalEntry::query()->findOrFail($original->journal_entry_id)->lines as $sequence => $line) {
             $entry->lines()->create(['user_id' => $user->getKey(), 'financial_account_id' => $line->financial_account_id, 'ledger_code' => $line->ledger_code, 'debit_minor_units' => $line->credit_minor_units, 'credit_minor_units' => $line->debit_minor_units, 'currency_code' => $line->currency_code, 'base_debit_minor_units' => $line->base_credit_minor_units, 'base_credit_minor_units' => $line->base_debit_minor_units, 'base_currency_code' => $line->base_currency_code, 'used_rate' => $line->used_rate, 'rate_date' => $line->rate_date, 'rate_source' => $line->rate_source, 'description' => 'Reversal: '.$reversal->reason, 'sequence' => $sequence]);
         }
@@ -285,9 +285,13 @@ final readonly class TransactionService
     }
 
     /** @param array<string, mixed> $summary */
-    private function audit(User $user, string $eventName, FinancialTransaction $transaction, array $summary): void
+    private function audit(User $user, string $eventName, FinancialTransaction $transaction, array $summary, ?string $requestId = null, ?string $operationId = null): void
     {
-        AuditEvent::query()->create(['actor_user_id' => $user->getKey(), 'user_id' => $user->getKey(), 'event_name' => $eventName, 'aggregate_type' => 'financial_transaction', 'aggregate_id' => $transaction->getKey(), 'summary' => $summary]);
+        AuditEvent::query()->create([
+            'actor_user_id' => $user->getKey(), 'user_id' => $user->getKey(), 'event_name' => $eventName,
+            'aggregate_type' => 'financial_transaction', 'aggregate_id' => $transaction->getKey(), 'summary' => $summary,
+            'request_id' => $requestId, 'operation_id' => $operationId,
+        ]);
     }
 
     private function createHistoryLocks(User $user, FinancialTransaction $transaction, mixed $postedAt): void

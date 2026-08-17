@@ -24,9 +24,9 @@ final readonly class ReceiptProcessingService
         private NotificationService $notifications,
     ) {}
 
-    public function queue(Receipt $receipt): void
+    public function queue(Receipt $receipt, ?string $requestId = null): void
     {
-        ProcessReceiptOcr::dispatch($receipt->getKey(), $receipt->request_id ?? (string) Str::uuid())->onQueue('ocr')->afterCommit();
+        ProcessReceiptOcr::dispatch($receipt->getKey(), $requestId ?? $receipt->request_id ?? (string) Str::uuid())->onQueue('ocr')->afterCommit();
     }
 
     public function process(string $receiptId, string $requestId, ?string $jobId = null): void
@@ -72,7 +72,7 @@ final readonly class ReceiptProcessingService
                 'locale' => $normalized['locale'], 'raw_response' => $result->rawResponse, 'normalized_data' => $normalized, 'confidence' => $result->confidence, 'completed_at' => now(),
             ])->save();
             $receipt->forceFill(['status' => 'needs_review', 'processed_at' => now()])->save();
-            AuditEvent::query()->create(['user_id' => $receipt->user_id, 'event_name' => 'receipt.ocr_completed', 'aggregate_type' => 'receipt', 'aggregate_id' => $receipt->getKey(), 'summary' => ['request_id' => $requestId, 'receipt_id' => $receipt->getKey(), 'extraction_id' => $extraction->getKey(), 'job_id' => $jobId]]);
+            AuditEvent::query()->create(['user_id' => $receipt->user_id, 'event_name' => 'receipt.ocr_completed', 'aggregate_type' => 'receipt', 'aggregate_id' => $receipt->getKey(), 'request_id' => $requestId, 'summary' => ['receipt_id' => $receipt->getKey(), 'extraction_id' => $extraction->getKey(), 'job_id' => $jobId]]);
 
             return $receipt->getKey();
         }, attempts: 3);
@@ -86,7 +86,7 @@ final readonly class ReceiptProcessingService
         Receipt::query()->whereKey($receiptId)->update(['status' => 'failed', 'failed_at' => now(), 'failure_reason' => 'ocr_processing_failed']);
         $receipt = Receipt::query()->find($receiptId);
         if ($receipt instanceof Receipt) {
-            AuditEvent::query()->create(['user_id' => $receipt->user_id, 'event_name' => 'receipt.ocr_failed', 'aggregate_type' => 'receipt', 'aggregate_id' => $receiptId, 'summary' => ['request_id' => $requestId, 'receipt_id' => $receiptId, 'job_id' => $jobId, 'exception' => $exception::class]]);
+            AuditEvent::query()->create(['user_id' => $receipt->user_id, 'event_name' => 'receipt.ocr_failed', 'aggregate_type' => 'receipt', 'aggregate_id' => $receiptId, 'request_id' => $requestId, 'summary' => ['receipt_id' => $receiptId, 'job_id' => $jobId, 'exception' => $exception::class]]);
             $this->notifications->create(
                 $receipt->user,
                 NotificationType::OcrFailed,

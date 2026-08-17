@@ -69,6 +69,13 @@ class RuntimeConfigurationValidator
             $errors['api_docs'] = 'Production release requires API documentation access to be disabled unless explicitly protected.';
         }
 
+        $logging = $configuration['logging'] ?? [];
+        $stackChannels = is_array($logging) ? data_get($logging, 'channels.stack.channels') : null;
+        $dailyRetention = is_array($logging) ? data_get($logging, 'channels.daily.max_files') : null;
+        if (! is_array($stackChannels) || ! in_array('daily', $stackChannels, true) || filter_var($dailyRetention, FILTER_VALIDATE_INT) === false || (int) $dailyRetention <= 0) {
+            $errors['logging'] = 'Production release requires daily log rotation with a positive retention count.';
+        }
+
         $release = $configuration['release'] ?? [];
         if (! is_array($release)) {
             return ['release' => 'Production release configuration is missing.'];

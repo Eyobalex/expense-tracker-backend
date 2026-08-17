@@ -66,7 +66,7 @@ class RuntimeCheck extends Command
     }
 
     /**
-     * @return array{app_key: mixed, app_debug: mixed, api_docs_enabled: mixed, database_default: mixed, cache_default: mixed, queue_default: mixed, filesystem_default: mixed, minio: array<string, mixed>, release: array<string, mixed>}
+     * @return array{app_key: mixed, app_debug: mixed, api_docs_enabled: mixed, database_default: mixed, cache_default: mixed, queue_default: mixed, filesystem_default: mixed, minio: array<string, mixed>, release: array<string, mixed>, logging: array<string, mixed>}
      */
     private function configuration(): array
     {
@@ -80,6 +80,7 @@ class RuntimeCheck extends Command
             'filesystem_default' => config('filesystems.default'),
             'minio' => config('filesystems.disks.minio', []),
             'release' => config('release', []),
+            'logging' => config('logging', []),
         ];
     }
 }

@@ -2,6 +2,7 @@
 
 use App\Application\Reporting\ReportService;
 use App\Jobs\GenerateReport;
+use App\Models\AuditEvent;
 use App\Models\Category;
 use App\Models\FinancialAccount;
 use App\Models\Receipt;
@@ -48,7 +49,8 @@ test('a small user-scoped CSV transaction report is generated synchronously and 
     $category = Category::factory()->for($owner)->create(['kind' => 'expense', 'budget_currency_code' => 'ETB']);
     postedReportExpense($owner, $account, $category, 1234, '2026-08-10T10:00:00Z');
 
-    $response = $this->withToken(reportToken($owner))->withHeader('Idempotency-Key', (string) Str::uuid())->postJson('/api/v1/reports', [
+    $requestId = (string) Str::uuid();
+    $response = $this->withToken(reportToken($owner))->withHeaders(['Idempotency-Key' => (string) Str::uuid(), 'X-Request-Id' => $requestId])->postJson('/api/v1/reports', [
         'type' => 'transaction', 'format' => 'csv', 'from' => '2026-08-01', 'to' => '2026-08-31',
     ])->assertCreated()
         ->assertJsonPath('data.type', 'transaction')
@@ -59,7 +61,10 @@ test('a small user-scoped CSV transaction report is generated synchronously and 
     $reportId = $response->json('data.id');
     $report = ReportJob::query()->findOrFail($reportId);
     expect($report->private_object_key)->toStartWith('reports/'.$owner->uuid.'/')
-        ->and($response->json('data'))->not->toHaveKey('private_object_key');
+        ->and($response->json('data'))->not->toHaveKey('private_object_key')
+        ->and($report->request_id)->toBe($requestId);
+    expect(AuditEvent::query()->where('event_name', 'report.requested')->where('aggregate_id', $report->id)->sole()->request_id)->toBe($requestId)
+        ->and(AuditEvent::query()->where('event_name', 'report.completed')->where('aggregate_id', $report->id)->sole()->request_id)->toBe($requestId);
     Storage::disk('minio')->assertExists($report->private_object_key);
 
     $download = $this->withToken(reportToken($owner))->get("/api/v1/reports/{$reportId}/download")

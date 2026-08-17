@@ -16,9 +16,9 @@ final readonly class ReceiptReviewService
     public function __construct(private TransactionService $transactions) {}
 
     /** @param array<string, mixed> $attributes */
-    public function createTransaction(User $user, Receipt $receipt, array $attributes): FinancialTransaction
+    public function createTransaction(User $user, Receipt $receipt, array $attributes, ?string $requestId = null, ?string $operationId = null): FinancialTransaction
     {
-        return DB::transaction(function () use ($user, $receipt, $attributes): FinancialTransaction {
+        return DB::transaction(function () use ($user, $receipt, $attributes, $requestId, $operationId): FinancialTransaction {
             /** @var Receipt|null $locked */
             $locked = Receipt::query()->ownedBy($user)->whereKey($receipt->getKey())->lockForUpdate()->first();
             if (! $locked instanceof Receipt || $locked->status !== 'needs_review') {
@@ -29,7 +29,11 @@ final readonly class ReceiptReviewService
             }
             $transaction = $this->transactions->create($user, [...$attributes, 'state' => 'pending_review', 'source' => 'receipt_ocr']);
             $locked->forceFill(['review_transaction_id' => $transaction->getKey(), 'version' => $locked->version + 1])->save();
-            AuditEvent::query()->create(['actor_user_id' => $user->getKey(), 'user_id' => $user->getKey(), 'event_name' => 'receipt.review_transaction_created', 'aggregate_type' => 'receipt', 'aggregate_id' => $locked->getKey(), 'summary' => ['receipt_id' => $locked->getKey(), 'transaction_id' => $transaction->getKey()]]);
+            AuditEvent::query()->create([
+                'actor_user_id' => $user->getKey(), 'user_id' => $user->getKey(), 'event_name' => 'receipt.review_transaction_created',
+                'aggregate_type' => 'receipt', 'aggregate_id' => $locked->getKey(), 'request_id' => $requestId, 'operation_id' => $operationId,
+                'summary' => ['receipt_id' => $locked->getKey(), 'transaction_id' => $transaction->getKey()],
+            ]);
 
             return $transaction;
         }, attempts: 3);

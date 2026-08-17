@@ -10,9 +10,9 @@ final readonly class PostTransactionService
 {
     public function __construct(private TransactionService $transactions) {}
 
-    public function post(User $user, FinancialTransaction $transaction, int $expectedVersion, ?string $requestId = null): FinancialTransaction
+    public function post(User $user, FinancialTransaction $transaction, int $expectedVersion, ?string $requestId = null, ?string $operationId = null): FinancialTransaction
     {
-        $posted = $this->transactions->post($user, $transaction, $expectedVersion);
+        $posted = $this->transactions->post($user, $transaction, $expectedVersion, $requestId, $operationId);
         EvaluateUserNotifications::dispatch($user->getKey(), $requestId)->afterCommit();
 
         return $posted;

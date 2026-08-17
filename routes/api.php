@@ -78,11 +78,11 @@ Route::prefix('v1')
             Route::post('budgets/{category}/reallocate', [BudgetController::class, 'reallocate'])->middleware('idempotency');
             Route::post('budgets/{category}/borrow-next-month', [BudgetController::class, 'borrow'])->middleware('idempotency');
 
-            Route::get('dashboard', [DashboardController::class, 'show']);
-            Route::get('insights/safe-to-spend', [InsightController::class, 'safeToSpend']);
-            Route::get('insights/forecast', [InsightController::class, 'forecast']);
-            Route::get('insights/income-concentration', [InsightController::class, 'incomeConcentration']);
-            Route::get('insights/item-prices', [InsightController::class, 'itemPrices']);
+            Route::get('dashboard', [DashboardController::class, 'show'])->middleware('throttle:insights');
+            Route::get('insights/safe-to-spend', [InsightController::class, 'safeToSpend'])->middleware('throttle:insights');
+            Route::get('insights/forecast', [InsightController::class, 'forecast'])->middleware('throttle:insights');
+            Route::get('insights/income-concentration', [InsightController::class, 'incomeConcentration'])->middleware('throttle:insights');
+            Route::get('insights/item-prices', [InsightController::class, 'itemPrices'])->middleware('throttle:insights');
 
             Route::get('merchants', [MerchantController::class, 'index']);
             Route::post('merchants', [MerchantController::class, 'store'])->middleware('idempotency');
@@ -100,9 +100,9 @@ Route::prefix('v1')
             Route::post('receipts/{receipt}/retry', [ReceiptController::class, 'retry'])->middleware(['idempotency', 'throttle:receipt-upload']);
             Route::post('receipts/{receipt}/review-transaction', [ReceiptController::class, 'createReviewTransaction'])->middleware('idempotency');
 
-            Route::post('sync/push', [SyncController::class, 'push'])->middleware('idempotency');
-            Route::get('sync/pull', [SyncController::class, 'pull']);
-            Route::get('sync/operations/{operation}', [SyncController::class, 'show']);
+            Route::post('sync/push', [SyncController::class, 'push'])->middleware(['idempotency', 'throttle:sync']);
+            Route::get('sync/pull', [SyncController::class, 'pull'])->middleware('throttle:sync');
+            Route::get('sync/operations/{operation}', [SyncController::class, 'show'])->middleware('throttle:sync');
 
             Route::get('categories', [CategoryController::class, 'index']);
             Route::post('categories', [CategoryController::class, 'store'])->middleware('idempotency');

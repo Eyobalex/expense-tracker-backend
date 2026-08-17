@@ -31,6 +31,8 @@ test('production runtime checks require explicit approved retention, recovery, a
         'driver' => 's3', 'key' => 'access-key', 'secret' => 'secret-key', 'bucket' => 'expense-tracker', 'region' => 'us-east-1',
         'endpoint' => 'http://minio:9000', 'visibility' => 'private', 'throw' => true, 'report' => true, 'use_path_style_endpoint' => true,
     ]);
+    Config::set('logging.channels.stack.channels', ['daily']);
+    Config::set('logging.channels.daily.max_files', 30);
     Config::set('release', validProductionReleaseConfiguration());
 
     $this->artisan('runtime:check --production')

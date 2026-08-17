@@ -64,6 +64,8 @@ class AppServiceProvider extends ServiceProvider
         RateLimiter::for('api', fn (Request $request): Limit => Limit::perMinute(120)->by((string) ($request->user()?->getKey() ?? $request->ip())));
         RateLimiter::for('receipt-upload', fn (Request $request): Limit => Limit::perMinute(10)->by((string) ($request->user()?->getKey() ?? $request->ip())));
         RateLimiter::for('exports', fn (Request $request): Limit => Limit::perMinute((int) config('reports.rate_limit_per_minute'))->by((string) ($request->user()?->getKey() ?? $request->ip())));
+        RateLimiter::for('sync', fn (Request $request): Limit => Limit::perMinute((int) config('sync.rate_limit_per_minute'))->by((string) ($request->user()?->getKey() ?? $request->ip())));
+        RateLimiter::for('insights', fn (Request $request): Limit => Limit::perMinute((int) config('insights.rate_limit_per_minute'))->by((string) ($request->user()?->getKey() ?? $request->ip())));
     }
 
     private function configureApiDocumentation(): void
