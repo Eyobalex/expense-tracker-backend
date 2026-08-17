@@ -2,7 +2,7 @@
 
 Status: IN PROGRESS
 
-Last reconciled with implementation plan: 2026-08-16; Feature 015 is verified merged into `dev` via PR #19 (`7e7ed53d74ca56e1621e3c712c4fcc1c9bf1f605`), and Feature 016 is open for review against `dev` as PR #20.
+Last reconciled with implementation plan: 2026-08-17; Feature 016 is verified merged into `dev` via PR #20 (`b8bfeee024dd6e242f1a7996c0072c32bf3a1124`). Feature 017 has local committed work but remains blocked on VPS-only release validation. Documentation-only Feature 020 started from synchronized `dev`.
 
 Integration branch: `dev`
 
@@ -94,15 +94,15 @@ The feature cannot safely continue until an external issue, dependency, requirem
 
 # Overall Progress
 
-Total planned features: 19
+Total planned features: 20
 
-Merged: 16
+Merged: 17
 
 In progress: 0
 
-PR open: 1
+PR open: 0
 
-Blocked: 0
+Blocked: 1
 
 Pending: 2
 
@@ -148,29 +148,30 @@ They may be split into additional independently reviewable features if required 
 | 013 | Offline synchronization API contract                            | Phase 11                              | 003, 007, 009, 011, 012 | `feat/013-sync-contract` | MERGED | 16 | af015b6bc8a01f952fb22b5eab2ff33215974b28 | CI passed | Authoritative cursor/full-resync contract merged into dev                      |
 | 014 | Dashboard and forecasting                                       | Phase 12                              | 008, 012, 013      | `feat/014-dashboard-forecasting`  | MERGED | 17 | 315bb79ca3065a1644aa3b10d374108225a8eb6d | CI passed | Merged into dev after PostgreSQL/Redis/MinIO-backed CI passed                  |
 | 015 | Notifications backend                                           | Phase 12                              | 014                | `feat/015-notifications`          | MERGED | 19  | 7e7ed53d74ca56e1621e3c712c4fcc1c9bf1f605 | CI passed | In-app, Android local payload, FCM, email; item-price notification threshold remains a product decision |
-| 016 | Reports and exports                                             | Phase 13                              | 007, 008, 012, 014 | `feat/016-reports-exports`        | PR_OPEN | 20 | —            | Local gates passed; CI in progress | PDF, XLSX, CSV, Full JSON Data Export, full-account ZIP                        |
-| 017 | Security, performance and operations hardening                  | Phase 14                              | 001-016            | `feat/017-release-hardening`      | PENDING | —  | —            | —             | RPO/RTO, retention, constraints, correlation, restore drills                  |
+| 016 | Reports and exports                                             | Phase 13                              | 007, 008, 012, 014 | `feat/016-reports-exports`        | MERGED | 20 | b8bfeee024dd6e242f1a7996c0072c32bf3a1124 | CI passed | PDF, XLSX, CSV, Full JSON Data Export, full-account ZIP                        |
+| 017 | Security, performance and operations hardening                  | Phase 14                              | 001-016            | `feat/017-release-hardening`      | BLOCKED | —  | — | Local gates passed; VPS gates pending | RPO/RTO, retention, constraints, correlation, restore drills                  |
 | 018 | MVP release validation                                          | Phase 15                              | 017                | `feat/018-mvp-release-validation` | PENDING | —  | —            | —             | No product features; final gates/runbooks                                      |
 | 019 | OpenAPI/Swagger documentation and REST endpoint scenarios      | API contract support                  | 003                | `feat/019-api-documentation`       | MERGED | 15 | db2c8f9775710dda79d9881f0037d17f885b3bab | CI passed | OpenAPI documentation, docs gate, and REST scenarios merged into dev |
+| 020 | Flutter backend integration guide                              | Documentation audit                   | 003-016, 019        | `feat/020-flutter-integration-guide` | IN_PROGRESS | — | — | Pending | Actual-state guide for the separate Flutter client repository |
 | 999 | Progress finalization                                           | Administrative                        | 001-018            | `feat/999-progress-finalization`  | PENDING | —  | —            | —             | Use only after final feature merge if needed                                   |
 
 ---
 
 # Current Feature
 
-Feature ID: 016
+Feature ID: 020
 
-Feature: Reports and exports
+Feature: Flutter backend integration guide
 
-Branch: `feat/016-reports-exports`
+Branch: `feat/020-flutter-integration-guide`
 
-Status: PR_OPEN
+Status: IN_PROGRESS
 
-Started: 2026-08-16
+Started: 2026-08-17
 
-PR: #20 — https://github.com/Eyobalex/expense-tracker-backend/pull/20
+PR: —
 
-Blocker: None. Local Pint, PHPStan, migration dry-run, Composer validation/audit, Scramble contract analysis, and complete Pest suite passed; GitHub CI is in progress.
+Blocker: None for Feature 020. Feature 017 remains blocked on a provisioned VPS/production-like environment, approved retention/RPO/RTO values, backup/restore, performance/query-plan, and outage drills.
 
 ---
 
