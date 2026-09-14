@@ -2,7 +2,7 @@
 
 Status: BLOCKED
 
-Last reconciled with implementation plan: 2026-08-17; Feature 017 local code, integrity, correlation, rate-limit, and release-gate work is committed on `feat/017-release-hardening`. Its remaining Phase 14 exit criteria require a provisioned VPS/backup environment and approved operations decisions.
+Last reconciled with implementation plan: 2026-09-14; Feature 020 is verified merged into `dev` via PR #22 (`e3605138f06a691d7f3d9e4919f93300304e0dee`). Feature 017 local code, integrity, correlation, rate-limit, and release-gate work remains blocked on VPS/backup validation and approved operations decisions.
 
 Integration branch: `dev`
 
@@ -94,9 +94,9 @@ The feature cannot safely continue until an external issue, dependency, requirem
 
 # Overall Progress
 
-Total planned features: 19
+Total planned features: 20
 
-Merged: 17
+Merged: 18
 
 In progress: 0
 
@@ -149,9 +149,10 @@ They may be split into additional independently reviewable features if required 
 | 014 | Dashboard and forecasting                                       | Phase 12                              | 008, 012, 013      | `feat/014-dashboard-forecasting`  | MERGED | 17 | 315bb79ca3065a1644aa3b10d374108225a8eb6d | CI passed | Merged into dev after PostgreSQL/Redis/MinIO-backed CI passed                  |
 | 015 | Notifications backend                                           | Phase 12                              | 014                | `feat/015-notifications`          | MERGED | 19  | 7e7ed53d74ca56e1621e3c712c4fcc1c9bf1f605 | CI passed | In-app, Android local payload, FCM, email; item-price notification threshold remains a product decision |
 | 016 | Reports and exports                                             | Phase 13                              | 007, 008, 012, 014 | `feat/016-reports-exports`        | MERGED | 20 | b8bfeee024dd6e242f1a7996c0072c32bf3a1124 | CI passed | PDF, XLSX, CSV, Full JSON Data Export, full-account ZIP                        |
-| 017 | Security, performance and operations hardening                  | Phase 14                              | 001-016            | `feat/017-release-hardening`      | BLOCKED | — | — | Local gates passed; VPS gates pending | RPO/RTO, retention, constraints, correlation, restore drills                  |
+| 017 | Security, performance and operations hardening                  | Phase 14                              | 001-016            | `feat/017-release-hardening`      | BLOCKED | — | — | Focused tests 18/18; Pint and PHPStan pass; full suite 175/176 because local MinIO is unavailable; VPS gates pending | RPO/RTO, retention, constraints, correlation, restore drills                  |
 | 018 | MVP release validation                                          | Phase 15                              | 017                | `feat/018-mvp-release-validation` | PENDING | —  | —            | —             | No product features; final gates/runbooks                                      |
 | 019 | OpenAPI/Swagger documentation and REST endpoint scenarios      | API contract support                  | 003                | `feat/019-api-documentation`       | MERGED | 15 | db2c8f9775710dda79d9881f0037d17f885b3bab | CI passed | OpenAPI documentation, docs gate, and REST scenarios merged into dev |
+| 020 | Flutter backend integration guide                              | Documentation audit                   | 003-016, 019        | `feat/020-flutter-integration-guide` | MERGED | 22 | e3605138f06a691d7f3d9e4919f93300304e0dee | CI passed | Actual-state guide for the separate Flutter client repository |
 | 999 | Progress finalization                                           | Administrative                        | 001-018            | `feat/999-progress-finalization`  | PENDING | —  | —            | —             | Use only after final feature merge if needed                                   |
 
 ---
@@ -171,6 +172,8 @@ Started: 2026-08-16
 PR: —
 
 Blocker: Local implementation is complete, but Phase 14 cannot exit or open a release-hardening PR until the VPS/production-like environment exists. Required external work: approve production retention and RPO/RTO values; provision private encrypted PostgreSQL and MinIO backup destinations plus an encryption-key reference; record the deployed PaddleOCR artifact SHA-256; configure production `APP_DEBUG=false`, protected/disabled API docs, and daily log rotation; run backup/restore, 100,000-transaction performance/query-plan, and dependency-outage drills. The branch's `runtime:check --production` correctly fails closed until these requirements are met.
+
+Local verification on 2026-09-14: focused release-hardening tests passed (18 tests, 164 assertions); Pint passed; PHPStan passed with `--memory-limit=512M`; the full suite passed 175 tests and failed the MinIO infrastructure smoke test because `127.0.0.1:9000` was unavailable. No PR was opened because Phase 14 exit criteria remain externally blocked.
 
 ---
 
@@ -206,6 +209,22 @@ Feature 014 — Dashboard and forecasting — merged into dev via PR #17 (315bb7
 Feature 015 — Notifications backend — merged into dev via PR #19 (7e7ed53d74ca56e1621e3c712c4fcc1c9bf1f605).
 
 Feature 016 — Reports and exports — merged into dev via PR #20 (b8bfeee024dd6e242f1a7996c0072c32bf3a1124).
+
+## Feature 017
+
+Status: BLOCKED
+
+Branch: `feat/017-release-hardening`
+
+Implementation plan coverage: Phase 14 local implementation and release-gate checks; production retention, backup/restore, performance, query-plan, outage, and VPS validation remain incomplete.
+
+PR: — (not opened while the feature is blocked)
+
+Tests executed: `php artisan test --compact tests/Feature/Console/ProductionReleaseCheckTest.php tests/Feature/DatabaseIntegrityConstraintsTest.php tests/Feature/Api/V1/ReceiptApiTest.php tests/Feature/Api/V1/ReportApiTest.php` — 18 passed; `vendor/bin/pint --dirty --format agent` — passed; `vendor/bin/phpstan analyse --memory-limit=512M` — passed; `php artisan test --compact` — 175 passed, 1 failed because local MinIO was unavailable.
+
+Checklist: Blocked on production-like infrastructure and approved operations evidence.
+
+Feature 020 — Flutter backend integration guide — merged into dev via PR #22 (e3605138f06a691d7f3d9e4919f93300304e0dee).
 
 ---
 
