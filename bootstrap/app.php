@@ -4,6 +4,8 @@ use App\Domain\Shared\Exceptions\DomainErrorCode;
 use App\Domain\Shared\Exceptions\DomainException;
 use App\Http\Middleware\AssignRequestId;
 use App\Http\Middleware\EnsureJsonRequest;
+use App\Http\Middleware\EnsureStaffMfa;
+use App\Http\Middleware\EnsureStaffPermission;
 use App\Http\Middleware\IdempotencyMiddleware;
 use Illuminate\Auth\AuthenticationException;
 use Illuminate\Foundation\Application;
@@ -23,10 +25,13 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->append(AssignRequestId::class);
         $middleware->throttleWithRedis();
+        $middleware->redirectGuestsTo(fn (Request $request): string => $request->is('admin/*') || $request->is('admin') ? route('admin.login') : route('login'));
         $middleware->alias([
             'request-id' => AssignRequestId::class,
             'api-json' => EnsureJsonRequest::class,
             'idempotency' => IdempotencyMiddleware::class,
+            'staff.mfa' => EnsureStaffMfa::class,
+            'staff.permission' => EnsureStaffPermission::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
